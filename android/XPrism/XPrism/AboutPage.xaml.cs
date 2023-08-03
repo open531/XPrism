@@ -1,9 +1,14 @@
+using System.Windows.Input;
+
 namespace XPrism;
 
 public partial class AboutPage : ContentPage
 {
-	public AboutPage()
-	{
-		InitializeComponent();
-	}
+    public ICommand TapCommand => new Command<string>(async (url) => await Launcher.OpenAsync(url));
+
+    public AboutPage()
+    {
+        InitializeComponent();
+        BindingContext = this;
+    }
 }

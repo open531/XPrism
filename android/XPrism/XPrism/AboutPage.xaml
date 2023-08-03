@@ -1,43 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:XPrism"
              x:Class="XPrism.AboutPage"
              Title="关于 XPrism">
-    <VerticalStackLayout>
-        <Label 
-            Text="关于 XPrism"
-            FontSize="Title"
-            HorizontalOptions="Center" />
-        <Label
-            Text="　　清华大学电子工程系硬件设计大赛参赛作品。"
-            FontSize="Body" />
-        <Label
-            Text="　　XPrism 是基于 ESP32-PICO-D4 开发的智能眼镜。其 Android 端控制器基于 .NET MAUI 开发。"
-            FontSize="Body" />
-        <Label>
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span Text="　　Copyright © 2023 " />
-                    <Span Text="潘徐成"
-                  TextColor="Blue"
-                  TextDecorations="Underline">
-                        <Span.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding TapCommand}"
-                                          CommandParameter="https://github.com/Panxuc" />
-                        </Span.GestureRecognizers>
-                    </Span>
-                    <Span Text=" " />
-                    <Span Text="孙宇琦"
-                  TextColor="Blue"
-                  TextDecorations="Underline">
-                        <Span.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding TapCommand}"
-                                          CommandParameter="https://github.com/always-del" />
-                        </Span.GestureRecognizers>
-                    </Span>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-
+    <VerticalStackLayout Margin="10">
+        <Label Text="关于 XPrism" FontSize="Title" HorizontalOptions="Center" />
+        <Label Text="清华大学电子工程系硬件设计大赛参赛作品。" />
+        <Label Text="XPrism 是基于 ESP32-PICO-D4 开发的智能眼镜。" />
+        <Label Text="本应用是基于 .NET MAUI 开发的 Android 端控制器。" />
+        <Label Text="Copyright © 2023 潘徐成 孙宇琦" />
+        <Label Text="All rights reserved." />
+        <Label Text=" " />
+        <Label Text="License" FontSize="Title" HorizontalOptions="Center" />
+        <Label Text="MIT License" FontAttributes="Bold" HorizontalOptions="Center" />
+        <Label Text="Copyright (c) 2023 潘徐成 孙宇琦" HorizontalOptions="Center" />
+        <Label Text="Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:" />
+        <Label Text="The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software." />
+        <Label Text="THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE." />
     </VerticalStackLayout>
 </ContentPage>
