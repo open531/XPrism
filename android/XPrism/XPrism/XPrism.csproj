@@ -15,7 +15,7 @@
 		<ApplicationTitle>XPrism</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.panxuc.xprism</ApplicationId>
+		<ApplicationId>io.panxuc.xprism</ApplicationId>
 		<ApplicationIdGuid>909b293f-34a0-4c63-9443-9c7b2fed76ce</ApplicationIdGuid>
 
 		<!-- Versions -->
@@ -31,6 +31,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+    <!-- App icon for android -->
+    <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" ForegroundScale="0.65" Color="#512BD4" />
+    
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 
