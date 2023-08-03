@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XPrism.SendPage"
+             Title="发送信息">
+    <VerticalStackLayout>
+        <Editor x:Name="editor"
+            Placeholder="请输入您要发送的内容"
+            HeightRequest="250"
+            TextChanged="OnEditorTextChanged"
+            Completed="OnEditorCompleted" />
+        <Button Text="发送" />
+    </VerticalStackLayout>
+</ContentPage>

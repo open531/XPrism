@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XPrism.AboutPage"
+             Title="关于 XPrism">
+    <VerticalStackLayout>
+        <Label 
+            Text="关于 XPrism"
+            FontSize="Title"
+            HorizontalOptions="Center" />
+        <Label
+            Text="　　清华大学电子工程系硬件设计大赛参赛作品。"
+            FontSize="Body" />
+        <Label
+            Text="　　XPrism 是基于 ESP32-PICO-D4 开发的智能眼镜。其 Android 端控制器基于 .NET MAUI 开发。"
+            FontSize="Body" />
+        <Label>
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="　　Copyright © 2023 " />
+                    <Span Text="潘徐成"
+                  TextColor="Blue"
+                  TextDecorations="Underline">
+                        <Span.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding TapCommand}"
+                                          CommandParameter="https://github.com/Panxuc" />
+                        </Span.GestureRecognizers>
+                    </Span>
+                    <Span Text=" " />
+                    <Span Text="孙宇琦"
+                  TextColor="Blue"
+                  TextDecorations="Underline">
+                        <Span.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding TapCommand}"
+                                          CommandParameter="https://github.com/always-del" />
+                        </Span.GestureRecognizers>
+                    </Span>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+    </VerticalStackLayout>
+</ContentPage>
