@@ -6,7 +6,8 @@ public partial class MainPage : ContentPage
 	public MainPage()
 	{
 		InitializeComponent();
-	}
+        Application.Current.UserAppTheme = AppTheme.Light;
+    }
 
 	public async void OnSendClicked(object sender, System.EventArgs e)
 	{

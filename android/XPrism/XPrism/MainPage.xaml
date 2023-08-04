@@ -4,30 +4,12 @@
              x:Class="XPrism.MainPage"
              Title="XPrism 智能眼镜控制器">
 
-    <!-- 使用Grid作为根布局 -->
-    <Grid x:Name="standard" RowSpacing="10" ColumnSpacing="10" Margin="10">
-
-        <!-- 设置六行四列的网格 -->
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <!-- 使用Button创建键盘按钮，并占据特定的Grid位置，设置Clicked事件处理程序 -->
-        <Button Text="发送信息" ImageSource="material_message_white.png" ContentLayout="Left, 0" FontSize="Large" Clicked="OnSendClicked" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"/>
-        <Button Text="关于 XPrism" ImageSource="material_information_white.png" ContentLayout="Left, 0" FontSize="Large" Clicked="OnAboutClicked" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"/>
-
-    </Grid>
-
+    <ScrollView>
+        <VerticalStackLayout Margin="24">
+        <Button Text="发送信息" ImageSource="material_message_white.png" ContentLayout="Left, 0" Clicked="OnSendClicked" />
+        <Label></Label>
+        <Button Text="关于 XPrism" ImageSource="material_information_white.png" ContentLayout="Left, 0" Clicked="OnAboutClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+    
 </ContentPage>
