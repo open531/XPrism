@@ -1,4 +1,6 @@
-﻿namespace XPrism;
+﻿using CommunityToolkit.Maui;
+
+namespace XPrism;
 
 public static class MauiProgram
 {
@@ -7,6 +9,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit()
 			.ConfigureFonts(fonts =>
 			{
 			});

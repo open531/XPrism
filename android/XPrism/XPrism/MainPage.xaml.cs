@@ -9,6 +9,12 @@ public partial class MainPage : ContentPage
         Application.Current.UserAppTheme = AppTheme.Light;
     }
 
+	public async void OnWeatherClicked(object sender, System.EventArgs e)
+	{
+        // 打开天气页面
+        await Navigation.PushAsync(new WeatherPage());
+    }
+
 	public async void OnSendClicked(object sender, System.EventArgs e)
 	{
         // 打开发送页面

@@ -7,15 +7,15 @@ public partial class SendPage : ContentPage
 		InitializeComponent();
 	}
 
-    void OnEditorTextChanged(object sender, TextChangedEventArgs e)
+    public void OnEditorTextChanged(object sender, TextChangedEventArgs e)
     {
-        string oldText = e.OldTextValue;
-        string newText = e.NewTextValue;
-        string myText = editor.Text;
+        //string oldText = e.OldTextValue;
+        //string newText = e.NewTextValue;
+        //string myText = editor.Text;
     }
 
-    void OnEditorCompleted(object sender, EventArgs e)
+    public void OnEditorCompleted(object sender, EventArgs e)
     {
-        string text = ((Editor)sender).Text;
+        //string text = ((Editor)sender).Text;
     }
 }
