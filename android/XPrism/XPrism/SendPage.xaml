@@ -4,13 +4,9 @@
              x:Class="XPrism.SendPage"
              Title="发送信息">
     <ScrollView>
-    <VerticalStackLayout Margin="16">
-        <Editor x:Name="editor"
-            Placeholder="请输入您要发送的内容"
-            HeightRequest="250"
-            TextChanged="OnEditorTextChanged"
-            Completed="OnEditorCompleted" />
-        <Button Text="发送" />
-    </VerticalStackLayout>
+        <VerticalStackLayout Margin="16">
+            <Editor x:Name="editor" Placeholder="请输入您要发送的内容" HeightRequest="250" TextChanged="OnEditorTextChanged" Completed="OnEditorCompleted" FontSize="18" />
+            <Button Text="发送" FontSize="18" />
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

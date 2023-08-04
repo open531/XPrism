@@ -15,7 +15,7 @@
             <Label Text=" " />
             <Label Text="设备信息" FontSize="Title" HorizontalOptions="Center" />
             <Label Text="获取失败" x:Name="deviceInfo" />
-            <Button Text="刷新设备信息" Clicked="OnRefreshClicked" />
+            <Button Text="刷新设备信息" Clicked="OnRefreshClicked" FontSize="18" />
             <Label Text=" " />
             <Label Text="License" FontSize="Title" HorizontalOptions="Center" />
             <Label Text="MIT License" FontAttributes="Bold" HorizontalOptions="Center" />

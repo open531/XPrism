@@ -6,11 +6,11 @@
 
     <ScrollView>
         <VerticalStackLayout Margin="24">
-            <Button Text="设置天气" ImageSource="material_weather_partly_cloudy_white.png" ContentLayout="Left, 0" Clicked="OnWeatherClicked" />
+            <Button Text="设置天气" ImageSource="material_weather_partly_cloudy_white.png" ContentLayout="Left, 0" Clicked="OnWeatherClicked" FontSize="18" />
             <Label></Label>
-            <Button Text="发送信息" ImageSource="material_message_white.png" ContentLayout="Left, 0" Clicked="OnSendClicked" />
+            <Button Text="发送信息" ImageSource="material_message_white.png" ContentLayout="Left, 0" Clicked="OnSendClicked" FontSize="18" />
             <Label></Label>
-            <Button Text="关于 XPrism" ImageSource="material_information_white.png" ContentLayout="Left, 0" Clicked="OnAboutClicked" />
+            <Button Text="关于 XPrism" ImageSource="material_information_white.png" ContentLayout="Left, 0" Clicked="OnAboutClicked" FontSize="18" />
         </VerticalStackLayout>
     </ScrollView>
 

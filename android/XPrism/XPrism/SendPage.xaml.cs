@@ -2,10 +2,10 @@ namespace XPrism;
 
 public partial class SendPage : ContentPage
 {
-	public SendPage()
-	{
-		InitializeComponent();
-	}
+    public SendPage()
+    {
+        InitializeComponent();
+    }
 
     public void OnEditorTextChanged(object sender, TextChangedEventArgs e)
     {

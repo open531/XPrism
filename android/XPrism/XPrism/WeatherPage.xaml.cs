@@ -1,6 +1,8 @@
 #define OPENWEATHERMAP // OPENWEATHERMAP or ACCUWEATHER
 
 using Android.App;
+using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Alerts;
 using System.Text.Json;
 
 namespace XPrism;
@@ -42,23 +44,32 @@ public partial class WeatherPage : ContentPage
                 var weather = JsonSerializer.Deserialize<Weather>(content);
                 if (weather.cod != 200)
                 {
-                    await DisplayAlert("错误", "城市名称错误", "确定");
+                    await DisplayAlert("错误", "城市名称错误或网络错误", "确定");
                     return;
                 }
-                cityLabel.Text = city;
+                cityLabel.Text = weather.name;
                 weatherLabel.Text = weather.weather[0].description;
                 temperatureLabel.Text = weather.main.temp.ToString() + "℃";
                 windDirectionLabel.Text = weather.wind.deg.ToString() + "°";
                 windSpeedLabel.Text = weather.wind.speed.ToString() + "m/s";
                 humidityLabel.Text = weather.main.humidity.ToString() + "%";
-                reportTimeLabel.Text = weather.dt.ToString();
+                reportTimeLabel.Text = UnixTimeStampToDateTime(weather.dt).ToString();
+                var toast = Toast.Make("查询成功", ToastDuration.Short, 14);
+                await toast.Show();
             }
             else
             {
-                await DisplayAlert("错误", "城市名称错误", "确定");
+                await DisplayAlert("错误", "城市名称错误或网络错误", "确定");
                 return;
             }
         }
+    }
+    public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
+    {
+        // Unix timestamp is seconds past epoch
+        DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
+        return dateTime;
     }
 }
 class Weather
@@ -67,6 +78,7 @@ class Weather
     public WeatherMain main { get; set; }
     public WeatherWind wind { get; set; }
     public WeatherWeather[] weather { get; set; }
+    public string name { get; set; }
     public int dt { get; set; }
 }
 class WeatherMain

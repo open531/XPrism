@@ -5,7 +5,7 @@
              Title="设置天气">
     <ScrollView>
         <VerticalStackLayout Margin="10">
-            <Label Text="选择城市：" FontSize="Title" />
+            <Label Text="选择城市" FontSize="Title" HorizontalTextAlignment="Center" />
             <!--<Picker x:Name="picker" Title="选择一个城市">
                 <Picker.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
@@ -23,44 +23,46 @@
                 </Picker.ItemsSource>
             </Picker>-->
 
-            <Entry x:Name="cityEntry" Placeholder="请输入城市名称" />
+            <Entry x:Name="cityEntry" Placeholder="请输入城市名称（建议输入英文）" HorizontalTextAlignment="Center" ClearButtonVisibility="WhileEditing" FontSize="18" />
 
-            <Button Text="查询" Clicked="OnSearchClicked" />
-
-            <Label Text="查询结果：" FontSize="Title" />
-            <StackLayout Orientation="Horizontal">
-                <Label Text="城市：" />
-                <Label x:Name="cityLabel" />
+            <Button Text="查询" Clicked="OnSearchClicked" FontSize="18" />
+            <Label></Label>
+            <Label Text="查询结果" FontSize="Title" HorizontalTextAlignment="Center" />
+            <Label></Label>
+            <StackLayout HorizontalOptions="Center">
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="城市：" />
+                    <Label x:Name="cityLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="天气：" />
+                    <Label x:Name="weatherLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="温度：" />
+                    <Label x:Name="temperatureLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="风向：" />
+                    <Label x:Name="windDirectionLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="风速：" />
+                    <Label x:Name="windSpeedLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="湿度：" />
+                    <Label x:Name="humidityLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="更新时间：" />
+                    <Label x:Name="reportTimeLabel" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="数据来源：" />
+                    <Label x:Name="sourceLabel" />
+                </StackLayout>
             </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="天气：" />
-                <Label x:Name="weatherLabel" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="温度：" />
-                <Label x:Name="temperatureLabel" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="风向：" />
-                <Label x:Name="windDirectionLabel" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="风速：" />
-                <Label x:Name="windSpeedLabel" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="湿度：" />
-                <Label x:Name="humidityLabel" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="更新时间：" />
-                <Label x:Name="reportTimeLabel" />
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="数据来源：" />
-                <Label x:Name="sourceLabel" />
-            </StackLayout>
-
 
         </VerticalStackLayout>
     </ScrollView>
