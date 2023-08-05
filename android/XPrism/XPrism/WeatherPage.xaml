@@ -24,7 +24,6 @@
             </Picker>-->
             <Label />
             <Entry x:Name="cityEntry" Placeholder="请输入城市名称（建议输入英文）" HorizontalTextAlignment="Center" ClearButtonVisibility="WhileEditing" FontSize="18" />
-
             <Button Text="查询" Clicked="OnSearchClicked" FontSize="18" />
             <Label />
             <Label Text="查询结果" FontSize="Title" HorizontalTextAlignment="Center" />

@@ -63,6 +63,11 @@ public partial class WeatherPage : ContentPage
                 return;
             }
         }
+        else
+        {
+            await DisplayAlert("错误", "城市名称不能为空", "确定");
+            return;
+        }
     }
     public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
     {
@@ -83,13 +88,13 @@ class Weather
 }
 class WeatherMain
 {
-    public float temp { get; set; }
+    public double temp { get; set; }
     public int humidity { get; set; }
 }
 class WeatherWind
 {
-    public float speed { get; set; }
-    public float deg { get; set; }
+    public double speed { get; set; }
+    public double deg { get; set; }
 }
 class WeatherWeather
 {

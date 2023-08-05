@@ -57,13 +57,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="SerialPage.xaml.cs">
+      <DependentUpon>SerialPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiXaml Update="AboutPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="DebugPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="SendPage.xaml">
+    <MauiXaml Update="NaviPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="SerialPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="SettingPage.xaml">

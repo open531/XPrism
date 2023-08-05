@@ -12,6 +12,11 @@ public partial class MainPage : ContentPage
         // 打开天气页面
         await Navigation.PushAsync(new WeatherPage());
     }
+    public async void OnNaviClicked(object sender, System.EventArgs e)
+    {
+        // 打开导航页面
+        await Navigation.PushAsync(new NaviPage());
+    }
     public async void OnSerialClicked(object sender, System.EventArgs e)
     {
         // 打开发送页面
