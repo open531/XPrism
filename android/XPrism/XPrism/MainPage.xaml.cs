@@ -2,29 +2,35 @@
 
 public partial class MainPage : ContentPage
 {
-
     public MainPage()
     {
         InitializeComponent();
         Application.Current.UserAppTheme = AppTheme.Light;
     }
-
     public async void OnWeatherClicked(object sender, System.EventArgs e)
     {
         // 打开天气页面
         await Navigation.PushAsync(new WeatherPage());
     }
-
-    public async void OnSendClicked(object sender, System.EventArgs e)
+    public async void OnSerialClicked(object sender, System.EventArgs e)
     {
         // 打开发送页面
-        await Navigation.PushAsync(new SendPage());
+        await Navigation.PushAsync(new SerialPage());
     }
-
+    public async void OnSettingClicked(object sender, System.EventArgs e)
+    {
+        // 打开设置页面
+        await Navigation.PushAsync(new SettingPage());
+    }
     public async void OnAboutClicked(object sender, System.EventArgs e)
     {
         // 打开关于页面
         await Navigation.PushAsync(new AboutPage());
+    }
+    public async void OnDebugClicked(object sender, System.EventArgs e)
+    {
+        // 打开调试页面
+        await Navigation.PushAsync(new DebugPage());
     }
 }
 

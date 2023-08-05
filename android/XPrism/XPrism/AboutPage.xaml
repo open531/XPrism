@@ -7,17 +7,20 @@
     <ScrollView>
         <VerticalStackLayout Margin="16">
             <Label Text="关于 XPrism" FontSize="Title" HorizontalOptions="Center" />
+            <Label />
             <Label Text="清华大学电子工程系硬件设计大赛参赛作品。" />
             <Label Text="XPrism 是基于 ESP32-PICO-D4 开发的智能眼镜。" />
             <Label Text="本应用是基于 .NET MAUI 开发的 Android 端控制器。" />
             <Label Text="Copyright © 2023 潘徐成 孙宇琦" />
             <Label Text="All rights reserved." />
-            <Label Text=" " />
+            <Label />
             <Label Text="设备信息" FontSize="Title" HorizontalOptions="Center" />
+            <Label />
             <Label Text="获取失败" x:Name="deviceInfo" />
             <Button Text="刷新设备信息" Clicked="OnRefreshClicked" FontSize="18" />
-            <Label Text=" " />
+            <Label />
             <Label Text="License" FontSize="Title" HorizontalOptions="Center" />
+            <Label />
             <Label Text="MIT License" FontAttributes="Bold" HorizontalOptions="Center" />
             <Label Text="Copyright (c) 2023 潘徐成 孙宇琦" HorizontalOptions="Center" />
             <Label Text="Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:" />

@@ -2,9 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="XPrism.WeatherPage"
-             Title="设置天气">
+             Title="天气信息">
     <ScrollView>
-        <VerticalStackLayout Margin="10">
+        <VerticalStackLayout Margin="16">
             <Label Text="选择城市" FontSize="Title" HorizontalTextAlignment="Center" />
             <!--<Picker x:Name="picker" Title="选择一个城市">
                 <Picker.ItemsSource>
@@ -22,13 +22,13 @@
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>-->
-
+            <Label />
             <Entry x:Name="cityEntry" Placeholder="请输入城市名称（建议输入英文）" HorizontalTextAlignment="Center" ClearButtonVisibility="WhileEditing" FontSize="18" />
 
             <Button Text="查询" Clicked="OnSearchClicked" FontSize="18" />
-            <Label></Label>
+            <Label />
             <Label Text="查询结果" FontSize="Title" HorizontalTextAlignment="Center" />
-            <Label></Label>
+            <Label />
             <StackLayout HorizontalOptions="Center">
                 <StackLayout Orientation="Horizontal">
                     <Label Text="城市：" />

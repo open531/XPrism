@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="XPrism.SendPage"
+             x:Class="XPrism.SerialPage"
              Title="发送信息">
     <ScrollView>
         <VerticalStackLayout Margin="16">
-            <Editor x:Name="editor" Placeholder="请输入您要发送的内容" HeightRequest="250" TextChanged="OnEditorTextChanged" Completed="OnEditorCompleted" FontSize="18" />
+            <Editor x:Name="editor" Placeholder="请输入您要发送的内容" FontSize="18" />
             <Button Text="发送" FontSize="18" />
+            <Label />
+            <ScrollView>
+                <VerticalStackLayout>
+                    <Label x:Name="serial" Background="LightGray" />
+                </VerticalStackLayout>
+            </ScrollView>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
