@@ -3,8 +3,9 @@
 
 #include <WString.h>
 
-struct Weather
+class Weather
 {
+public:
 	String name;
 	String description;
 	double temp;
