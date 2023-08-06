@@ -3,12 +3,21 @@
 #include "display.h"
 #include "icons.h"
 
+lv_obj_t *scr;
+
 void lv_xprism_gui(void)
 {
-	// set style
-	static lv_style_t style;
-	lv_style_init(&style);
-	lv_style_set_radius(&style, 5);
-	lv_style_set_bg_opa(&style, LV_OPA_COVER);
-	lv_style_set_bg_color(&style, LV_COLOR_BLACK);
+	static lv_style_t default_style;
+	lv_style_init(&default_style);
+	lv_style_set_bg_color(&default_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+	lv_style_set_bg_color(&default_style, LV_STATE_PRESSED, LV_COLOR_GRAY);
+	lv_style_set_bg_color(&default_style, LV_STATE_FOCUSED, LV_COLOR_BLACK);
+	lv_style_set_bg_color(&default_style, LV_STATE_FOCUSED | LV_STATE_PRESSED, lv_color_hex(0xf88));
+
+	lv_obj_add_style(lv_scr_act(), LV_BTN_PART_MAIN, &default_style);
+
+	scr = lv_scr_act();
+	lv_obj_t *img = lv_img_create(lv_scr_act(), NULL);
+	lv_img_set_src(img, &logo);
+	lv_obj_align(img, NULL, LV_ALIGN_CENTER, 0, 0);
 }

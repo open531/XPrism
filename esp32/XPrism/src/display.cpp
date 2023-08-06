@@ -1,73 +1,65 @@
 #include "display.h"
-#include <Arduino_GFX_Library.h>
+#include <TFT_eSPI.h>
+
+/*
+TFT pins should be set in path/to/Arduino/libraries/TFT_eSPI/User_Setups/Setup24_ST7789.h
+*/
+TFT_eSPI tft = TFT_eSPI();
+
+static lv_disp_buf_t disp_buf;
+static lv_color_t buf[LV_HOR_RES_MAX * 10];
+
+void my_print(lv_log_level_t level, const char *file, uint32_t line, const char *fun, const char *dsc)
+{
+	Serial.printf("%s@%d %s->%s\r\n", file, line, fun, dsc);
+	Serial.flush();
+}
 
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
-  uint32_t w = (area->x2 - area->x1 + 1);
-  uint32_t h = (area->y2 - area->y1 + 1);
+	uint32_t w = (area->x2 - area->x1 + 1);
+	uint32_t h = (area->y2 - area->y1 + 1);
 
-#if (LV_COLOR_16_SWAP != 0)
-  gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#else
-  gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#endif
+	tft.startWrite();
+	tft.setAddrWindow(area->x1, area->y1, w, h);
+	tft.pushColors(&color_p->full, w * h, true);
+	tft.endWrite();
 
-  lv_disp_flush_ready(disp);
+	lv_disp_flush_ready(disp);
 }
 
 void Display::init()
 {
-#ifdef GFX_EXTRA_PRE_INIT
-	GFX_EXTRA_PRE_INIT();
-#endif
-
-	// Init Display
-	if (!gfx->begin())
-	{
-		Serial.println("gfx->begin() failed!");
-	}
-	gfx->fillScreen(BLACK);
-
-#ifdef GFX_BL
-	pinMode(GFX_BL, OUTPUT);
-	digitalWrite(GFX_BL, HIGH);
-#endif
+	ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
+	ledcAttachPin(LCD_BL_PIN, LCD_BL_PWM_CHANNEL);
 
 	lv_init();
 
-	screenWidth = gfx->width();
-	screenHeight = gfx->height();
+	lv_log_register_print_cb(my_print); /* register print function for debugging */
 
-	disp_draw_buf = (lv_color_t *)heap_caps_malloc(sizeof(lv_color_t) * screenWidth * 40, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+	tft.begin();		/* TFT init */
+	tft.setRotation(4); /* mirror */
 
-	if (!disp_draw_buf)
-	{
-		Serial.println("LVGL disp_draw_buf allocate failed!");
-	}
-	else
-	{
-		lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, NULL, screenWidth * 40);
+	lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
 
-		// Initialize the display
-		lv_disp_drv_init(&disp_drv);
-		// Change the following line to your display resolution
-		disp_drv.hor_res = screenWidth;
-		disp_drv.ver_res = screenHeight;
-		disp_drv.flush_cb = my_disp_flush;
-		disp_drv.draw_buf = &draw_buf;
-		lv_disp_drv_register(&disp_drv);
+	/*Initialize the display*/
+	lv_disp_drv_t disp_drv;
+	lv_disp_drv_init(&disp_drv);
+	disp_drv.hor_res = 240;
+	disp_drv.ver_res = 240;
+	disp_drv.flush_cb = my_disp_flush;
+	disp_drv.buffer = &disp_buf;
+	lv_disp_drv_register(&disp_drv);
+}
 
-		// Initialize the (dummy) input device driver
-		static lv_indev_drv_t indev_drv;
-		lv_indev_drv_init(&indev_drv);
-		indev_drv.type = LV_INDEV_TYPE_POINTER;
-		lv_indev_drv_register(&indev_drv);
+void Display::routine()
+{
+	lv_task_handler();
+}
 
-		// Create simple label
-		lv_obj_t *label = lv_label_create(lv_scr_act());
-		lv_label_set_text(label, "Hello Arduino! (V" GFX_STR(LVGL_VERSION_MAJOR) "." GFX_STR(LVGL_VERSION_MINOR) "." GFX_STR(LVGL_VERSION_PATCH) ")");
-		lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-
-		Serial.println("Setup done");
-	}
+void Display::setBackLight(float duty)
+{
+	duty = constrain(duty, 0, 1);
+	duty = 1 - duty;
+	ledcWrite(LCD_BL_PWM_CHANNEL, (int)(duty * 255));
 }
