@@ -14,14 +14,14 @@ extern "C"
 {
 #endif
 
-	/*********************
-	 *      INCLUDES
-	 *********************/
+    /*********************
+     *      INCLUDES
+     *********************/
 #include "lvgl.h"
 
-	extern lv_indev_t *indev_encoder;
+    extern lv_indev_t *indev_encoder;
 
-	void lv_port_indev_init(void);
+    void lv_port_indev_init(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

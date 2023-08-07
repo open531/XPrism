@@ -12,7 +12,7 @@ XPrism is a smart glasses based on ESP32-PICO-D4.
 
 The repository also contains an Android controller based on .NET MAUI.
 
-Copyright © 2023 [Pan Xucheng] (https://github.com/Panxuc) [Sun Yuqi] (https://github.com/always-del)
+Copyright © 2023 [Pan Xucheng](https://github.com/Panxuc) [Sun Yuqi](https://github.com/always-del)
 
 ## Features
 
