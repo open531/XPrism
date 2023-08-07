@@ -1,7 +1,7 @@
 #include "imu.h"
 #include "system.h"
 
-const char *active_type_info[] = {"TURN_RIGHT", "RETURN",
+const char *imu_active_type_info[] = {"TURN_RIGHT", "RETURN",
                                   "TURN_LEFT", "UP",
                                   "DOWN", "GO_FORWORD",
                                   "SHAKE", "UNKNOWN"};
@@ -9,7 +9,7 @@ const char *active_type_info[] = {"TURN_RIGHT", "RETURN",
 IMU::IMU()
 {
     action_info.isValid = false;
-    action_info.active = ACTIVE_TYPE::UNKNOWN;
+    action_info.active = IMU_ACTIVE_TYPE::UNKNOWN;
     action_info.long_time = true;
     // 初始化数据
     for (int pos = 0; pos < ACTION_HISTORY_BUF_LEN; ++pos)
@@ -98,20 +98,20 @@ ImuAction *IMU::update(int interval)
             {
                 encoder_diff--;
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::TURN_LEFT;
+                action_info.active = IMU_ACTIVE_TYPE::TURN_LEFT;
             }
             else if (action_info.v_ay < -4000)
             {
                 encoder_diff++;
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::TURN_RIGHT;
+                action_info.active = IMU_ACTIVE_TYPE::TURN_RIGHT;
             }
             else if (action_info.v_ay > 1000 || action_info.v_ay < -1000)
             {
                 // 震动检测
                 encoder_diff--;
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::SHAKE;
+                action_info.active = IMU_ACTIVE_TYPE::SHAKE;
             }
             else
             {
@@ -124,26 +124,26 @@ ImuAction *IMU::update(int interval)
             if (action_info.v_ax > 5000)
             {
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::UP;
+                action_info.active = IMU_ACTIVE_TYPE::UP;
                 delay(500);
                 getVirtureMotion6(&action_info);
                 if (action_info.v_ax > 5000)
                 {
                     action_info.isValid = 1;
-                    action_info.active = ACTIVE_TYPE::GO_FORWORD;
+                    action_info.active = IMU_ACTIVE_TYPE::GO_FORWORD;
                     encoder_state = LV_INDEV_STATE_PR;
                 }
             }
             else if (action_info.v_ax < -5000)
             {
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::DOWN;
+                action_info.active = IMU_ACTIVE_TYPE::DOWN;
                 delay(500);
                 getVirtureMotion6(&action_info);
                 if (action_info.v_ax < -5000)
                 {
                     action_info.isValid = 1;
-                    action_info.active = ACTIVE_TYPE::RETURN;
+                    action_info.active = IMU_ACTIVE_TYPE::RETURN;
                     encoder_state = LV_INDEV_STATE_REL;
                 }
             }
@@ -151,7 +151,7 @@ ImuAction *IMU::update(int interval)
             {
                 // 震动检测
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::SHAKE;
+                action_info.active = IMU_ACTIVE_TYPE::SHAKE;
             }
             else
             {
@@ -173,40 +173,40 @@ ImuAction *IMU::getAction(void)
     // Serial.printf("gx = %d\tgy = %d\tgz = %d", tmp_info.v_gx, tmp_info.v_gy, tmp_info.v_gz);
     // Serial.printf("\tax = %d\tay = %d\taz = %d\n", tmp_info.v_ax, tmp_info.v_ay, tmp_info.v_az);
 
-    tmp_info.active = ACTIVE_TYPE::UNKNOWN;
+    tmp_info.active = IMU_ACTIVE_TYPE::UNKNOWN;
 
     // 原先判断的只是加速度，现在要加上陀螺仪
-    if (ACTIVE_TYPE::UNKNOWN == tmp_info.active)
+    if (IMU_ACTIVE_TYPE::UNKNOWN == tmp_info.active)
     {
         if (tmp_info.v_ay > 4000)
         {
-            tmp_info.active = ACTIVE_TYPE::TURN_LEFT;
+            tmp_info.active = IMU_ACTIVE_TYPE::TURN_LEFT;
         }
         else if (tmp_info.v_ay < -4000)
         {
-            tmp_info.active = ACTIVE_TYPE::TURN_RIGHT;
+            tmp_info.active = IMU_ACTIVE_TYPE::TURN_RIGHT;
         }
         else if (tmp_info.v_ay > 1000 || tmp_info.v_ay < -1000)
         {
             // 震动检测
-            tmp_info.active = ACTIVE_TYPE::SHAKE;
+            tmp_info.active = IMU_ACTIVE_TYPE::SHAKE;
         }
     }
 
-    if (ACTIVE_TYPE::UNKNOWN == tmp_info.active)
+    if (IMU_ACTIVE_TYPE::UNKNOWN == tmp_info.active)
     {
         if (tmp_info.v_ax > 5000)
         {
-            tmp_info.active = ACTIVE_TYPE::UP;
+            tmp_info.active = IMU_ACTIVE_TYPE::UP;
         }
         else if (tmp_info.v_ax < -5000)
         {
-            tmp_info.active = ACTIVE_TYPE::DOWN;
+            tmp_info.active = IMU_ACTIVE_TYPE::DOWN;
         }
         else if (action_info.v_ax > 1000 || action_info.v_ax < -1000)
         {
             // 震动检测
-            tmp_info.active = ACTIVE_TYPE::SHAKE;
+            tmp_info.active = IMU_ACTIVE_TYPE::SHAKE;
         }
     }
 
@@ -223,7 +223,7 @@ ImuAction *IMU::getAction(void)
         int second = (index + ACTION_HISTORY_BUF_LEN - 1) % ACTION_HISTORY_BUF_LEN;
         int third = (index + ACTION_HISTORY_BUF_LEN - 2) % ACTION_HISTORY_BUF_LEN;
         // 先识别"短按" （注：不要写成else if）
-        if (ACTIVE_TYPE::UNKNOWN != tmp_info.active)
+        if (IMU_ACTIVE_TYPE::UNKNOWN != tmp_info.active)
         {
             action_info.isValid = 1;
             action_info.active = tmp_info.active;
@@ -232,25 +232,25 @@ ImuAction *IMU::getAction(void)
         if (act_info_history[index] == act_info_history[second] && act_info_history[second] == act_info_history[third])
         {
             // 目前只识别前后的长按
-            if (ACTIVE_TYPE::UP == tmp_info.active)
+            if (IMU_ACTIVE_TYPE::UP == tmp_info.active)
             {
                 isHoldDown = true;
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::GO_FORWORD;
+                action_info.active = IMU_ACTIVE_TYPE::GO_FORWORD;
             }
-            else if (ACTIVE_TYPE::DOWN == tmp_info.active)
+            else if (IMU_ACTIVE_TYPE::DOWN == tmp_info.active)
             {
                 isHoldDown = true;
                 action_info.isValid = 1;
-                action_info.active = ACTIVE_TYPE::RETURN;
+                action_info.active = IMU_ACTIVE_TYPE::RETURN;
             }
             // 如需左右的长按可在此处添加"else if"的逻辑
 
             if (isHoldDown)
             {
                 // 本次识别为长按，则手动清除识别过的历史数据 避免对下次动作识别的影响
-                act_info_history[second] = ACTIVE_TYPE::UNKNOWN;
-                act_info_history[third] = ACTIVE_TYPE::UNKNOWN;
+                act_info_history[second] = IMU_ACTIVE_TYPE::UNKNOWN;
+                act_info_history[third] = IMU_ACTIVE_TYPE::UNKNOWN;
             }
         }
     }

@@ -3,10 +3,11 @@
 
 #include <WString.h>
 
-class Weather
+struct Weather
 {
-public:
+    int id;
     String name;
+    String main;
     String description;
     double temp;
     double feels_like;
