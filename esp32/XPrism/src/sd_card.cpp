@@ -1,15 +1,104 @@
 #include "sd_card.h"
+#include <SD_MMC.h>
+#include <string.h>
+#include "system.h"
+
+#define TF_VFS_IS_NULL(RET)                           \
+	if (NULL == tf_vfs)                               \
+	{                                                 \
+		Serial.println("[Sys SD Card] Mount Failed"); \
+		return RET;                                   \
+	}
+
+int photo_file_num = 0;
+char file_name_list[DIR_FILE_NUM][DIR_FILE_NAME_MAX_LEN];
+
+static fs::FS *tf_vfs = NULL;
+
+void release_file_info(File_Info *info)
+{
+	File_Info *cur_node = NULL; // 记录当前节点
+	if (NULL == info)
+	{
+		return;
+	}
+	for (cur_node = info->next_node; NULL != cur_node;)
+	{
+		// 判断是不是循环一圈回来了
+		if (info->next_node == cur_node)
+		{
+			break;
+		}
+		File_Info *tmp = cur_node; // 保存准备删除的节点
+		cur_node = cur_node->next_node;
+		free(tmp);
+	}
+	free(info);
+}
+
+void join_path(char *dst_path, const char *pre_path, const char *rear_path)
+{
+	while (*pre_path != 0)
+	{
+		*dst_path = *pre_path;
+		++dst_path;
+		++pre_path;
+	}
+	if (*(pre_path - 1) != '/')
+	{
+		*dst_path = '/';
+		++dst_path;
+	}
+
+	if (*rear_path == '/')
+	{
+		++rear_path;
+	}
+	while (*rear_path != 0)
+	{
+		*dst_path = *rear_path;
+		++dst_path;
+		++rear_path;
+	}
+	*dst_path = 0;
+}
+
+/*
+ * get file basename
+ */
+static const char *get_file_basename(const char *path)
+{
+	// 获取最后一个'/'所在的下标
+	const char *ret = path;
+	for (const char *cur = path; *cur != 0; ++cur)
+	{
+		if (*cur == '/')
+		{
+			ret = cur + 1;
+		}
+	}
+	return ret;
+}
 
 void SdCard::init()
 {
-
-	SPIClass *sd_spi = new SPIClass(HSPI); // another SPI
-	if (!SD.begin(15, *sd_spi))			   // SD-Card SS pin is 15
+	SPIClass *sd_spi = new SPIClass(HSPI);			// another SPI
+	sd_spi->begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS); // Replace default HSPI pins
+	if (!SD.begin(SD_SS, *sd_spi, 80000000))		// SD-Card SS pin is 15
 	{
 		Serial.println("Card Mount Failed");
 		return;
 	}
+	tf_vfs = &SD;
 	uint8_t cardType = SD.cardType();
+
+	// 目前SD_MMC驱动与硬件引脚存在冲突
+	// if(!SD_MMC.begin("/", true)){
+	//     Serial.println("Card Mount Failed");
+	//     return;
+	// }
+	// tf_vfs = &SD_MMC;
+	// uint8_t cardType = SD_MMC.cardType();
 
 	if (cardType == CARD_NONE)
 	{
@@ -41,9 +130,12 @@ void SdCard::init()
 
 void SdCard::listDir(const char *dirname, uint8_t levels)
 {
-	Serial.printf("Listing directory: %s\n", dirname);
+	TF_VFS_IS_NULL()
 
-	File root = SD.open(dirname);
+	Serial.printf("Listing directory: %s\n", dirname);
+	photo_file_num = 0;
+
+	File root = tf_vfs->open(dirname);
 	if (!root)
 	{
 		Serial.println("Failed to open directory");
@@ -55,8 +147,10 @@ void SdCard::listDir(const char *dirname, uint8_t levels)
 		return;
 	}
 
+	int dir_len = strlen(dirname) + 1;
+
 	File file = root.openNextFile();
-	while (file)
+	while (file && photo_file_num < DIR_FILE_NUM)
 	{
 		if (file.isDirectory())
 		{
@@ -70,18 +164,123 @@ void SdCard::listDir(const char *dirname, uint8_t levels)
 		else
 		{
 			Serial.print("  FILE: ");
-			Serial.print(file.name());
+			// 只取文件名 保存到file_name_list中
+			strncpy(file_name_list[photo_file_num], file.name() + dir_len, DIR_FILE_NAME_MAX_LEN - 1);
+			file_name_list[photo_file_num][strlen(file_name_list[photo_file_num]) - 4] = 0;
+
+			char file_name[FILENAME_MAX_LEN] = {0};
+			sprintf(file_name, "%s/%s.bin", dirname, file_name_list[photo_file_num]);
+			Serial.print(file_name);
+			++photo_file_num;
 			Serial.print("  SIZE: ");
 			Serial.println(file.size());
 		}
 		file = root.openNextFile();
 	}
+	Serial.println(photo_file_num);
+}
+
+File_Info *SdCard::listDir(const char *dirname)
+{
+	TF_VFS_IS_NULL(NULL)
+
+	Serial.printf("Listing directory: %s\n", dirname);
+
+	File root = tf_vfs->open(dirname);
+	if (!root)
+	{
+		Serial.println("Failed to open directory");
+		return NULL;
+	}
+	if (!root.isDirectory())
+	{
+		Serial.println("Not a directory");
+		return NULL;
+	}
+
+	int dir_len = strlen(dirname) + 1;
+
+	// 头节点的创建（头节点用来记录此文件夹）
+	File_Info *head_file = (File_Info *)malloc(sizeof(File_Info));
+	head_file->file_type = FILE_TYPE_FOLDER;
+	head_file->file_name = (char *)malloc(dir_len);
+	// 将文件夹名赋值给头节点（当作这个节点的文件名）
+	strncpy(head_file->file_name, dirname, dir_len - 1);
+	head_file->file_name[dir_len - 1] = 0;
+	head_file->front_node = NULL;
+	head_file->next_node = NULL;
+
+	File_Info *file_node = head_file;
+
+	File file = root.openNextFile();
+	while (file)
+	{
+		// if (levels)
+		// {
+		//     listDir(file.name(), levels - 1);
+		// }
+		const char *fn = get_file_basename(file.name());
+		// 字符数组长度为实际字符串长度+1
+		int filename_len = strlen(fn);
+		if (filename_len > FILENAME_MAX_LEN - 10)
+		{
+			Serial.println("Filename is too long.");
+		}
+
+		// 创建新节点
+		file_node->next_node = (File_Info *)malloc(sizeof(File_Info));
+		// 让下一个节点指向当前节点
+		// （此时第一个节点的front_next会指向head节点，等遍历结束再调一下）
+		file_node->next_node->front_node = file_node;
+		// file_node指针移向节点
+		file_node = file_node->next_node;
+
+		// 船家创建新节点的文件名
+		file_node->file_name = (char *)malloc(filename_len);
+		strncpy(file_node->file_name, fn, filename_len); //
+		file_node->file_name[filename_len] = 0;			 //
+		// 下一个节点赋空
+		file_node->next_node = NULL;
+
+		char tmp_file_name[FILENAME_MAX_LEN] = {0};
+		// sprintf(tmp_file_name, "%s/%s", dirname, file_node->file_name);
+		join_path(tmp_file_name, dirname, file_node->file_name);
+		if (file.isDirectory())
+		{
+			file_node->file_type = FILE_TYPE_FOLDER;
+			// 类型为文件夹
+			Serial.print("  DIR : ");
+			Serial.println(tmp_file_name);
+		}
+		else
+		{
+			file_node->file_type = FILE_TYPE_FILE;
+			// 类型为文件
+			Serial.print("  FILE: ");
+			Serial.print(tmp_file_name);
+			Serial.print("  SIZE: ");
+			Serial.println(file.size());
+		}
+
+		file = root.openNextFile();
+	}
+
+	if (NULL != head_file->next_node)
+	{
+		// 将最后一个节点的next_node指针指向 head_file->next_node
+		file_node->next_node = head_file->next_node;
+		// 调整第一个数据节点的front_node指针（非head节点）
+		head_file->next_node->front_node = file_node;
+	}
+	return head_file;
 }
 
 void SdCard::createDir(const char *path)
 {
+	TF_VFS_IS_NULL()
+
 	Serial.printf("Creating Dir: %s\n", path);
-	if (SD.mkdir(path))
+	if (tf_vfs->mkdir(path))
 	{
 		Serial.println("Dir created");
 	}
@@ -93,8 +292,10 @@ void SdCard::createDir(const char *path)
 
 void SdCard::removeDir(const char *path)
 {
+	TF_VFS_IS_NULL()
+
 	Serial.printf("Removing Dir: %s\n", path);
-	if (SD.rmdir(path))
+	if (tf_vfs->rmdir(path))
 	{
 		Serial.println("Dir removed");
 	}
@@ -106,9 +307,11 @@ void SdCard::removeDir(const char *path)
 
 void SdCard::readFile(const char *path)
 {
+	TF_VFS_IS_NULL()
+
 	Serial.printf("Reading file: %s\n", path);
 
-	File file = SD.open(path);
+	File file = tf_vfs->open(path);
 	if (!file)
 	{
 		Serial.println("Failed to open file for reading");
@@ -123,11 +326,13 @@ void SdCard::readFile(const char *path)
 	file.close();
 }
 
-String SdCard::readFileLine(const char *path, int num = 1)
+String SdCard::readFileLine(const char *path, int num)
 {
+	TF_VFS_IS_NULL("")
+
 	Serial.printf("Reading file: %s line: %d\n", path, num);
 
-	File file = SD.open(path);
+	File file = tf_vfs->open(path);
 	if (!file)
 	{
 		return ("Failed to open file for reading");
@@ -158,19 +363,21 @@ String SdCard::readFileLine(const char *path, int num = 1)
 	return String("error parameter!");
 }
 
-void SdCard::writeFile(const char *path, const char *message)
+void SdCard::writeFile(const char *path, const char *info)
 {
+	TF_VFS_IS_NULL()
+
 	Serial.printf("Writing file: %s\n", path);
 
-	File file = SD.open(path, FILE_WRITE);
+	File file = tf_vfs->open(path, FILE_WRITE);
 	if (!file)
 	{
 		Serial.println("Failed to open file for writing");
 		return;
 	}
-	if (file.print(message))
+	if (file.println(info))
 	{
-		Serial.println("File written");
+		Serial.println("Write succ");
 	}
 	else
 	{
@@ -179,11 +386,20 @@ void SdCard::writeFile(const char *path, const char *message)
 	file.close();
 }
 
+File SdCard::open(const String &path, const char *mode)
+{
+	// TF_VFS_IS_NULL(RET)
+
+	return tf_vfs->open(path, mode);
+}
+
 void SdCard::appendFile(const char *path, const char *message)
 {
+	TF_VFS_IS_NULL()
+
 	Serial.printf("Appending to file: %s\n", path);
 
-	File file = SD.open(path, FILE_APPEND);
+	File file = tf_vfs->open(path, FILE_APPEND);
 	if (!file)
 	{
 		Serial.println("Failed to open file for appending");
@@ -202,8 +418,10 @@ void SdCard::appendFile(const char *path, const char *message)
 
 void SdCard::renameFile(const char *path1, const char *path2)
 {
+	TF_VFS_IS_NULL()
+
 	Serial.printf("Renaming file %s to %s\n", path1, path2);
-	if (SD.rename(path1, path2))
+	if (tf_vfs->rename(path1, path2))
 	{
 		Serial.println("File renamed");
 	}
@@ -213,27 +431,49 @@ void SdCard::renameFile(const char *path1, const char *path2)
 	}
 }
 
-void SdCard::deleteFile(const char *path)
+boolean SdCard::deleteFile(const char *path)
 {
+	TF_VFS_IS_NULL(false)
+
 	Serial.printf("Deleting file: %s\n", path);
-	if (SD.remove(path))
+	if (tf_vfs->remove(path))
 	{
 		Serial.println("File deleted");
+		return true;
 	}
 	else
 	{
 		Serial.println("Delete failed");
 	}
+	return false;
+}
+
+boolean SdCard::deleteFile(const String &path)
+{
+	TF_VFS_IS_NULL(false)
+
+	Serial.printf("Deleting file: %s\n", path);
+	if (tf_vfs->remove(path))
+	{
+		Serial.println("File deleted");
+		return true;
+	}
+	else
+	{
+		Serial.println("Delete failed");
+	}
+	return false;
 }
 
 void SdCard::readBinFromSd(const char *path, uint8_t *buf)
 {
-	File file = SD.open(path);
+	TF_VFS_IS_NULL()
+
+	File file = tf_vfs->open(path);
 	size_t len = 0;
 	if (file)
 	{
 		len = file.size();
-		size_t flen = len;
 
 		while (len)
 		{
@@ -256,7 +496,9 @@ void SdCard::readBinFromSd(const char *path, uint8_t *buf)
 
 void SdCard::writeBinToSd(const char *path, uint8_t *buf)
 {
-	File file = SD.open(path, FILE_WRITE);
+	TF_VFS_IS_NULL()
+
+	File file = tf_vfs->open(path, FILE_WRITE);
 	if (!file)
 	{
 		Serial.println("Failed to open file for writing");
@@ -273,7 +515,9 @@ void SdCard::writeBinToSd(const char *path, uint8_t *buf)
 
 void SdCard::fileIO(const char *path)
 {
-	File file = SD.open(path);
+	TF_VFS_IS_NULL()
+
+	File file = tf_vfs->open(path);
 	static uint8_t buf[512];
 	size_t len = 0;
 	uint32_t start = millis();
@@ -302,7 +546,7 @@ void SdCard::fileIO(const char *path)
 		Serial.println("Failed to open file for reading");
 	}
 
-	file = SD.open(path, FILE_WRITE);
+	file = tf_vfs->open(path, FILE_WRITE);
 	if (!file)
 	{
 		Serial.println("Failed to open file for writing");

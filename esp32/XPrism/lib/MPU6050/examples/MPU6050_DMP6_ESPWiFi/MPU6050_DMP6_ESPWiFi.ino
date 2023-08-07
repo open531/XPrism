@@ -91,12 +91,7 @@ VectorInt16 aa;         // [x, y, z]            accel sensor measurements
 VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
 VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
 VectorFloat gravity;    // [x, y, z]            gravity vector
-#ifdef OUTPUT_READABLE_EULER
-float euler[3];         // [psi, theta, phi]    Euler angle container
-#endif
-#ifdef OUTPUT_READABLE_YAWPITCHROLL
-float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
-#endif
+
 
 // uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
 // quaternion components in a [w, x, y, z] format (not best for parsing
@@ -133,6 +128,14 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 // format used for the InvenSense teapot demo
 #define OUTPUT_TEAPOT_OSC
 
+
+#ifdef OUTPUT_READABLE_EULER
+float euler[3];         // [psi, theta, phi]    Euler angle container
+#endif
+#ifdef OUTPUT_READABLE_YAWPITCHROLL
+float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+#endif
+
 #define INTERRUPT_PIN 15 // use pin 15 on ESP8266
 
 const char DEVICE_NAME[] = "mpu6050";
@@ -146,7 +149,7 @@ const unsigned int outPort = 9999;          // remote port to receive OSC
 // ================================================================
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
-void dmpDataReady() {
+void ICACHE_RAM_ATTR dmpDataReady() {
     mpuInterrupt = true;
 }
 
