@@ -170,19 +170,20 @@ void Clock_gui_release(void)
     }
 }
 
+unsigned long StopStart=0,StopFinish=0;
+
 // easy to use helper-function for non-blocking timing
 boolean TimePeriodIsOver (unsigned long &periodStartTime, unsigned long TimePeriod) {
-  unsigned long StopStart=0,StopFinish=0;
+  
   unsigned long currentMillis  = millis();
   if(data->forceUpdate==0)
   {
-    StopStart=millis();
     return false;
   }
   if(data->forceUpdate==1)
   {
-    StopFinish=millis();
     currentMillis=currentMillis-(StopFinish-StopStart);
+    StopStart=StopFinish;
   if ( currentMillis - periodStartTime >= TimePeriod )
   {
     periodStartTime = currentMillis; // set new expireTime
@@ -321,10 +322,12 @@ static void ClockProcess(XPages *sys,const Action *action)
             if(data->forceUpdate==0)
             {
                 data->forceUpdate=1;
+                StopFinish=millis();
             }
             else if(data->forceUpdate==1)
             {
                 data->forceUpdate=0;
+                StopStart=millis();
             }
         }
         else if(data->currentPage==1)
@@ -332,10 +335,12 @@ static void ClockProcess(XPages *sys,const Action *action)
             if(data->forceUpdate==0)
             {
                 data->forceUpdate=1;
+                StopFinish=millis();
             }
             else if(data->forceUpdate==1)
             {
                 data->forceUpdate=0;
+                StopStart=millis();
             }
         }
         delay(500);
