@@ -1,28 +1,28 @@
-# XPrism
+# Xprism
 
-[English](README.en.md) | [日本語](README.ja.md) | [简体中文](README.md) | **繁體中文**
+[English](README.en.md) | **日本語** | [简体中文](README.md) | [繁體中文](README.zh_TW.md)
 
-## 關於
+## このプロジェクトについて
 
 ![appicon](.readme/appicon.png)
 
-清華大學電子工程系硬體設計大賽參賽作品。
+本作品は清華大学電子工学部のハードウェアデザインコンテストのエントリーです。
 
-遵循 [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html) 授權條款。
+[GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html) に基づいてライセンスされています。
 
-XPrism 是基於 ESP32-PICO-D4 開發的智慧眼鏡。
+XPrism は ESP32-PICO-D4 をベースとしたスマートグラスです。
 
-此倉庫同時包含基於 .NET MAUI 開發的 Android 端控制器。
+このリポジトリには .NET MAUI をベースとした Android コントローラーも含まれています。
 
 Copyright © 2023 [潘徐成](https://github.com/Panxuc) [孫宇琦](https://github.com/always-del)
 
-## 特色
+## 特徴
 
 TBA
 
-## 致謝
+## 謝辞
 
-XPrism 的誕生離不開以下開源專案的支援、參考與引用。
+XPrism の誕生は以下のオープンソースプロジェクトのサポート、参考、引用なしには成り立ちませんでした。
 
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 - [ESP32FTPServer](https://github.com/HenrikSte/ESP32FTPServer)

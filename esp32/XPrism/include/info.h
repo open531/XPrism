@@ -1,14 +1,12 @@
 #ifndef INFO_H
 #define INFO_H
 
-#include <WString.h>
-
 struct Weather
 {
     int id;
-    String name;
-    String main;
-    String description;
+    char name[10];
+    char main[20];
+    char description[20];
     double temp;
     double feels_like;
     int pressure;

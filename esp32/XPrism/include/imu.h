@@ -19,7 +19,7 @@ enum IMU_ACTIVE_TYPE
     TURN_LEFT,
     UP,
     DOWN,
-    GO_FORWORD,
+    GO_FORWARD,
     SHAKE,
     UNKNOWN
 };
@@ -75,8 +75,7 @@ public:
 
 public:
     IMU();
-    void init(uint8_t order, uint8_t auto_calibration,
-              SysMpuConfig *mpu_cfg);
+    void init(uint8_t order, uint8_t auto_calibration, SysMpuConfig *mpu_cfg);
     void setOrder(uint8_t order); // 设置方向
     bool Encoder_GetIsPush(void); // 适配Peak的编码器中键 开关机使用
     ImuAction *update(int interval);

@@ -1,5 +1,5 @@
 #include "pages_main.h"
-#include "pages_gui.h"
+#include "pages_main_ui.h"
 #include "system.h"
 #include "interface.h"
 #include "Arduino.h"
@@ -135,12 +135,12 @@ int XPages::app_auto_start()
     return 0;
 }
 
-int XPages::main_process(ImuAction *act_info)
+int XPages::main_process(Action *act_info)
 {
-    if (IMU_ACTIVE_TYPE::UNKNOWN != act_info->active)
+    if (ACTION_TYPE::UNKNOWN != act_info->type)
     {
-        Serial.print(F("[Operate]\tact_info->active: "));
-        Serial.println(imu_active_type_info[act_info->active]);
+        Serial.print(F("[Operate]\tact_info->type: "));
+        Serial.println(action_type_info[act_info->type]);
     }
 
     if (isRunEventDeal)
@@ -160,14 +160,14 @@ int XPages::main_process(ImuAction *act_info)
     {
         // 当前没有进入任何app
         lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-        if (IMU_ACTIVE_TYPE::TURN_LEFT == act_info->active)
+        if (ACTION_TYPE::LEFT == act_info->type)
         {
             anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
             pre_app_index = cur_app_index;
             cur_app_index = (cur_app_index + 1) % app_num;
             Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
         }
-        else if (IMU_ACTIVE_TYPE::TURN_RIGHT == act_info->active)
+        else if (ACTION_TYPE::RIGHT == act_info->type)
         {
             anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
             pre_app_index = cur_app_index;
@@ -176,7 +176,7 @@ int XPages::main_process(ImuAction *act_info)
             cur_app_index = (cur_app_index - 1 + app_num) % app_num; // 此处的3与p_processList的长度一致
             Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
         }
-        else if (IMU_ACTIVE_TYPE::GO_FORWORD == act_info->active)
+        else if (ACTION_TYPE::FORWARD == act_info->type)
         {
             app_exit_flag = 1; // 进入app
             if (NULL != appList[cur_app_index]->app_init)
@@ -185,7 +185,7 @@ int XPages::main_process(ImuAction *act_info)
             }
         }
 
-        if (IMU_ACTIVE_TYPE::GO_FORWORD != act_info->active) // && UNKNOWN != act_info->active
+        if (ACTION_TYPE::FORWARD != act_info->type) // && UNKNOWN != act_info->type
         {
             app_control_display_scr(appList[cur_app_index]->app_image,
                                     appList[cur_app_index]->app_name,
@@ -201,7 +201,7 @@ int XPages::main_process(ImuAction *act_info)
         // 运行APP进程 等效于把控制权交给当前APP
         (*(appList[cur_app_index]->main_process))(this, act_info);
     }
-    act_info->active = IMU_ACTIVE_TYPE::UNKNOWN;
+    act_info->type = ACTION_TYPE::UNKNOWN;
     act_info->isValid = 0;
     return 0;
 }

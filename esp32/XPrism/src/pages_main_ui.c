@@ -1,4 +1,6 @@
-#include "pages_gui.h"
+#include "pages_main_ui.h"
+
+LV_FONT_DECLARE(lv_font_wqy_microhei_20);
 
 // 必须定义为全局或者静态
 static lv_obj_t *app_scr = NULL;
@@ -31,7 +33,7 @@ void app_control_gui_init(void)
     lv_style_init(&app_name_style);
     lv_style_set_text_opa(&app_name_style, LV_OPA_COVER);
     lv_style_set_text_color(&app_name_style, lv_color_white());
-    lv_style_set_text_font(&app_name_style, &lv_font_montserrat_24);
+    lv_style_set_text_font(&app_name_style, &lv_font_wqy_microhei_20);
 
     // APP图标页
     app_scr = lv_obj_create(NULL);

@@ -2,9 +2,9 @@
 #include "system.h"
 
 const char *imu_active_type_info[] = {"TURN_RIGHT", "RETURN",
-                                  "TURN_LEFT", "UP",
-                                  "DOWN", "GO_FORWORD",
-                                  "SHAKE", "UNKNOWN"};
+                                      "TURN_LEFT", "UP",
+                                      "DOWN", "GO_FORWARD",
+                                      "SHAKE", "UNKNOWN"};
 
 IMU::IMU()
 {
@@ -15,7 +15,7 @@ IMU::IMU()
     for (int pos = 0; pos < ACTION_HISTORY_BUF_LEN; ++pos)
     {
         // act_info_history.push_back(UNKNOWN);
-        act_info_history[pos] = UNKNOWN;
+        act_info_history[pos] = IMU_ACTIVE_TYPE::UNKNOWN;
     }
     act_info_history_ind = ACTION_HISTORY_BUF_LEN - 1;
     this->order = 0; // 表示方位
@@ -130,7 +130,7 @@ ImuAction *IMU::update(int interval)
                 if (action_info.v_ax > 5000)
                 {
                     action_info.isValid = 1;
-                    action_info.active = IMU_ACTIVE_TYPE::GO_FORWORD;
+                    action_info.active = IMU_ACTIVE_TYPE::GO_FORWARD;
                     encoder_state = LV_INDEV_STATE_PR;
                 }
             }
@@ -236,7 +236,7 @@ ImuAction *IMU::getAction(void)
             {
                 isHoldDown = true;
                 action_info.isValid = 1;
-                action_info.active = IMU_ACTIVE_TYPE::GO_FORWORD;
+                action_info.active = IMU_ACTIVE_TYPE::GO_FORWARD;
             }
             else if (IMU_ACTIVE_TYPE::DOWN == tmp_info.active)
             {

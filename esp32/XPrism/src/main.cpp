@@ -1,15 +1,3 @@
-/***************************************************
-  HoloCubic多功能固件源码
-  （项目中若参考本工程源码，请注明参考来源）
-
-  聚合多种APP，内置天气、时钟、相册、特效动画、视频播放、视频投影、
-  浏览器文件修改。（各APP具体使用参考说明书）
-
-  Github repositories：https://github.com/ClimbSnail/HoloCubic_AIO
-
-  Last review/edit by ClimbSnail: 2023/01/14
- ****************************************************/
-
 #include <Arduino.h>
 
 #include "lv_port_indev.h"
@@ -17,7 +5,6 @@
 
 #include "system.h"
 #include "pages_main.h"
-
 #include "pages_conf.h"
 
 #include <SPIFFS.h>
@@ -27,8 +14,8 @@
 static bool isCheckAction = false;
 
 /*** Component objects **7*/
-ImuAction *act_info; // 存放mpu6050返回的数据
-XPages *xpages;      // APP控制器
+Action *act_info; // 存放当前按钮输入的动作信息
+XPages *xpages;   // APP控制器
 
 TaskHandle_t handleTaskLvgl;
 
@@ -78,18 +65,6 @@ void setup()
         return;
     }
 
-#ifdef PEAK
-    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT);
-    pinMode(CONFIG_ENCODER_PUSH_PIN, INPUT_PULLUP);
-    /*电源使能保持*/
-    Serial.println("Power: Waiting...");
-    pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
-    digitalWrite(CONFIG_POWER_EN_PIN, LOW);
-    digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
-    Serial.println("Power: ON");
-    log_e("Power: ON");
-#endif
-
     // config_read(NULL, &g_cfg);   // 旧的配置文件读取方式
     xpages->read_config(&xpages->sys_cfg);
     xpages->read_config(&xpages->mpu_cfg);
@@ -135,56 +110,23 @@ void setup()
     xpages->init();
 
     // 将APP"安装"到controller里
-#if APP_WEATHER_USE
-    xpages->app_install(&weather_app);
-#endif
-#if APP_WEATHER_OLD_USE
-    xpages->app_install(&weather_old_app);
-#endif
-#if APP_PICTURE_USE
-    xpages->app_install(&picture_app);
-#endif
-#if APP_MEDIA_PLAYER_USE
-    xpages->app_install(&media_app);
-#endif
-#if APP_SCREEN_SHARE_USE
-    xpages->app_install(&screen_share_app);
-#endif
-#if APP_FILE_MANAGER_USE
-    xpages->app_install(&file_manager_app);
+#if INSTALL_PAGE_TIME
+    xpages->app_install(&page_time);
 #endif
 
-    // xpages->app_install(&server_app);
+#if INSTALL_PAGE_WEATHER
+    xpages->app_install(&page_weather);
+#endif
 
-#if APP_IDEA_ANIM_USE
-    xpages->app_install(&idea_app);
+#if INSTALL_PAGE_FILE
+    xpages->app_install(&page_file);
 #endif
-#if APP_BILIBILI_FANS_USE
-    xpages->app_install(&bilibili_app);
-#endif
-#if APP_SETTING_USE
-    xpages->app_install(&settings_app);
-#endif
-#if APP_GAME_2048_USE
-    xpages->app_install(&game_2048_app);
-#endif
-#if APP_ANNIVERSARY_USE
-    xpages->app_install(&anniversary_app);
-#endif
-#if APP_HEARTBEAT_USE
-    xpages->app_install(&heartbeat_app, APP_TYPE_BACKGROUND);
-#endif
-#if APP_STOCK_MARKET_USE
-    xpages->app_install(&stockmarket_app);
-#endif
-#if APP_PC_RESOURCE_USE
-    xpages->app_install(&pc_resource_app);
-#endif
+
     // 自启动APP
     xpages->app_auto_start();
 
     // 优先显示屏幕 加快视觉上的开机时间
-    xpages->main_process(&mpu.action_info);
+    xpages->main_process(btns.get_action());
 
     /*** Init IMU as input device ***/
     // lv_port_indev_init();
@@ -206,11 +148,9 @@ void setup()
     set_led_and_run(&led_setting, RUN_MODE_TASK);
 
     // 先初始化一次动作数据 防空指针
-    act_info = mpu.getAction();
+    // act_info = mpu.getAction();
     // 定义一个mpu6050的动作检测定时器
-    xTimerAction = xTimerCreate("Action Check",
-                                200 / portTICK_PERIOD_MS,
-                                pdTRUE, (void *)0, actionCheckHandle);
+    xTimerAction = xTimerCreate("Action Check", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, actionCheckHandle);
     xTimerStart(xTimerAction, 0);
 }
 
@@ -234,7 +174,7 @@ void loop()
     if (isCheckAction)
     {
         isCheckAction = false;
-        act_info = mpu.getAction();
+        act_info = btns.get_action();
     }
     xpages->main_process(act_info); // 运行当前进程
                                     // Serial.println(ambLight.getLux() / 50.0);

@@ -186,9 +186,9 @@ static void task_update(void *pvParameters)
                 else
                 {
                     data->wea.id = doc["weather"][0]["id"].as<int>();
-                    data->wea.name = doc["name"].as<String>();
-                    data->wea.main = doc["weather"][0]["main"].as<String>();
-                    data->wea.description = doc["weather"][0]["description"].as<String>();
+                    strcpy(data->wea.name, doc["name"].as<char *>());
+                    strcpy(data->wea.main, doc["weather"][0]["main"].as<char *>());
+                    strcpy(data->wea.description, doc["weather"][0]["description"].as<char *>());
                     data->wea.temp = doc["main"]["temp"].as<double>();
                     data->wea.feels_like = doc["main"]["feels_like"].as<double>();
                     data->wea.pressure = doc["main"]["pressure"].as<int>();
