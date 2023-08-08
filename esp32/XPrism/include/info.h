@@ -35,6 +35,7 @@ struct Clock
     int Hour;
     int Minute;
     int Second;
+    Clock initialClock();
 };
 
 #endif

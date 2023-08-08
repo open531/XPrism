@@ -10,9 +10,9 @@
 #define Time_APP_NAME "时间"
 #define TIME_CONFIG_PATH "/time.json"
 
-LV_FONT_DECLARE(lv_font_ibmplex_115);
-LV_FONT_DECLARE(lv_font_ibmplex_64);
-LV_FONT_DECLARE(ch_font20);
+LV_FONT_DECLARE(lv_font_ubuntu_b_108);
+LV_FONT_DECLARE(lv_font_ubuntu_b_64);
+LV_FONT_DECLARE(lv_font_wqy_microhei_20);
 static lv_style_t default_style;
 static lv_style_t chFont_style;
 static lv_style_t numberSmall_style;
@@ -41,17 +41,17 @@ void Time_gui_init(void)
     lv_style_init(&chFont_style);
     lv_style_set_text_opa(&chFont_style, LV_OPA_COVER);
     lv_style_set_text_color(&chFont_style, lv_color_hex(0xffffff));
-    lv_style_set_text_font(&chFont_style, &ch_font20);
+    lv_style_set_text_font(&chFont_style, &lv_font_wqy_microhei_20);
 
     lv_style_init(&numberSmall_style);
     lv_style_set_text_opa(&numberSmall_style, LV_OPA_COVER);
     lv_style_set_text_color(&numberSmall_style, lv_color_hex(0xffffff));
-    lv_style_set_text_font(&numberSmall_style, &lv_font_ibmplex_64);
+    lv_style_set_text_font(&numberSmall_style, &lv_font_ubuntu_b_64);
 
     lv_style_init(&numberBig_style);
     lv_style_set_text_opa(&numberBig_style, LV_OPA_COVER);
     lv_style_set_text_color(&numberBig_style, lv_color_hex(0xffffff));
-    lv_style_set_text_font(&numberBig_style, &lv_font_ibmplex_115);
+    lv_style_set_text_font(&numberBig_style, &lv_font_ubuntu_b_108);
 
     lv_style_init(&btn_style);
     lv_style_set_border_width(&btn_style, 0);
