@@ -14,7 +14,7 @@ extern "C"
         lv_task_handler(); // 等待动画完成
 
     void Clock_gui_init(void);
-    void display_clock(Time TimInfo);
+    void display_clock(Clock TimInfo);
     
     
     void Clock_gui_release(void);
