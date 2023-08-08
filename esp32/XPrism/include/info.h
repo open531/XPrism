@@ -21,4 +21,21 @@ public:
     long sunset;
 };
 
+struct Time
+{
+    int Month;
+    int Day;
+    int Hour;
+    int Minute;
+    int Second;
+    int Weekday;
+};
+
+struct Clock
+{
+    int Hour;
+    int Minute;
+    int Second;
+};
+
 #endif
