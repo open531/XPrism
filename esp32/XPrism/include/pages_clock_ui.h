@@ -15,17 +15,13 @@ extern "C"
 
     void Clock_gui_init(void);
     void display_clock(Clock TimInfo);
-    
-    
-    void Clock_gui_release(void);
-    void Clock_gui_del(void);
 
+    // void Clock_gui_release(void);
+    void Clock_gui_del(void);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
-
 
 #ifdef __cplusplus
 extern "C"
@@ -38,6 +34,5 @@ extern "C"
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
 
 #endif

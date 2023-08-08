@@ -118,6 +118,10 @@ void setup()
     xpages->app_install(&page_weather);
 #endif
 
+#if INSTALL_PAGE_CLOCK
+    xpages->app_install(&page_clock);
+#endif
+
 #if INSTALL_PAGE_FILE
     xpages->app_install(&page_file);
 #endif

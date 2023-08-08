@@ -12,6 +12,11 @@
 #include "pages_weather.h"
 #endif
 
+#define INSTALL_PAGE_CLOCK true
+#if INSTALL_PAGE_CLOCK
+#include "pages_clock.h"
+#endif
+
 #define INSTALL_PAGE_FILE true
 #if INSTALL_PAGE_FILE
 #include "pages_file.h"
