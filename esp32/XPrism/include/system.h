@@ -4,6 +4,7 @@
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 #include <Arduino.h>
+#include "actions.h"
 #include "display.h"
 #include "flash_fs.h"
 #include "imu.h"
