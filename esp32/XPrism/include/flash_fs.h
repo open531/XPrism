@@ -1,3 +1,6 @@
+#ifndef FLASH_FS_H
+#define FLASH_FS_H
+
 #include <Arduino.h>
 #include "FS.h"
 
@@ -21,3 +24,5 @@ private:
 };
 
 bool analyseParam(char *info, int argc, char **argv);
+
+#endif

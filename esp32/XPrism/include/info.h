@@ -4,38 +4,20 @@
 struct Weather
 {
     int id;
-    char name[10];
+    char city[10];
     char main[20];
-    char description[20];
+    char description[30];
     double temp;
-    double feels_like;
+    double feelsLike;
     int pressure;
     int humidity;
-    double wind_speed;
-    int wind_deg;
+    double windSpeed;
+    int windDeg;
     int clouds;
     int visibility;
     long dt;
     long sunrise;
     long sunset;
-};
-
-struct Time
-{
-    int Month;
-    int Day;
-    int Hour;
-    int Minute;
-    int Second;
-    int Weekday;
-};
-
-struct Clock
-{
-    int Hour;
-    int Minute;
-    int Second;
-    Clock initialClock();
 };
 
 #endif
