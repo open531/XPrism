@@ -25,7 +25,8 @@
 #define IMU_I2C_SDA 32
 #define IMU_I2C_SCL 33
 
-extern IMU mpu; // 原则上只提供给主程序调用
+extern XPages *xpages;
+extern IMU mpu;
 extern SdCard tf;
 extern Pixel led;
 extern Network g_network;  // 网络连接
