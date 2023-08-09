@@ -43,10 +43,10 @@ struct APP_OBJ
     int (*app_init)(XPages *sys);
 
     // APP的主程序函数入口指针
-    void (*main_process)(XPages *sys, const Action *act_info);
+    void (*main_process)(XPages *sys, Buttons *btn_info);
 
     // APP的任务的入口指针（一般一分钟内会调用一次）
-    void (*background_task)(XPages *sys, const Action *act_info);
+    void (*background_task)(XPages *sys, Buttons *btn_info);
 
     // 退出之前需要处理的回调函数 可为空
     int (*exit_callback)(void *param);

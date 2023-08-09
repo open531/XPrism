@@ -1,16 +1,17 @@
 #include "pages_time.h"
 #include "pages_time_ui.h"
 #include "lvgl.h"
+#include "lv_xprism_color.h"
 
 LV_FONT_DECLARE(lv_font_ubuntu_b_108);
 LV_FONT_DECLARE(lv_font_ubuntu_b_64);
 LV_FONT_DECLARE(lv_font_wqy_microhei_20);
+
 static lv_style_t default_style;
 static lv_style_t chFont_style;
 static lv_style_t numberSmall_style;
 static lv_style_t numberBig_style;
 static lv_style_t btn_style;
-static lv_style_t bar_style;
 
 static lv_obj_t *scr_1 = NULL;
 static lv_obj_t *scr_2 = NULL;
@@ -25,33 +26,25 @@ static lv_chart_series_t *ser1, *ser2;
 void Time_gui_init(void)
 {
     lv_style_init(&default_style);
-    lv_style_set_bg_color(&default_style, lv_color_hex(0x000000));
+    lv_style_set_bg_color(&default_style, LV_COLOR_BLACK);
 
     lv_style_init(&chFont_style);
     lv_style_set_text_opa(&chFont_style, LV_OPA_COVER);
-    lv_style_set_text_color(&chFont_style, lv_color_hex(0xffffff));
+    lv_style_set_text_color(&chFont_style, LV_COLOR_WHITE);
     lv_style_set_text_font(&chFont_style, &lv_font_wqy_microhei_20);
 
     lv_style_init(&numberSmall_style);
     lv_style_set_text_opa(&numberSmall_style, LV_OPA_COVER);
-    lv_style_set_text_color(&numberSmall_style, lv_color_hex(0xffffff));
+    lv_style_set_text_color(&numberSmall_style, LV_COLOR_WHITE);
     lv_style_set_text_font(&numberSmall_style, &lv_font_ubuntu_b_64);
 
     lv_style_init(&numberBig_style);
     lv_style_set_text_opa(&numberBig_style, LV_OPA_COVER);
-    lv_style_set_text_color(&numberBig_style, lv_color_hex(0xffffff));
+    lv_style_set_text_color(&numberBig_style, LV_COLOR_WHITE);
     lv_style_set_text_font(&numberBig_style, &lv_font_ubuntu_b_108);
 
     lv_style_init(&btn_style);
     lv_style_set_border_width(&btn_style, 0);
-    lv_style_init(&bar_style);
-    lv_style_set_bg_color(&bar_style, lv_color_hex(0x000000));
-    lv_style_set_border_width(&bar_style, 2);
-    lv_style_set_border_color(&bar_style, lv_color_hex(0xFFFFFF));
-    lv_style_set_pad_top(&bar_style, 1); // 指示器到背景四周的距离
-    lv_style_set_pad_bottom(&bar_style, 1);
-    lv_style_set_pad_left(&bar_style, 1);
-    lv_style_set_pad_right(&bar_style, 1);
 }
 
 void display_Time_init()

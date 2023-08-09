@@ -45,7 +45,8 @@ void initialdata()
 unsigned long StopStart = 0, StopFinish = 0;
 
 // easy to use helper-function for non-blocking timing
-boolean TimePeriodIsOver(unsigned long &periodStartTime, unsigned long TimePeriod)
+boolean TimePeriodIsOver(unsigned long &periodStartTime,
+                         unsigned long TimePeriod)
 {
 
     unsigned long currentMillis = millis();

@@ -256,50 +256,57 @@ static int weather_init(XPages *sys)
     return 0;
 }
 
-static void weather_process(XPages *sys, const Action *action)
+static void click_BACK()
 {
-    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
+    xpages->app_exit();
+}
 
-    if (action->type == BACK)
-    {
-        sys->app_exit();
-        return;
-    }
-    else if (action->type == FORWARD)
-    {
-        run_data->forceUpdate = 1;
-        delay(500);
-    }
-    else if (action->type == LEFT)
-    {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-        run_data->currentPage = (run_data->currentPage + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-    }
-    else if (action->type == RIGHT)
-    {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-        run_data->currentPage = (run_data->currentPage + 1) % WEATHER_PAGE_SIZE;
-    }
-    else
-    {
-        return;
-    }
+static void click_FORWARD()
+{
+    run_data->forceUpdate = 1;
+    delay(500);
+}
 
+static void click_LEFT()
+{
+    run_data->currentPage = (run_data->currentPage + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
     if (run_data->currentPage == 0)
     {
-        display_weather(run_data->wea, anim_type);
-        if (run_data->wea.id == 0 || run_data->forceUpdate || (millis() - run_data->lastUpdate > run_data->updateInterval))
-        {
-            get_weather();
-        }
+        display_weather(run_data->wea, LV_SCR_LOAD_ANIM_MOVE_LEFT);
     }
     else
     {
-        display_detail(run_data->wea, anim_type);
+        display_detail(run_data->wea, LV_SCR_LOAD_ANIM_MOVE_LEFT);
     }
 }
 
-static void weather_background_task(XPages *sys, const Action *act_info)
+static void click_RIGHT()
+{
+    run_data->currentPage = (run_data->currentPage + 1) % WEATHER_PAGE_SIZE;
+    if (run_data->currentPage == 0)
+    {
+        display_weather(run_data->wea, LV_SCR_LOAD_ANIM_MOVE_RIGHT);
+    }
+    else
+    {
+        display_detail(run_data->wea, LV_SCR_LOAD_ANIM_MOVE_RIGHT);
+    }
+}
+
+static void weather_process(XPages *sys,
+                            Buttons *btns_info)
+{
+    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
+
+    btns_info->tick();
+    btns.attachClick(BACK, click_BACK);
+    btns.attachClick(FORWARD, click_FORWARD);
+    btns.attachClick(LEFT, click_LEFT);
+    btns.attachClick(RIGHT, click_RIGHT);
+}
+
+static void weather_background_task(XPages *sys,
+                                    Buttons *btns_info)
 {
 }
 
@@ -318,7 +325,11 @@ static int weather_exit_callback(void *param)
     return 0;
 }
 
-static void weather_message_handle(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info)
+static void weather_message_handle(const char *from,
+                                   const char *to,
+                                   APP_MESSAGE_TYPE type,
+                                   void *message,
+                                   void *ext_info)
 {
     switch (type)
     {
@@ -401,4 +412,11 @@ static void weather_message_handle(const char *from, const char *to, APP_MESSAGE
     }
 }
 
-APP_OBJ weather_app = {WEATHER_APP_NAME, &app_weather, "", weather_init, weather_process, weather_background_task, weather_exit_callback, weather_message_handle};
+APP_OBJ weather_app = {WEATHER_APP_NAME,
+                       &app_weather,
+                       "",
+                       weather_init,
+                       weather_process,
+                       weather_background_task,
+                       weather_exit_callback,
+                       weather_message_handle};

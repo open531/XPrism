@@ -39,15 +39,16 @@ static int file_init(XPages *sys)
     return 0;
 }
 
-static void file_process(XPages *sys, const Action *action)
+static void click_BACK()
+{
+    xpages->app_exit();
+}
+
+static void file_process(XPages *sys, Buttons *btns_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
-    if (action->type == BACK)
-    {
-        sys->app_exit();
-        return;
-    }
+    btns_info->attachClick(BACK, click_BACK);
 
     // if (run_data->tcp_server_started == false && run_data->request_sent == false)
     // {
@@ -65,7 +66,7 @@ static void file_process(XPages *sys, const Action *action)
     // }
 }
 
-static void file_background_task(XPages *sys, const Action *act_info)
+static void file_background_task(XPages *sys, Buttons *btns_info)
 {
 }
 
@@ -118,4 +119,11 @@ static void file_message_handle(const char *from, const char *to, APP_MESSAGE_TY
     // }
 }
 
-APP_OBJ file_app = {FILE_APP_NAME, &app_file, "", file_init, file_process, file_background_task, file_exit_callback, file_message_handle};
+APP_OBJ file_app = {FILE_APP_NAME,
+                    &app_file,
+                    "",
+                    file_init,
+                    file_process,
+                    file_background_task,
+                    file_exit_callback,
+                    file_message_handle};

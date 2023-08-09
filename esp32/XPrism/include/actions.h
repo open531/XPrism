@@ -17,11 +17,22 @@ enum ACTION_TYPE
     RIGHT,
 };
 
+enum ACTION_STATE
+{
+    NONE = 0,
+    CLICK,
+    DOUBLE_CLICK,
+    MULTI_CLICK,
+    LONG_PRESS_START,
+    LONG_PRESS_STOP,
+    DURING_LONG_PRESS,
+};
+
 struct Action
 {
     volatile ACTION_TYPE type;
+    volatile ACTION_STATE state;
     boolean isValid;
-    // boolean long_time;
 };
 
 extern char *action_type_info[];
