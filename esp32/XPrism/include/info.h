@@ -1,41 +1,50 @@
 #ifndef INFO_H
 #define INFO_H
 
-struct Weather
-{
-    int id;
-    char name[10];
-    char main[20];
-    char description[20];
-    double temp;
-    double feels_like;
-    int pressure;
-    int humidity;
-    double wind_speed;
-    int wind_deg;
-    int clouds;
-    int visibility;
-    long dt;
-    long sunrise;
-    long sunset;
-};
-
 struct Time
 {
-    int Month;
-    int Day;
-    int Hour;
-    int Minute;
-    int Second;
-    int Weekday;
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+    int weekday;
+    unsigned long timestamp;
 };
 
-struct Clock
+struct Weather
 {
-    int Hour;
-    int Minute;
-    int Second;
-    Clock initialClock();
+    int weatherId;
+    char weatherMain[20];
+    char weatherDescription[50];
+    char weatherIcon[5];
+    char base[10];
+    double mainTemp;
+    double mainFeelsLike;
+    double mainTempMin;
+    double mainTempMax;
+    int mainPressure;
+    int mainHumidity;
+    int mainSeaLevel;
+    int mainGrndLevel;
+    int visibility;
+    double windSpeed;
+    int windDeg;
+    double windGust;
+    double rain1h;
+    double rain3h;
+    double snow1h;
+    double snow3h;
+    int cloudsAll;
+    unsigned long dt;
+    char sysCountry[5];
+    unsigned long sysSunrise;
+    unsigned long sysSunset;
+    int timezone;
+    int id;
+    char name[50];
+    int cod;
 };
 
 #endif

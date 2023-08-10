@@ -1,3 +1,6 @@
+#ifndef LV_XPRISM_COLOR_H
+#define LV_XPRISM_COLOR_H
+
 #include <lvgl.h>
 
 #define LV_COLOR_BLACK lv_color_hex(0x000000)
@@ -28,3 +31,5 @@
 #define LV_COLOR_XPRISM lv_color_hex(0x7430da)
 #define LV_COLOR_TSINGHUA lv_color_hex(0x660874)
 #define LV_COLOR_TSINGHUA_SECONDARY lv_color_hex(0xa652cb)
+
+#endif
