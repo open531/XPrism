@@ -1,17 +1,21 @@
 #ifndef ICONS_WEATHER
 #define ICONS_WEATHER
 
+#if __has_include("lvgl.h")
 #include "lvgl.h"
+#else
+#include "lvgl/lvgl.h"
+#endif
 
 #ifndef LV_ATTRIBUTE_MEM_ALIGN
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_IMG_THERMOMETER
-#define LV_ATTRIBUTE_IMG_THERMOMETER
+#ifndef LV_ATTRIBUTE_IMG_WEATHER
+#define LV_ATTRIBUTE_IMG_WEATHER
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_THERMOMETER uint8_t thermometer_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t thermometer_map[] = {
   0x06, 0x06, 0x06, 0x05, 	/*Color of index 0*/
   0xe8, 0xe8, 0xe8, 0xe6, 	/*Color of index 1*/
 
@@ -114,20 +118,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_THERMOMET
 };
 
 const lv_img_dsc_t thermometer = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = thermometer_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  thermometer_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WATER
-#define LV_ATTRIBUTE_IMG_WATER
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WATER uint8_t water_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t water_map[] = {
   0x06, 0x06, 0x06, 0x04, 	/*Color of index 0*/
   0xed, 0xed, 0xed, 0xea, 	/*Color of index 1*/
 
@@ -230,20 +232,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WATER uin
 };
 
 const lv_img_dsc_t water = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = water_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  water_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_CLOUDY
-#define LV_ATTRIBUTE_IMG_WEATHER_CLOUDY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_CLOUDY uint8_t weather_cloudy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_cloudy_map[] = {
   0x0a, 0x0a, 0x0a, 0x07, 	/*Color of index 0*/
   0xc8, 0xc8, 0xc8, 0xc1, 	/*Color of index 1*/
 
@@ -346,20 +346,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_C
 };
 
 const lv_img_dsc_t weather_cloudy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_cloudy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_cloudy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_DUST
-#define LV_ATTRIBUTE_IMG_WEATHER_DUST
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_DUST uint8_t weather_dust_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_dust_map[] = {
   0x13, 0x13, 0x13, 0x0f, 	/*Color of index 0*/
   0xcb, 0xcb, 0xcb, 0xc7, 	/*Color of index 1*/
 
@@ -462,20 +460,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_D
 };
 
 const lv_img_dsc_t weather_dust = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_dust_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_dust_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_FOG
-#define LV_ATTRIBUTE_IMG_WEATHER_FOG
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_FOG uint8_t weather_fog_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_fog_map[] = {
   0x0f, 0x0f, 0x0f, 0x0b, 	/*Color of index 0*/
   0xcb, 0xcb, 0xcb, 0xc6, 	/*Color of index 1*/
 
@@ -578,20 +574,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_F
 };
 
 const lv_img_dsc_t weather_fog = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_fog_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_fog_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_HAIL
-#define LV_ATTRIBUTE_IMG_WEATHER_HAIL
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_HAIL uint8_t weather_hail_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_hail_map[] = {
   0x0c, 0x0c, 0x0c, 0x08, 	/*Color of index 0*/
   0xbe, 0xbe, 0xbe, 0xb7, 	/*Color of index 1*/
 
@@ -694,20 +688,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_H
 };
 
 const lv_img_dsc_t weather_hail = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_hail_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_hail_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_HURRICANE
-#define LV_ATTRIBUTE_IMG_WEATHER_HURRICANE
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_HURRICANE uint8_t weather_hurricane_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_hurricane_map[] = {
   0x09, 0x09, 0x09, 0x07, 	/*Color of index 0*/
   0xe4, 0xe4, 0xe4, 0xe0, 	/*Color of index 1*/
 
@@ -810,20 +802,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_H
 };
 
 const lv_img_dsc_t weather_hurricane = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_hurricane_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_hurricane_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_LIGHTNING
-#define LV_ATTRIBUTE_IMG_WEATHER_LIGHTNING
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_LIGHTNING uint8_t weather_lightning_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_lightning_map[] = {
   0x0c, 0x0c, 0x0c, 0x08, 	/*Color of index 0*/
   0xc1, 0xc1, 0xc1, 0xb9, 	/*Color of index 1*/
 
@@ -926,20 +916,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_L
 };
 
 const lv_img_dsc_t weather_lightning = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_lightning_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_lightning_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_LIGHTNING_RAINY
-#define LV_ATTRIBUTE_IMG_WEATHER_LIGHTNING_RAINY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_LIGHTNING_RAINY uint8_t weather_lightning_rainy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_lightning_rainy_map[] = {
   0x0f, 0x0f, 0x0f, 0x09, 	/*Color of index 0*/
   0xc3, 0xc3, 0xc3, 0xba, 	/*Color of index 1*/
 
@@ -1042,20 +1030,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_L
 };
 
 const lv_img_dsc_t weather_lightning_rainy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_lightning_rainy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_lightning_rainy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_NIGHT
-#define LV_ATTRIBUTE_IMG_WEATHER_NIGHT
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_NIGHT uint8_t weather_night_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_night_map[] = {
   0x12, 0x12, 0x12, 0x0b, 	/*Color of index 0*/
   0xc4, 0xc4, 0xc4, 0xb4, 	/*Color of index 1*/
 
@@ -1158,20 +1144,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_N
 };
 
 const lv_img_dsc_t weather_night = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_night_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_night_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_NIGHT_PARTLY_CLOUDY
-#define LV_ATTRIBUTE_IMG_WEATHER_NIGHT_PARTLY_CLOUDY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_NIGHT_PARTLY_CLOUDY uint8_t weather_night_partly_cloudy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_night_partly_cloudy_map[] = {
   0x0e, 0x0e, 0x0e, 0x0b, 	/*Color of index 0*/
   0xc9, 0xc9, 0xc9, 0xc4, 	/*Color of index 1*/
 
@@ -1274,20 +1258,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_N
 };
 
 const lv_img_dsc_t weather_night_partly_cloudy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_night_partly_cloudy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_night_partly_cloudy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_PARTLY_CLOUDY
-#define LV_ATTRIBUTE_IMG_WEATHER_PARTLY_CLOUDY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_PARTLY_CLOUDY uint8_t weather_partly_cloudy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_partly_cloudy_map[] = {
   0x14, 0x14, 0x14, 0x0e, 	/*Color of index 0*/
   0xcd, 0xcd, 0xcd, 0xc3, 	/*Color of index 1*/
 
@@ -1390,20 +1372,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_P
 };
 
 const lv_img_dsc_t weather_partly_cloudy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_partly_cloudy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_partly_cloudy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_PARTLY_LIGHTNING
-#define LV_ATTRIBUTE_IMG_WEATHER_PARTLY_LIGHTNING
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_PARTLY_LIGHTNING uint8_t weather_partly_lightning_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_partly_lightning_map[] = {
   0x14, 0x14, 0x14, 0x0e, 	/*Color of index 0*/
   0xc4, 0xc4, 0xc4, 0xb8, 	/*Color of index 1*/
 
@@ -1506,20 +1486,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_P
 };
 
 const lv_img_dsc_t weather_partly_lightning = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_partly_lightning_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_partly_lightning_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_PARTLY_RAINY
-#define LV_ATTRIBUTE_IMG_WEATHER_PARTLY_RAINY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_PARTLY_RAINY uint8_t weather_partly_rainy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_partly_rainy_map[] = {
   0x15, 0x15, 0x15, 0x0e, 	/*Color of index 0*/
   0xc5, 0xc5, 0xc5, 0xbb, 	/*Color of index 1*/
 
@@ -1622,20 +1600,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_P
 };
 
 const lv_img_dsc_t weather_partly_rainy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_partly_rainy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_partly_rainy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_PARTLY_SNOWY
-#define LV_ATTRIBUTE_IMG_WEATHER_PARTLY_SNOWY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_PARTLY_SNOWY uint8_t weather_partly_snowy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_partly_snowy_map[] = {
   0x15, 0x15, 0x15, 0x0e, 	/*Color of index 0*/
   0xc1, 0xc1, 0xc1, 0xb7, 	/*Color of index 1*/
 
@@ -1738,20 +1714,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_P
 };
 
 const lv_img_dsc_t weather_partly_snowy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_partly_snowy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_partly_snowy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_PARTLY_SNOWY_RAINY
-#define LV_ATTRIBUTE_IMG_WEATHER_PARTLY_SNOWY_RAINY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_PARTLY_SNOWY_RAINY uint8_t weather_partly_snowy_rainy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_partly_snowy_rainy_map[] = {
   0x16, 0x16, 0x16, 0x0f, 	/*Color of index 0*/
   0xc1, 0xc1, 0xc1, 0xb6, 	/*Color of index 1*/
 
@@ -1854,20 +1828,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_P
 };
 
 const lv_img_dsc_t weather_partly_snowy_rainy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_partly_snowy_rainy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_partly_snowy_rainy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_POURING
-#define LV_ATTRIBUTE_IMG_WEATHER_POURING
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_POURING uint8_t weather_pouring_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_pouring_map[] = {
   0x0f, 0x0f, 0x0f, 0x0a, 	/*Color of index 0*/
   0xbc, 0xbc, 0xbc, 0xb2, 	/*Color of index 1*/
 
@@ -1970,20 +1942,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_P
 };
 
 const lv_img_dsc_t weather_pouring = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_pouring_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_pouring_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_RAINY
-#define LV_ATTRIBUTE_IMG_WEATHER_RAINY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_RAINY uint8_t weather_rainy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_rainy_map[] = {
   0x0f, 0x0f, 0x0f, 0x09, 	/*Color of index 0*/
   0xc1, 0xc1, 0xc1, 0xb8, 	/*Color of index 1*/
 
@@ -2086,20 +2056,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_R
 };
 
 const lv_img_dsc_t weather_rainy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_rainy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_rainy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SNOWY
-#define LV_ATTRIBUTE_IMG_WEATHER_SNOWY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SNOWY uint8_t weather_snowy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_snowy_map[] = {
   0x0e, 0x0e, 0x0e, 0x09, 	/*Color of index 0*/
   0xc3, 0xc3, 0xc3, 0xb9, 	/*Color of index 1*/
 
@@ -2202,20 +2170,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_snowy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_snowy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_snowy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SNOWY_HEAVY
-#define LV_ATTRIBUTE_IMG_WEATHER_SNOWY_HEAVY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SNOWY_HEAVY uint8_t weather_snowy_heavy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_snowy_heavy_map[] = {
   0x12, 0x12, 0x12, 0x0c, 	/*Color of index 0*/
   0xc3, 0xc3, 0xc3, 0xba, 	/*Color of index 1*/
 
@@ -2318,20 +2284,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_snowy_heavy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_snowy_heavy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_snowy_heavy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SNOWY_RAINY
-#define LV_ATTRIBUTE_IMG_WEATHER_SNOWY_RAINY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SNOWY_RAINY uint8_t weather_snowy_rainy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_snowy_rainy_map[] = {
   0x10, 0x10, 0x10, 0x0b, 	/*Color of index 0*/
   0xc6, 0xc6, 0xc6, 0xbc, 	/*Color of index 1*/
 
@@ -2434,20 +2398,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_snowy_rainy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_snowy_rainy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_snowy_rainy_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SUNNY
-#define LV_ATTRIBUTE_IMG_WEATHER_SUNNY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SUNNY uint8_t weather_sunny_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_sunny_map[] = {
   0x10, 0x10, 0x10, 0x09, 	/*Color of index 0*/
   0xb8, 0xb8, 0xb8, 0xa9, 	/*Color of index 1*/
 
@@ -2550,20 +2512,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_sunny = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_sunny_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_sunny_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SUNSET
-#define LV_ATTRIBUTE_IMG_WEATHER_SUNSET
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SUNSET uint8_t weather_sunset_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_sunset_map[] = {
   0x12, 0x12, 0x12, 0x0e, 	/*Color of index 0*/
   0xd1, 0xd1, 0xd1, 0xcc, 	/*Color of index 1*/
 
@@ -2666,20 +2626,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_sunset = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_sunset_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_sunset_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SUNSET_DOWN
-#define LV_ATTRIBUTE_IMG_WEATHER_SUNSET_DOWN
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SUNSET_DOWN uint8_t weather_sunset_down_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_sunset_down_map[] = {
   0x0e, 0x0e, 0x0e, 0x09, 	/*Color of index 0*/
   0xc7, 0xc7, 0xc7, 0xba, 	/*Color of index 1*/
 
@@ -2782,20 +2740,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_sunset_down = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_sunset_down_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_sunset_down_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_SUNSET_UP
-#define LV_ATTRIBUTE_IMG_WEATHER_SUNSET_UP
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_SUNSET_UP uint8_t weather_sunset_up_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_sunset_up_map[] = {
   0x0e, 0x0e, 0x0e, 0x09, 	/*Color of index 0*/
   0xc8, 0xc8, 0xc8, 0xb9, 	/*Color of index 1*/
 
@@ -2898,20 +2854,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_S
 };
 
 const lv_img_dsc_t weather_sunset_up = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_sunset_up_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_sunset_up_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_TORNADO
-#define LV_ATTRIBUTE_IMG_WEATHER_TORNADO
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_TORNADO uint8_t weather_tornado_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_tornado_map[] = {
   0x0b, 0x0b, 0x0b, 0x09, 	/*Color of index 0*/
   0xd5, 0xd5, 0xd5, 0xd6, 	/*Color of index 1*/
 
@@ -3014,20 +2968,18 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_T
 };
 
 const lv_img_dsc_t weather_tornado = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_tornado_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_tornado_map,
 };
 
-#ifndef LV_ATTRIBUTE_IMG_WEATHER_WINDY
-#define LV_ATTRIBUTE_IMG_WEATHER_WINDY
-#endif
-
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_WINDY uint8_t weather_windy_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_WEATHER uint8_t weather_windy_map[] = {
   0x0f, 0x0f, 0x0f, 0x0c, 	/*Color of index 0*/
   0xd1, 0xd1, 0xd1, 0xcd, 	/*Color of index 1*/
 
@@ -3130,13 +3082,15 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_WEATHER_W
 };
 
 const lv_img_dsc_t weather_windy = {
-  .header.cf = LV_IMG_CF_INDEXED_1BIT,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 96,
-  .header.h = 96,
-  .data_size = 1160,
-  .data = weather_windy_map,
+  {
+    LV_IMG_CF_INDEXED_1BIT,
+    0,
+    0,
+    96,
+    96,
+  },
+  1160,
+  weather_windy_map,
 };
 
 #endif
