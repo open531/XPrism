@@ -33,5 +33,6 @@ XPrism 的誕生離不開以下開源專案的支援、參考與引用。
 - [lvgl](https://github.com/lvgl/lvgl)
 - [lv_lib_100ask](https://github.com/100askTeam/lv_lib_100ask)
 - [MPU6050](https://github.com/kriswiner/MPU6050)
+- [OneButton](https://github.com/mathertel/OneButton)
 - [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
 - [U8g2](https://github.com/olikraus/u8g2)
