@@ -19,7 +19,7 @@ extern "C"
     void appWeatherUiDisplayDetail(struct Weather weaInfo, lv_scr_load_anim_t animType);
     void appWeatherUiDelete();
 
-    extern const lv_img_dsc_t weatherAppIcon;
+    extern const lv_img_dsc_t icon_weather;
 
 #ifdef __cplusplus
 } /* extern "C" */

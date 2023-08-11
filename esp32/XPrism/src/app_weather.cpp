@@ -325,7 +325,7 @@ static void weatherOnMessage(const char *from, const char *to,
 
 App weatherApp = {
     APP_WEATHER_NAME,
-    &weatherAppIcon,
+    &icon_weather,
     APP_WEATHER_INFO,
     weatherInit,
     weatherRoutine,
