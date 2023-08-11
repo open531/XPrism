@@ -13,6 +13,13 @@ struct Time
     unsigned long timestamp;
 };
 
+struct Clock
+{
+    int hour;
+    int minute;
+    int second;
+};
+
 struct Weather
 {
     int weatherId;
