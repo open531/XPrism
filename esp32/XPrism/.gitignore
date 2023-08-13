@@ -1,2 +1,4 @@
-.pio
-.vscode/*
+.pio/
+.DS_Store
+.vscode/
+..VSCodeCounter/

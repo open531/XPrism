@@ -6,7 +6,18 @@ extern "C"
 {
 #endif
 
-#include "info.h"
+    struct Time
+    {
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+        int second;
+        int weekday;
+        unsigned long timestamp;
+    };
+
 #include "lvgl.h"
 
 #define WAIT_ANIM                   \
@@ -18,10 +29,9 @@ extern "C"
     void appTimeUiDelete();
 
     extern const lv_img_dsc_t icon_time;
-    
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
 #endif
-

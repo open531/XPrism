@@ -1,53 +1,62 @@
 #ifndef APP_H
 #define APP_H
 
-#include <Arduino.h>
-
-enum AppMsg
+enum AppMsgType
 {
-    APP_MSG_WIFI_CONN,
-    APP_MSG_WIFI_DISCONN,
-    APP_MSG_WIFI_AP,
-    APP_MSG_WIFI_ALIVE,
-    APP_MSG_UPDATE_TIME,
-    APP_MSG_MQTT_DATA,
-    APP_MSG_GET_PARAM,
-    APP_MSG_SET_PARAM,
-    APP_MSG_READ_CFG,
-    APP_MSG_WRITE_CFG,
-    APP_MSG_NONE
+    APP_MESSAGE_WIFI_CONN = 0, // 开启连接
+    APP_MESSAGE_WIFI_AP,       // 开启AP事件
+    APP_MESSAGE_WIFI_ALIVE,    // wifi开关的心跳维持
+    APP_MESSAGE_WIFI_DISCONN,  // 连接断开
+    APP_MESSAGE_UPDATE_TIME,
+    APP_MESSAGE_MQTT_DATA, // MQTT客户端收到消息
+    APP_MESSAGE_GET_PARAM, // 获取参数
+    APP_MESSAGE_SET_PARAM, // 设置参数
+    APP_MESSAGE_READ_CFG,  // 向磁盘读取参数
+    APP_MESSAGE_WRITE_CFG, // 向磁盘写入参数
+
+    APP_MESSAGE_NONE
 };
 
 enum AppType
 {
-    APP_TYPE_FRONT,
-    APP_TYPE_BACKGROUND,
+    APP_TYPE_REAL_TIME = 0, // 实时应用
+    APP_TYPE_BACKGROUND,    // 后台应用
+
     APP_TYPE_NONE
 };
 
 class AppCenter;
+struct Action;
 
 struct App
 {
-    const char *name;
-    const void *icon;
-    const char *info;
-    int (*init)(AppCenter *appCenter);
-    void (*routine)(AppCenter *appCenter);
-    void (*background)(AppCenter *appCenter);
-    int (*exit)(AppCenter *appCenter);
-    void (*onMessage)(const char *from, const char *to,
-                      AppMsg type, void *msg, void *info);
-};
+    // 应用程序名称 及title
+    const char *app_name;
 
-struct Event
-{
-    const App *from;
-    AppMsg type;
-    void *info;
-    uint8_t retryNum;
-    uint8_t retryMax;
-    unsigned long lastTime;
+    // APP的图片存放地址    APP应用图标 128*128
+    const void *app_image;
+
+    // 应用程序的其他信息 如作者、版本号等等
+    const char *app_info;
+
+    // APP的初始化函数 也可以为空或什么都不做（作用等效于arduino setup()函数）
+    int (*app_init)(AppCenter *sys);
+
+    // APP的主程序函数入口指针
+    void (*main_process)(AppCenter *sys,
+                         const Action *act_info);
+
+    // APP的任务的入口指针（一般一分钟内会调用一次）
+    void (*background_task)(AppCenter *sys,
+                            const Action *act_info);
+
+    // 退出之前需要处理的回调函数 可为空
+    int (*exit_callback)(void *param);
+
+    // 消息处理机制
+    void (*message_handle)(const char *from, const char *to,
+                           AppMsgType type, void *message,
+                           void *ext_info);
 };
 
 #endif

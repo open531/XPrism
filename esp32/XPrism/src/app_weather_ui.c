@@ -1,11 +1,10 @@
 #include "app_weather_ui.h"
 #include "icons_weather.h"
 #include "lvgl.h"
-#include "lv_xprism_color.h"
 
 LV_FONT_DECLARE(lv_font_ubuntu_b_108)
 LV_FONT_DECLARE(lv_font_ubuntu_b_64)
-LV_FONT_DECLARE(lv_font_wqy_microhei_20);
+LV_FONT_DECLARE(lv_font_wqy_microhei_24);
 
 static lv_style_t defaultStyle;
 static lv_style_t textStyle;
@@ -25,27 +24,25 @@ static lv_obj_t *windPanel = NULL;
 static lv_obj_t *windLabel = NULL;
 static lv_obj_t *cloudPanel = NULL;
 static lv_obj_t *cloudLabel = NULL;
-static lv_obj_t *sunPanel = NULL;
-static lv_obj_t *sunLabel = NULL;
 
 void appWeatherUiInit()
 {
     lv_style_init(&defaultStyle);
-    lv_style_set_bg_color(&defaultStyle, LV_COLOR_BLACK);
+    lv_style_set_bg_color(&defaultStyle, lv_color_hex(0x000000));
 
     lv_style_init(&textStyle);
     lv_style_set_text_opa(&textStyle, LV_OPA_COVER);
-    lv_style_set_text_color(&textStyle, LV_COLOR_WHITE);
-    lv_style_set_text_font(&textStyle, &lv_font_wqy_microhei_20);
+    lv_style_set_text_color(&textStyle, lv_color_hex(0xffffff));
+    lv_style_set_text_font(&textStyle, &lv_font_wqy_microhei_24);
 
     lv_style_init(&numSmallStyle);
     lv_style_set_text_opa(&numSmallStyle, LV_OPA_COVER);
-    lv_style_set_text_color(&numSmallStyle, LV_COLOR_WHITE);
+    lv_style_set_text_color(&numSmallStyle, lv_color_hex(0xffffff));
     lv_style_set_text_font(&numSmallStyle, &lv_font_ubuntu_b_64);
 
     lv_style_init(&numBigStyle);
     lv_style_set_text_opa(&numBigStyle, LV_OPA_COVER);
-    lv_style_set_text_color(&numBigStyle, LV_COLOR_WHITE);
+    lv_style_set_text_color(&numBigStyle, lv_color_hex(0xffffff));
     lv_style_set_text_font(&numBigStyle, &lv_font_ubuntu_b_108);
 }
 
@@ -65,23 +62,24 @@ void appWeatherUiDisplayBasicInit(lv_scr_load_anim_t animType)
 
     weatherImage = lv_img_create(basicScr);
     lv_img_set_src(weatherImage, &weather_sunny);
-    lv_obj_set_size(weatherImage, 96, 96);
-    lv_obj_set_pos(weatherImage, -48, -48);
 
     weatherLabel = lv_label_create(basicScr);
     lv_obj_add_style(weatherLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(weatherLabel, "晴");
-    lv_obj_set_pos(weatherLabel, -72, 96);
 
     tempLabel = lv_label_create(basicScr);
-    lv_obj_add_style(tempLabel, &numBigStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(tempLabel, "25°C");
-    lv_obj_set_pos(tempLabel, 48, 48);
+    lv_obj_add_style(tempLabel, &numSmallStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(tempLabel, "25 C");
 
     cityLabel = lv_label_create(basicScr);
     lv_obj_add_style(cityLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_recolor(cityLabel, true);
     lv_label_set_text(cityLabel, "北京");
-    lv_obj_set_pos(cityLabel, -72, 48);
+
+    lv_obj_align(weatherImage, LV_ALIGN_TOP_LEFT, 0, 10);
+    lv_obj_align(cityLabel, LV_ALIGN_TOP_RIGHT, -10, 10);
+    lv_obj_align(tempLabel, LV_ALIGN_LEFT_MID, 0, 10);
+    lv_obj_align(weatherLabel, LV_ALIGN_BOTTOM_LEFT, 10, 0);
 }
 
 void appWeatherUiDisplayBasic(struct Weather weaInfo,
@@ -91,7 +89,7 @@ void appWeatherUiDisplayBasic(struct Weather weaInfo,
 
     lv_label_set_text(cityLabel, weaInfo.name);
     lv_label_set_text(weatherLabel, weaInfo.weatherDescription);
-    lv_label_set_text_fmt(tempLabel, "%.1f°C", weaInfo.mainTemp);
+    lv_label_set_text_fmt(tempLabel, "%.1f C", weaInfo.mainTemp);
 
     lv_img_dsc_t *img = NULL;
     switch (weaInfo.id)
@@ -121,85 +119,56 @@ void appWeatherUiDisplayBasic(struct Weather weaInfo,
     case 321:
     case 500:
     case 501:
+    case 502:
+    case 503:
+    case 504:
     case 520:
     case 521:
     case 522:
     case 531:
         img = &weather_rainy;
         break;
-    case 502:
-    case 503:
-    case 504:
-        img = &weather_pouring;
-        break;
     case 511:
+    case 600:
+    case 601:
+    case 602:
     case 611:
     case 612:
     case 613:
     case 615:
     case 616:
-        img = &weather_snowy_rainy;
-        break;
-    case 600:
-    case 601:
     case 620:
     case 621:
-        img = &weather_snowy;
-        break;
-    case 602:
     case 622:
-        img = &weather_snowy_heavy;
+        img = &weather_snowy;
         break;
     case 701:
     case 711:
     case 721:
-    case 741:
-    case 771:
-        img = &weather_fog;
-        break;
     case 731:
+    case 741:
     case 751:
     case 761:
     case 762:
-        img = &weather_dust;
+    case 771:
+        img = &weather_fog;
         break;
     case 781:
         img = &weather_tornado;
         break;
     case 800:
-        if (weaInfo.dt < weaInfo.sysSunrise || weaInfo.dt > weaInfo.sysSunset)
-        {
-            img = &weather_night;
-        }
-        else
-        {
-            img = &weather_sunny;
-        }
+        img = &weather_sunny;
         break;
     case 801:
     case 802:
-        if (weaInfo.dt < weaInfo.sysSunrise || weaInfo.dt > weaInfo.sysSunset)
-        {
-            img = &weather_night_partly_cloudy;
-        }
-        else
-        {
-            img = &weather_partly_cloudy;
-        }
+        img = &weather_partly_cloudy;
         break;
     case 803:
     case 804:
         img = &weather_cloudy;
         break;
     default:
-        if (weaInfo.dt < weaInfo.sysSunrise || weaInfo.dt > weaInfo.sysSunset)
-        {
-            img = &weather_night;
-        }
-        else
-        {
-            img = &weather_sunny;
-        }
+        img = &weather_sunny;
         break;
     }
     lv_img_set_src(weatherImage, img);
@@ -210,7 +179,7 @@ void appWeatherUiDisplayBasic(struct Weather weaInfo,
     }
     else
     {
-        lv_src_load(basicScr);
+        lv_scr_load(basicScr);
     }
 }
 
@@ -230,8 +199,8 @@ void appWeatherUiDisplayDetailInit(lv_scr_load_anim_t animType)
 
     airPanel = lv_obj_create(detailScr);
     lv_obj_add_style(airPanel, &defaultStyle, LV_STATE_DEFAULT);
-    lv_obj_set_size(airPanel, 240, 40);
-    lv_obj_set_pos(airPanel, 0, -75);
+    lv_obj_set_width(airPanel, 200);
+    lv_obj_set_height(airPanel, 70);
 
     airLabel = lv_label_create(airPanel);
     lv_obj_add_style(airLabel, &textStyle, LV_STATE_DEFAULT);
@@ -240,8 +209,8 @@ void appWeatherUiDisplayDetailInit(lv_scr_load_anim_t animType)
 
     windPanel = lv_obj_create(detailScr);
     lv_obj_add_style(windPanel, &defaultStyle, LV_STATE_DEFAULT);
-    lv_obj_set_size(windPanel, 240, 40);
-    lv_obj_set_pos(windPanel, 0, -25);
+    lv_obj_set_width(windPanel, 200);
+    lv_obj_set_height(windPanel, 70);
 
     windLabel = lv_label_create(windPanel);
     lv_obj_add_style(windLabel, &textStyle, LV_STATE_DEFAULT);
@@ -250,23 +219,26 @@ void appWeatherUiDisplayDetailInit(lv_scr_load_anim_t animType)
 
     cloudPanel = lv_obj_create(detailScr);
     lv_obj_add_style(cloudPanel, &defaultStyle, LV_STATE_DEFAULT);
-    lv_obj_set_size(cloudPanel, 240, 40);
-    lv_obj_set_pos(cloudPanel, 0, 25);
+    lv_obj_set_width(cloudPanel, 200);
+    lv_obj_set_height(cloudPanel, 70);
 
     cloudLabel = lv_label_create(cloudPanel);
     lv_obj_add_style(cloudLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(cloudLabel, "云量");
     lv_obj_align(cloudLabel, LV_ALIGN_CENTER, 0, 0);
 
-    sunPanel = lv_obj_create(detailScr);
-    lv_obj_add_style(sunPanel, &defaultStyle, LV_STATE_DEFAULT);
-    lv_obj_set_size(sunPanel, 240, 40);
-    lv_obj_set_pos(sunPanel, 0, 75);
+    lv_obj_align(airPanel, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_align(windPanel, LV_ALIGN_TOP_MID, 0, 80);
+    lv_obj_align(cloudPanel, LV_ALIGN_TOP_MID, 0, 160);
 
-    sunLabel = lv_label_create(sunPanel);
-    lv_obj_add_style(sunLabel, &textStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(sunLabel, "日出与日落");
-    lv_obj_align(sunLabel, LV_ALIGN_CENTER, 0, 0);
+    if (animType != LV_SCR_LOAD_ANIM_NONE)
+    {
+        lv_scr_load_anim(detailScr, animType, 300, 300, false);
+    }
+    else
+    {
+        lv_scr_load(detailScr);
+    }
 }
 
 void appWeatherUiDisplayDetail(struct Weather weaInfo,
@@ -279,33 +251,19 @@ void appWeatherUiDisplayDetail(struct Weather weaInfo,
     lv_label_set_text_fmt(windLabel, "风速：%.1f m/s\n风向：%d°",
                           weaInfo.windSpeed, weaInfo.windDeg);
     lv_label_set_text_fmt(cloudLabel, "云量：%d%%", weaInfo.cloudsAll);
-    lv_label_set_text_fmt(sunLabel, "日出：%02d:%02d\n日落：%02d:%02d",
-                          (weaInfo.sysSunrise / 3600 + weaInfo.timezone / 3600) % 24,
-                          (weaInfo.sysSunrise / 60) % 60,
-                          (weaInfo.sysSunset / 3600 + weaInfo.timezone / 3600) % 24,
-                          (weaInfo.sysSunset / 60) % 60);
-
-    if (animType != LV_SCR_LOAD_ANIM_NONE)
-    {
-        lv_scr_load_anim(detailScr, animType, 300, 300, false);
-    }
-    else
-    {
-        lv_src_load(detailScr);
-    }
 }
 
 void appWeatherUiDelete()
 {
     if (basicScr != NULL)
     {
-        lv_obj_del(basicScr);
+        lv_obj_clean(basicScr);
         basicScr = NULL;
     }
 
     if (detailScr != NULL)
     {
-        lv_obj_del(detailScr);
+        lv_obj_clean(detailScr);
         detailScr = NULL;
     }
 }

@@ -1,7 +1,10 @@
-#include "flash_fs.h"
 #include <Arduino.h>
-#include <FS.h>
+#include "FS.h"
 #include <SPIFFS.h>
+#include <time.h>
+#include "flash_fs.h"
+
+#define FORMAT_LITTLEFS_IF_FAILED true
 
 FlashFS::FlashFS()
 {
@@ -33,7 +36,12 @@ void FlashFS::listDir(const char *dirname, uint8_t levels)
         if (file.isDirectory())
         {
             Serial.print("  DIR : ");
-            Serial.println(file.name());
+
+            Serial.print(file.name());
+            time_t t = file.getLastWrite();
+            struct tm *tmstruct = localtime(&t);
+            Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
+
             if (levels)
             {
                 listDir(file.name(), levels - 1);
@@ -44,7 +52,11 @@ void FlashFS::listDir(const char *dirname, uint8_t levels)
             Serial.print("  FILE: ");
             Serial.print(file.name());
             Serial.print("  SIZE: ");
-            Serial.println(file.size());
+
+            Serial.print(file.size());
+            time_t t = file.getLastWrite();
+            struct tm *tmstruct = localtime(&t);
+            Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
         }
         file = root.openNextFile();
     }
@@ -55,21 +67,21 @@ uint16_t FlashFS::readFile(const char *path, uint8_t *info)
     Serial.printf("Reading file: %s\r\n", path);
 
     File file = SPIFFS.open(path);
+    uint16_t ret_len = 0;
     if (!file || file.isDirectory())
     {
         Serial.println("- failed to open file for reading");
-        return 0;
+        return ret_len;
     }
 
-    Serial.println("- read from file:");
-    uint16_t i = 0;
+    // Serial.println("- read from file:");
     while (file.available())
     {
-        info[i++] = file.read();
-        Serial.write(info[i - 1]);
+        ret_len += file.read(info + ret_len, 15);
+        // Serial.write(file.read());
     }
-    Serial.println();
-    return i;
+    file.close();
+    return ret_len;
 }
 
 void FlashFS::writeFile(const char *path, const char *message)
@@ -90,6 +102,7 @@ void FlashFS::writeFile(const char *path, const char *message)
     {
         Serial.println("- write failed");
     }
+    file.close();
 }
 
 void FlashFS::appendFile(const char *path, const char *message)
@@ -110,6 +123,7 @@ void FlashFS::appendFile(const char *path, const char *message)
     {
         Serial.println("- append failed");
     }
+    file.close();
 }
 
 void FlashFS::renameFile(const char *src, const char *dst)
@@ -138,165 +152,18 @@ void FlashFS::deleteFile(const char *path)
     }
 }
 
-void FlashFS::testFileIO(const char *path)
-{
-    File file = SPIFFS.open(path);
-    static uint8_t buf[512];
-    size_t len = 0;
-    uint32_t start = millis();
-    uint32_t end = start;
-    if (file)
-    {
-        len = file.size();
-        size_t flen = len;
-        start = millis();
-        while (len)
-        {
-            size_t toRead = len;
-            if (toRead > 512)
-            {
-                toRead = 512;
-            }
-            file.read(buf, toRead);
-            len -= toRead;
-        }
-        end = millis() - start;
-        Serial.printf("%u bytes read for %u ms\r\n", flen, end);
-        file.close();
-    }
-    else
-    {
-        Serial.println("- failed to open file for reading");
-    }
-
-    file = SPIFFS.open(path, FILE_WRITE);
-    if (!file)
-    {
-        Serial.println("- failed to open file for writing");
-        return;
-    }
-
-    size_t i;
-    start = millis();
-    for (i = 0; i < 2048; i++)
-    {
-        file.write(buf, 512);
-    }
-    end = millis() - start;
-    Serial.printf("%u bytes written for %u ms\r\n", 2048 * 512, end);
-    file.close();
-}
-
 bool analyseParam(char *info, int argc, char **argv)
 {
-    if (argc == 0)
+    int cnt; // 记录解析到第几个参数
+    for (cnt = 0; cnt < argc; ++cnt)
     {
-        return false;
+        argv[cnt] = info;
+        while (*info != '\n')
+        {
+            ++info;
+        }
+        *info = 0;
+        ++info;
     }
-    if (strcmp(argv[0], "list") == 0)
-    {
-        if (argc == 1)
-        {
-            strcpy(info, "list");
-            return true;
-        }
-        else if (argc == 2)
-        {
-            strcpy(info, "list ");
-            strcat(info, argv[1]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (strcmp(argv[0], "read") == 0)
-    {
-        if (argc == 2)
-        {
-            strcpy(info, "read ");
-            strcat(info, argv[1]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (strcmp(argv[0], "write") == 0)
-    {
-        if (argc == 3)
-        {
-            strcpy(info, "write ");
-            strcat(info, argv[1]);
-            strcat(info, " ");
-            strcat(info, argv[2]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (strcmp(argv[0], "append") == 0)
-    {
-        if (argc == 3)
-        {
-            strcpy(info, "append ");
-            strcat(info, argv[1]);
-            strcat(info, " ");
-            strcat(info, argv[2]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (strcmp(argv[0], "rename") == 0)
-    {
-        if (argc == 3)
-        {
-            strcpy(info, "rename ");
-            strcat(info, argv[1]);
-            strcat(info, " ");
-            strcat(info, argv[2]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (strcmp(argv[0], "delete") == 0)
-    {
-        if (argc == 2)
-        {
-            strcpy(info, "delete ");
-            strcat(info, argv[1]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (strcmp(argv[0], "test") == 0)
-    {
-        if (argc == 2)
-        {
-            strcpy(info, "test ");
-            strcat(info, argv[1]);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return false;
-    }
+    return true;
 }

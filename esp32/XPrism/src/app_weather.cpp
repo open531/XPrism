@@ -1,9 +1,12 @@
 #include "app_weather.h"
 #include "app_weather_ui.h"
-#include "icons_weather.h"
-#include "system.h"
+#include "icons.h"
 #include "app_center.h"
+#include "network.h"
+#include "common.h"
 #include "ArduinoJson.h"
+#include <esp32-hal-timer.h>
+#include <map>
 
 #define APP_WEATHER_NAME "天气"
 #define APP_WEATHER_INFO "显示天气信息"
@@ -11,239 +14,208 @@
 #define WEATHER_API_CITY "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric&lang=zh_cn"
 #define APP_WEATHER_PAGE_SIZE 2
 
-#define WEATHER_CFG_PATH "/weather.cfg"
-
+// 天气的持久化配置
+#define WEATHER_CONFIG_PATH "/weather.cfg"
 struct WeatherCfg
 {
-    char appid[50];
-    char city[50];
-    char lat[10];
-    char lon[10];
-    unsigned long lastUpdate;
+    String appid;
+    String city;
+    String lat;
+    String lon;
+    unsigned long updateInterval; // 天气更新的时间间隔(s)
 };
-
-struct WeatherRunData
-{
-    unsigned long lastUpdate;
-    unsigned int forceUpdate;
-    unsigned int currPage;
-    BaseType_t xReturn;
-    TaskHandle_t xHandle;
-    Weather weaInfo;
-};
-
-static void readWeatherCfg(WeatherCfg *cfg)
-{
-    FILE *fp = fopen(WEATHER_CFG_PATH, "rb");
-    if (fp)
-    {
-        fread(cfg, sizeof(WeatherCfg), 1, fp);
-        fclose(fp);
-    }
-}
 
 static void writeWeatherCfg(WeatherCfg *cfg)
 {
-    FILE *fp = fopen(WEATHER_CFG_PATH, "wb");
-    if (fp)
-    {
-        fwrite(cfg, sizeof(WeatherCfg), 1, fp);
-        fclose(fp);
-    }
+    char tmp[16];
+    // 将配置数据保存在文件中（持久化）
+    String w_data;
+    w_data = w_data + cfg->appid + "\n";
+    w_data = w_data + cfg->city + "\n";
+    w_data = w_data + cfg->lat + "\n";
+    w_data = w_data + cfg->lon + "\n";
+    memset(tmp, 0, 16);
+    snprintf(tmp, 16, "%lu\n", cfg->updateInterval);
+    w_data += tmp;
+    m_flashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
 }
 
-static WeatherCfg weatherCfg;
-static WeatherRunData *weatherRunData = NULL;
-
-static void weatherTask(void *pvParameters)
+static void readWeatherCfg(WeatherCfg *cfg)
 {
-    WeatherRunData *data = (WeatherRunData *)pvParameters;
-    while (1)
+    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
+    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
+    char info[128] = {0};
+    uint16_t size = m_flashCfg.readFile(WEATHER_CONFIG_PATH, (uint8_t *)info);
+    info[size] = 0;
+    if (size == 0)
     {
-        if (data->forceUpdate || (millis() - data->lastUpdate > 1000 * 60 * 60))
-        {
-            data->forceUpdate = 0;
-            data->lastUpdate = millis();
-            if (strlen(weatherCfg.lat) > 0 && strlen(weatherCfg.lon) > 0)
-            {
-                char url[200];
-                sprintf(url, WEATHER_API_LATLON, weatherCfg.lat, weatherCfg.lon, weatherCfg.appid);
-                HTTPClient http;
-                http.begin(url);
-                int httpCode = http.GET();
-                if (httpCode > 0)
-                {
-                    String payload = http.getString();
-                    DynamicJsonDocument doc(1024);
-                    deserializeJson(doc, payload);
-                    JsonObject root = doc.as<JsonObject>();
-                    data->weaInfo.weatherId = root["weather"][0]["id"];
-                    strcpy(data->weaInfo.weatherMain, root["weather"][0]["main"]);
-                    strcpy(data->weaInfo.weatherDescription, root["weather"][0]["description"]);
-                    strcpy(data->weaInfo.weatherIcon, root["weather"][0]["icon"]);
-                    strcpy(data->weaInfo.base, root["base"]);
-                    data->weaInfo.mainTemp = root["main"]["temp"];
-                    data->weaInfo.mainFeelsLike = root["main"]["feels_like"];
-                    data->weaInfo.mainTempMin = root["main"]["temp_min"];
-                    data->weaInfo.mainTempMax = root["main"]["temp_max"];
-                    data->weaInfo.mainPressure = root["main"]["pressure"];
-                    data->weaInfo.mainHumidity = root["main"]["humidity"];
-                    data->weaInfo.mainSeaLevel = root["main"]["sea_level"];
-                    data->weaInfo.mainGrndLevel = root["main"]["grnd_level"];
-                    data->weaInfo.visibility = root["visibility"];
-                    data->weaInfo.windSpeed = root["wind"]["speed"];
-                    data->weaInfo.windDeg = root["wind"]["deg"];
-                    data->weaInfo.windGust = root["wind"]["gust"];
-                    data->weaInfo.rain1h = root["rain"]["1h"];
-                    data->weaInfo.rain3h = root["rain"]["3h"];
-                    data->weaInfo.snow1h = root["snow"]["1h"];
-                    data->weaInfo.snow3h = root["snow"]["3h"];
-                    data->weaInfo.cloudsAll = root["clouds"]["all"];
-                    data->weaInfo.dt = root["dt"];
-                    strcpy(data->weaInfo.sysCountry, root["sys"]["country"]);
-                    data->weaInfo.sysSunrise = root["sys"]["sunrise"];
-                    data->weaInfo.sysSunset = root["sys"]["sunset"];
-                    data->weaInfo.timezone = root["timezone"];
-                    data->weaInfo.id = root["id"];
-                    strcpy(data->weaInfo.name, root["name"]);
-                    data->weaInfo.cod = root["cod"];
-                }
-                http.end();
-            }
-            else if (strlen(weatherCfg.city) > 0)
-            {
-                char url[200];
-                sprintf(url, WEATHER_API_CITY, weatherCfg.city, weatherCfg.appid);
-                HTTPClient http;
-                http.begin(url);
-                int httpCode = http.GET();
-                if (httpCode > 0)
-                {
-                    String payload = http.getString();
-                    DynamicJsonDocument doc(1024);
-                    deserializeJson(doc, payload);
-                    JsonObject root = doc.as<JsonObject>();
-                    data->weaInfo.weatherId = root["weather"][0]["id"];
-                    strcpy(data->weaInfo.weatherMain, root["weather"][0]["main"]);
-                    strcpy(data->weaInfo.weatherDescription, root["weather"][0]["description"]);
-                    strcpy(data->weaInfo.weatherIcon, root["weather"][0]["icon"]);
-                    strcpy(data->weaInfo.base, root["base"]);
-                    data->weaInfo.mainTemp = root["main"]["temp"];
-                    data->weaInfo.mainFeelsLike = root["main"]["feels_like"];
-                    data->weaInfo.mainTempMin = root["main"]["temp_min"];
-                    data->weaInfo.mainTempMax = root["main"]["temp_max"];
-                    data->weaInfo.mainPressure = root["main"]["pressure"];
-                    data->weaInfo.mainHumidity = root["main"]["humidity"];
-                    data->weaInfo.mainSeaLevel = root["main"]["sea_level"];
-                    data->weaInfo.mainGrndLevel = root["main"]["grnd_level"];
-                    data->weaInfo.visibility = root["visibility"];
-                    data->weaInfo.windSpeed = root["wind"]["speed"];
-                    data->weaInfo.windDeg = root["wind"]["deg"];
-                    data->weaInfo.windGust = root["wind"]["gust"];
-                    data->weaInfo.rain1h = root["rain"]["1h"];
-                    data->weaInfo.rain3h = root["rain"]["3h"];
-                    data->weaInfo.snow1h = root["snow"]["1h"];
-                    data->weaInfo.snow3h = root["snow"]["3h"];
-                    data->weaInfo.cloudsAll = root["clouds"]["all"];
-                    data->weaInfo.dt = root["dt"];
-                    strcpy(data->weaInfo.sysCountry, root["sys"]["country"]);
-                    data->weaInfo.sysSunrise = root["sys"]["sunrise"];
-                    data->weaInfo.sysSunset = root["sys"]["sunset"];
-                    data->weaInfo.timezone = root["timezone"];
-                    data->weaInfo.id = root["id"];
-                    strcpy(data->weaInfo.name, root["name"]);
-                    data->weaInfo.cod = root["cod"];
-                }
-                http.end();
-            }
-        }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-}
-
-static void getWeather()
-{
-    if (weatherRunData == NULL)
-    {
-        weatherRunData = (WeatherRunData *)malloc(sizeof(WeatherRunData));
-        weatherRunData->lastUpdate = 0;
-        weatherRunData->forceUpdate = 1;
-        weatherRunData->xReturn = xTaskCreate(weatherTask,
-                                              "weatherTask",
-                                              4096,
-                                              weatherRunData,
-                                              1,
-                                              &weatherRunData->xHandle);
+        // 默认值
+        cfg->city = "Beijing";
+        cfg->updateInterval = 900000; // 天气更新的时间间隔900000(900s)
+        writeWeatherCfg(cfg);
     }
     else
     {
-        weatherRunData->forceUpdate = 1;
+        // 解析数据
+        char *param[5] = {0};
+        analyseParam(info, 5, param);
+        cfg->appid = param[0];
+        cfg->city = param[1];
+        cfg->lat = param[2];
+        cfg->lon = param[3];
+        cfg->updateInterval = atol(param[4]);
     }
+}
+
+struct WeatherAppRunData
+{
+    unsigned long lastUpdate; // 上一回更新天气时的毫秒数
+    unsigned int forceUpdate; // 强制更新标志
+    int currPage;
+
+    BaseType_t xReturned_task_task_update; // 更新数据的异步任务
+    TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
+
+    Weather weaInfo; // 保存天气状况
+};
+
+static WeatherCfg weatherCfg;
+static WeatherAppRunData *weatherRunData = NULL;
+
+static void getWeather()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    HTTPClient http;
+    http.setTimeout(1000);
+    char url[128] = {0};
+    if (weatherCfg.lat.length() > 0 && weatherCfg.lon.length() > 0)
+    {
+        snprintf(url, 128, WEATHER_API_LATLON,
+                 weatherCfg.lat.c_str(), weatherCfg.lon.c_str(),
+                 weatherCfg.appid.c_str());
+    }
+    else
+    {
+        snprintf(url, 128, WEATHER_API_CITY,
+                 weatherCfg.city.c_str(), weatherCfg.appid.c_str());
+    }
+    Serial.println(url);
+    http.begin(url);
+
+    int httpCode = http.GET();
+    if (httpCode > 0)
+    {
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
+        {
+            String payload = http.getString();
+            Serial.println(payload);
+            DynamicJsonDocument doc(1024);
+            DeserializationError error = deserializeJson(doc, payload);
+            if (error)
+            {
+                Serial.print(F("deserializeJson() failed: "));
+                Serial.println(error.f_str());
+                return;
+            }
+            weatherRunData->weaInfo.weatherId = doc["weather"][0]["id"].as<int>();
+            strcpy(weatherRunData->weaInfo.weatherMain, doc["weather"][0]["main"].as<char *>());
+            strcpy(weatherRunData->weaInfo.weatherDescription, doc["weather"][0]["description"].as<char *>());
+            strcpy(weatherRunData->weaInfo.weatherIcon, doc["weather"][0]["icon"].as<char *>());
+            weatherRunData->weaInfo.mainTemp = doc["main"]["temp"].as<float>();
+            weatherRunData->weaInfo.mainFeelsLike = doc["main"]["feels_like"].as<float>();
+            weatherRunData->weaInfo.mainTempMin = doc["main"]["temp_min"].as<float>();
+            weatherRunData->weaInfo.mainTempMax = doc["main"]["temp_max"].as<float>();
+            weatherRunData->weaInfo.mainPressure = doc["main"]["pressure"].as<float>();
+            weatherRunData->weaInfo.mainHumidity = doc["main"]["humidity"].as<float>();
+            weatherRunData->weaInfo.windSpeed = doc["wind"]["speed"].as<float>();
+            weatherRunData->weaInfo.windDeg = doc["wind"]["deg"].as<float>();
+            weatherRunData->weaInfo.cloudsAll = doc["clouds"]["all"].as<float>();
+            weatherRunData->weaInfo.dt = doc["dt"].as<unsigned long>();
+            weatherRunData->weaInfo.sysSunrise = doc["sys"]["sunrise"].as<unsigned long>();
+            weatherRunData->weaInfo.sysSunset = doc["sys"]["sunset"].as<unsigned long>();
+            weatherRunData->weaInfo.timezone = doc["timezone"].as<int>();
+            strcpy(weatherRunData->weaInfo.name, doc["name"].as<char *>());
+            weatherRunData->weaInfo.cod = doc["cod"].as<int>();
+        }
+    }
+    else
+    {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+    http.end();
 }
 
 static int weatherInit(AppCenter *appCenter)
 {
+    m_tft->setSwapBytes(true);
+    appWeatherUiInit();
+    weatherRunData = (WeatherAppRunData *)malloc(sizeof(WeatherAppRunData));
+    weatherRunData->currPage = 0;
+    weatherRunData->lastUpdate = 0;
+    weatherRunData->forceUpdate = 1;
+    strcpy(weatherRunData->weaInfo.name, "北京");
+    weatherRunData->weaInfo.weatherId = 800;
+    strcpy(weatherRunData->weaInfo.weatherDescription, "晴");
+    weatherRunData->weaInfo.mainTemp = 25.0;
     readWeatherCfg(&weatherCfg);
     getWeather();
     return 0;
 }
 
-static void clickBack()
+static void weatherRoutine(AppCenter *appCenter, const Action *action)
 {
-    appCenter->appExit();
-}
+    lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
 
-static void clickForward()
-{
-    weatherRunData->forceUpdate = 1;
-    delay(100);
-}
+    if (action->active == BTN_BACK)
+    {
+        appCenter->app_exit();
+        return;
+    }
+    else if (action->active == BTN_FORWARD)
+    {
+        weatherRunData->forceUpdate = 1;
+        delay(500);
+    }
+    else if (action->active == BTN_LEFT)
+    {
+        animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
+        weatherRunData->currPage = (weatherRunData->currPage + 1) % APP_WEATHER_PAGE_SIZE;
+    }
+    else if (action->active == BTN_RIGHT)
+    {
+        animType = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
+        weatherRunData->currPage = (weatherRunData->currPage + APP_WEATHER_PAGE_SIZE - 1) % APP_WEATHER_PAGE_SIZE;
+    }
 
-static void clickLeft()
-{
-    weatherRunData->currPage = (weatherRunData->currPage + APP_WEATHER_PAGE_SIZE - 1) % APP_WEATHER_PAGE_SIZE;
     if (weatherRunData->currPage == 0)
     {
-        appWeatherUiDisplayBasic(weatherRunData->weaInfo, LV_SCR_LOAD_ANIM_MOVE_LEFT);
+        appWeatherUiDisplayBasic(weatherRunData->weaInfo, animType);
+        delay(300);
     }
     else
     {
-        appWeatherUiDisplayDetail(weatherRunData->weaInfo, LV_SCR_LOAD_ANIM_MOVE_LEFT);
+        appWeatherUiDisplayDetail(weatherRunData->weaInfo, animType);
+        delay(300);
     }
 }
 
-static void clickRight()
-{
-    weatherRunData->currPage = (weatherRunData->currPage + 1) % APP_WEATHER_PAGE_SIZE;
-    if (weatherRunData->currPage == 0)
-    {
-        appWeatherUiDisplayBasic(weatherRunData->weaInfo, LV_SCR_LOAD_ANIM_MOVE_RIGHT);
-    }
-    else
-    {
-        appWeatherUiDisplayDetail(weatherRunData->weaInfo, LV_SCR_LOAD_ANIM_MOVE_RIGHT);
-    }
-}
-
-static void weatherRoutine(AppCenter *appCenter)
-{
-    m_button.routine();
-    m_button.attachClick(BTN_BACK, clickBack);
-    m_button.attachClick(BTN_FORWARD, clickForward);
-    m_button.attachClick(BTN_LEFT, clickLeft);
-    m_button.attachClick(BTN_RIGHT, clickRight);
-}
-
-static void weatherBackground(AppCenter *appCenter)
+static void weatherBackground(AppCenter *appCenter, const Action *action)
 {
 }
 
-static int weatherExit(AppCenter *appCenter)
+static int weatherExit(void *param)
 {
     appWeatherUiDelete();
+    if (weatherRunData->xReturned_task_task_update == pdPASS)
+    {
+        vTaskDelete(weatherRunData->xHandle_task_task_update);
+    }
     if (weatherRunData != NULL)
     {
-        vTaskDelete(weatherRunData->xHandle);
         free(weatherRunData);
         weatherRunData = NULL;
     }
@@ -251,9 +223,9 @@ static int weatherExit(AppCenter *appCenter)
 }
 
 static void weatherOnMessage(const char *from, const char *to,
-                             AppMsg type, void *msg, void *info)
+                             AppMsgType type, void *msg, void *info)
 {
-    if (type == APP_MSG_WIFI_CONN)
+    if (type == APP_MESSAGE_WIFI_CONN)
     {
         getWeather();
         if (weatherRunData->currPage == 0)
@@ -265,7 +237,7 @@ static void weatherOnMessage(const char *from, const char *to,
             appWeatherUiDisplayDetail(weatherRunData->weaInfo, LV_SCR_LOAD_ANIM_NONE);
         }
     }
-    else if (type == APP_MSG_GET_PARAM)
+    else if (type == APP_MESSAGE_GET_PARAM)
     {
         if (strcmp((char *)msg, "appid") == 0)
         {
@@ -284,25 +256,25 @@ static void weatherOnMessage(const char *from, const char *to,
             snprintf((char *)info, 10, "%s", weatherCfg.lon);
         }
     }
-    else if (type == APP_MSG_SET_PARAM)
+    else if (type == APP_MESSAGE_SET_PARAM)
     {
         char *paramKey = (char *)msg;
         char *paramValue = (char *)info;
         if (strcmp((char *)msg, "appid") == 0)
         {
-            snprintf(weatherCfg.appid, 50, "%s", paramValue);
+            weatherCfg.appid = paramValue;
         }
         else if (strcmp((char *)msg, "city") == 0)
         {
-            snprintf(weatherCfg.city, 50, "%s", paramValue);
+            weatherCfg.city = paramValue;
         }
         else if (strcmp((char *)msg, "lat") == 0)
         {
-            snprintf(weatherCfg.lat, 10, "%s", paramValue);
+            weatherCfg.lat = paramValue;
         }
         else if (strcmp((char *)msg, "lon") == 0)
         {
-            snprintf(weatherCfg.lon, 10, "%s", paramValue);
+            weatherCfg.lon = paramValue;
         }
         else if (strcmp((char *)msg, "save") == 0)
         {
@@ -313,11 +285,11 @@ static void weatherOnMessage(const char *from, const char *to,
             getWeather();
         }
     }
-    else if (type == APP_MSG_READ_CFG)
+    else if (type == APP_MESSAGE_READ_CFG)
     {
         readWeatherCfg(&weatherCfg);
     }
-    else if (type == APP_MSG_WRITE_CFG)
+    else if (type == APP_MESSAGE_WRITE_CFG)
     {
         writeWeatherCfg(&weatherCfg);
     }

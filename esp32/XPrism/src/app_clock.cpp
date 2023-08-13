@@ -1,7 +1,8 @@
 #include "app_clock.h"
 #include "app_clock_ui.h"
-#include "system.h"
+#include "common.h"
 #include "app_center.h"
+#include "icons.h"
 #include "ArduinoJson.h"
 #include "ESP32Time.h"
 
@@ -15,7 +16,6 @@
 
 struct ClockCfg
 {
-
 };
 
 struct ClockRunData
@@ -37,9 +37,9 @@ static int RTC_Hour;
 static int RTC_Minute;
 static int RTC_Second;
 
-static int RTR_Hour=1;
-static int RTR_Minute=59;
-static int RTR_Second=59;
+static int RTR_Hour = 1;
+static int RTR_Minute = 59;
+static int RTR_Second = 59;
 
 static ClockRunData *run_data = NULL;
 
@@ -49,7 +49,7 @@ static void initialdata()
 {
     data->lastUpdate = 0;
     data->updateInterval = 100;
-    data->forceUpdate=0;
+    data->forceUpdate = 0;
 }
 
 unsigned long StopStart = 0, StopFinish = 0;
@@ -201,26 +201,47 @@ static void resecond_clock() // 计时器
     Clock *resecond_clock;
     task_update_resecond(resecond_clock);
 
-    //初始化时间
+    // 初始化时间
 }
 //
 
 static void ClockTask(void *pvParameters)
 {
     ClockRunData *data = (ClockRunData *)pvParameters;
-    Clock *second_clock,*resecond_clock;
-    
-    if(data->currPage==0)
+    Clock *second_clock, *resecond_clock;
+
+    if (data->currPage == 0)
     {
         task_update_second(second_clock);
     }
-    else if(data->currPage==1)
+    else if (data->currPage == 1)
     {
         task_update_resecond(resecond_clock);
     }
-
 }
 
+<<<<<<< HEAD
+=======
+static void getClock()
+{
+    if (clockRunData == NULL)
+    {
+        clockRunData = (ClockRunData *)malloc(sizeof(clockRunData));
+        clockRunData->lastUpdate = 0;
+        clockRunData->forceUpdate = 1;
+        clockRunData->xReturn = xTaskCreate(ClockTask,
+                                            "ClockTask",
+                                            4096,
+                                            clockRunData,
+                                            1,
+                                            &clockRunData->xHandle);
+    }
+    else
+    {
+        clockRunData->forceUpdate = 1;
+    }
+}
+>>>>>>> 15d41c0f547eee8f2cbc745467dcbb084ec72da0
 
 static int clockInit(AppCenter *appCenter)
 {
@@ -228,88 +249,21 @@ static int clockInit(AppCenter *appCenter)
     return 0;
 }
 
-static void clickBack()
+static void clockRoutine(AppCenter *appCenter, const Action *action)
 {
-    appCenter->appExit();
+    lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
+    if (action->active == BTN_BACK)
+    {
+        appCenter->app_exit();
+        return;
+    }
 }
 
-
-static void clickForward()
-{
-     if (data->currPage == 0)
-        {
-            if (data->forceUpdate == 0)
-            {
-                data->forceUpdate = 1;
-                StopFinish = millis();
-            }
-            else if (data->forceUpdate == 1)
-            {
-                data->forceUpdate = 0;
-                StopStart = millis();
-            }
-        }
-        else if (data->currPage == 1)
-        {
-            if (data->forceUpdate == 0)
-            {
-                data->forceUpdate = 1;
-                StopFinish = millis();
-            }
-            else if (data->forceUpdate == 1)
-            {
-                data->forceUpdate = 0;
-                StopStart = millis();
-            }
-        }
-        delay(100);
-}
-
-static void clickLeft()
-{
-    if (data->currPage == 0)
-        {
-            Second_Clear();
-            data->forceUpdate == 0;
-        }
-        else if (data->currPage == 1)
-        {
-            ReSecond_Clear();
-            data->forceUpdate == 0;
-        }
-    clockRunData->currPage = (clockRunData->currPage + APP_CLOCK_PAGE_SIZE - 1) % APP_CLOCK_PAGE_SIZE;
-
-    
-}
-
-static void clickRight()
-{
-    if (data->currPage == 0)
-        {
-            Second_Clear();
-            data->forceUpdate == 0;
-        }
-        else if (data->currPage == 1)
-        {
-            ReSecond_Clear();
-            data->forceUpdate == 0;
-        }
-    clockRunData->currPage = (clockRunData->currPage + 1) % APP_CLOCK_PAGE_SIZE;
-    
-}
-
-static void clockRoutine(AppCenter *appCenter)
-{
-    m_button.routine();
-    m_button.attachClick(BTN_BACK, clickBack);
-    
-}
-
-static void clockBackground(AppCenter *appCenter)
+static void clockBackground(AppCenter *appCenter, const Action *action)
 {
 }
 
-static int clockExit(AppCenter *appCenter)
+static int clockExit(void *param)
 {
     appClockUiDelete();
     if (clockRunData != NULL)
@@ -320,7 +274,6 @@ static int clockExit(AppCenter *appCenter)
     }
     return 0;
 }
-
 
 
 App ClockApp = {
