@@ -140,8 +140,20 @@ static void second_clock() // 秒表
 }
 
 // 需要补充：
-// Clock initialRTR() // 倒计时初始化
+// Clock initialRTR(Clock *setClock) // 倒计时初始化
 // {
+//    if (clockRunData->currPage==0)
+//    {
+//       appClockUiInit();
+//        appClockUiDisplayBasic(clockRunData->cloInfo);
+//    }
+    
+//    else if (clockRunData->currPage==1)
+//    {
+//        RTR_Hour=setClock->hour;
+//        RTR_Minute=setClock->minute;
+//        RTR_Second=setClock->second;
+//    }
 // }
 
 unsigned long RTR_Timer;
@@ -209,29 +221,10 @@ static void ClockTask(void *pvParameters)
 
 }
 
-static void getClock()
-{
-    if (clockRunData == NULL)
-    {
-        clockRunData = (ClockRunData *)malloc(sizeof(clockRunData));
-        clockRunData->lastUpdate = 0;
-        clockRunData->forceUpdate = 1;
-        clockRunData->xReturn = xTaskCreate(ClockTask,
-                                              "ClockTask",
-                                              4096,
-                                              clockRunData,
-                                              1,
-                                              &clockRunData->xHandle);
-    }
-    else
-    {
-        clockRunData->forceUpdate = 1;
-    }
-}
 
 static int clockInit(AppCenter *appCenter)
 {
-    getClock();
+    appClockUiInit();
     return 0;
 }
 
@@ -328,27 +321,7 @@ static int clockExit(AppCenter *appCenter)
     return 0;
 }
 
-static void clockOnMessage(const char *from, const char *to,
-                             AppMsg type, void *msg, void *info)
-{
-    if (type == APP_MSG_WIFI_CONN)
-    {
-        getClock();
-        appClockUiDisplayBasic(clockRunData->cloInfo);
-    }
-    
-    else if (type == APP_MSG_SET_PARAM)
-    {
-        char *paramKey = (char *)msg;
-        char *paramValue = (char *)info;
-        
-        if (strcmp((char *)msg, "update") == 0)
-        {
-            getClock();
-        }
-    }
-    
-}
+
 
 App ClockApp = {
     APP_CLOCK_NAME,
@@ -358,4 +331,4 @@ App ClockApp = {
     clockRoutine,
     clockBackground,
     clockExit,
-    clockOnMessage};
+    };
