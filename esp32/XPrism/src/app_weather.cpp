@@ -154,6 +154,7 @@ static int weatherInit(AppCenter *appCenter)
     m_tft->setSwapBytes(true);
     appWeatherUiInit();
     weatherRunData = (WeatherAppRunData *)malloc(sizeof(WeatherAppRunData));
+    memset((char *)&weatherRunData->weaInfo, 0, sizeof(Weather));
     weatherRunData->currPage = 0;
     weatherRunData->lastUpdate = 0;
     weatherRunData->forceUpdate = 1;
@@ -241,24 +242,31 @@ static void weatherOnMessage(const char *from, const char *to,
     {
         if (strcmp((char *)msg, "appid") == 0)
         {
-            snprintf((char *)info, 50, "%s", weatherCfg.appid);
+            snprintf((char *)info, 32, "%s", weatherCfg.appid);
         }
         else if (strcmp((char *)msg, "city") == 0)
         {
-            snprintf((char *)info, 50, "%s", weatherCfg.city);
+            snprintf((char *)info, 32, "%s", weatherCfg.city);
         }
         else if (strcmp((char *)msg, "lat") == 0)
         {
-            snprintf((char *)info, 10, "%s", weatherCfg.lat);
+            snprintf((char *)info, 32, "%s", weatherCfg.lat);
         }
         else if (strcmp((char *)msg, "lon") == 0)
         {
-            snprintf((char *)info, 10, "%s", weatherCfg.lon);
+            snprintf((char *)info, 32, "%s", weatherCfg.lon);
+        }
+        else if (strcmp((char *)msg, "updateInterval") == 0)
+        {
+            snprintf((char *)info, 32, "%lu", weatherCfg.updateInterval);
+        }
+        else
+        {
+            snprintf((char *)info, 32, "%s", "NULL");
         }
     }
     else if (type == APP_MESSAGE_SET_PARAM)
     {
-        char *paramKey = (char *)msg;
         char *paramValue = (char *)info;
         if (strcmp((char *)msg, "appid") == 0)
         {
@@ -276,13 +284,9 @@ static void weatherOnMessage(const char *from, const char *to,
         {
             weatherCfg.lon = paramValue;
         }
-        else if (strcmp((char *)msg, "save") == 0)
+        else if (strcmp((char *)msg, "updateInterval") == 0)
         {
-            writeWeatherCfg(&weatherCfg);
-        }
-        else if (strcmp((char *)msg, "update") == 0)
-        {
-            getWeather();
+            weatherCfg.updateInterval = atol(paramValue);
         }
     }
     else if (type == APP_MESSAGE_READ_CFG)

@@ -24,8 +24,8 @@ extern "C"
     while (lv_anim_count_running()) \
         lv_task_handler(); // 等待动画完成
     void appTimeUiInit();
-    void appTimeUiDisplayBasicInit();
-    void appTimeUiDisplayBasic(struct Time timInfo);
+    void appTimeUiDisplayInit(lv_scr_load_anim_t animType);
+    void appTimeUiDisplay(struct Time timInfo, lv_scr_load_anim_t animType);
     void appTimeUiDelete();
 
     extern const lv_img_dsc_t icon_time;
