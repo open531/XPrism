@@ -6,7 +6,13 @@ extern "C"
 {
 #endif
 
-#include "info.h"
+    struct Clock
+    {
+        int hour;
+        int minute;
+        int second;
+    };
+
 #include "lvgl.h"
 
 #define WAIT_ANIM                   \
@@ -18,7 +24,7 @@ extern "C"
     void appClockUiDelete();
 
     extern const lv_img_dsc_t icon_clock;
-    
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

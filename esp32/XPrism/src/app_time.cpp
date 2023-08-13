@@ -1,7 +1,8 @@
 #include "app_time.h"
 #include "app_time_ui.h"
-#include "system.h"
+#include "common.h"
 #include "app_center.h"
+#include "icons.h"
 #include "ArduinoJson.h"
 #include "ESP32Time.h"
 
@@ -27,11 +28,11 @@ struct TimeRunData
     BaseType_t xReturn;
     TaskHandle_t xHandle;
     Time timInfo;
-    
-    long long preNetTimestamp; 
+
+    long long preNetTimestamp;
     ESP32Time g_rtc;
-    long long errorNetTimestamp;    // 网络到显示过程中的时间误差
-    long long preLocalTimestamp;    // 上一次的本地机器时间戳
+    long long errorNetTimestamp; // 网络到显示过程中的时间误差
+    long long preLocalTimestamp; // 上一次的本地机器时间戳
 };
 
 static void readTimeCfg(TimeCfg *cfg)
@@ -56,8 +57,6 @@ static void writeTimeCfg(TimeCfg *cfg)
 
 static TimeCfg timeCfg;
 static TimeRunData *timeRunData = NULL;
-
-
 
 static void UpdateTime_RTC(long long timestamp)
 {
@@ -109,7 +108,6 @@ static long long get_timestamp(String url)
     return timeRunData->preNetTimestamp;
 }
 
-
 static void TimeTask(void *pvParameters)
 {
     TimeRunData *data = (TimeRunData *)pvParameters;
@@ -121,8 +119,6 @@ static void TimeTask(void *pvParameters)
             data->lastUpdate = millis();
             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
             UpdateTime_RTC(timestamp);
-            
-           
         }
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
@@ -136,11 +132,11 @@ static void getTime()
         timeRunData->lastUpdate = 0;
         timeRunData->forceUpdate = 1;
         timeRunData->xReturn = xTaskCreate(TimeTask,
-                                              "TimeTask",
-                                              4096,
-                                              timeRunData,
-                                              1,
-                                              &timeRunData->xHandle);
+                                           "TimeTask",
+                                           4096,
+                                           timeRunData,
+                                           1,
+                                           &timeRunData->xHandle);
     }
     else
     {
@@ -155,24 +151,20 @@ static int timeInit(AppCenter *appCenter)
     return 0;
 }
 
-static void clickBack()
+static void timeRoutine(AppCenter *appCenter, const Action *action)
 {
-    appCenter->appExit();
+    if (action->active == BTN_BACK)
+    {
+        appCenter->app_exit();
+        return;
+    }
 }
 
-
-static void timeRoutine(AppCenter *appCenter)
-{
-    m_button.routine();
-    m_button.attachClick(BTN_BACK, clickBack);
-    
-}
-
-static void timeBackground(AppCenter *appCenter)
+static void timeBackground(AppCenter *appCenter, const Action *action)
 {
 }
 
-static int timeExit(AppCenter *appCenter)
+static int timeExit(void *param)
 {
     appTimeUiDelete();
     if (timeRunData != NULL)
@@ -185,19 +177,18 @@ static int timeExit(AppCenter *appCenter)
 }
 
 static void timeOnMessage(const char *from, const char *to,
-                             AppMsg type, void *msg, void *info)
+                          AppMsgType type, void *msg, void *info)
 {
-    if (type == APP_MSG_WIFI_CONN)
+    if (type == APP_MESSAGE_WIFI_CONN)
     {
         getTime();
         appTimeUiDisplayBasic(timeRunData->timInfo);
     }
-    else if (type == APP_MSG_GET_PARAM)
+    else if (type == APP_MESSAGE_GET_PARAM)
     {
         snprintf((char *)info, 50, "%s", timeCfg.appid);
-        
     }
-    else if (type == APP_MSG_SET_PARAM)
+    else if (type == APP_MESSAGE_SET_PARAM)
     {
         char *paramKey = (char *)msg;
         char *paramValue = (char *)info;
@@ -214,11 +205,11 @@ static void timeOnMessage(const char *from, const char *to,
             getTime();
         }
     }
-    else if (type == APP_MSG_READ_CFG)
+    else if (type == APP_MESSAGE_READ_CFG)
     {
         readTimeCfg(&timeCfg);
     }
-    else if (type == APP_MSG_WRITE_CFG)
+    else if (type == APP_MESSAGE_WRITE_CFG)
     {
         writeTimeCfg(&timeCfg);
     }
