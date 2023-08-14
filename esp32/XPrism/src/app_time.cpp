@@ -226,7 +226,7 @@ static void timeOnMessage(const char *from, const char *to,
     }
 }
 
-App TimeApp = {
+App timeApp = {
     APP_TIME_NAME,
     &icon_time,
     APP_TIME_INFO,

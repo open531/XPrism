@@ -3,6 +3,6 @@
 
 #include "app.h"
 
-extern App TimeApp;
+extern App timeApp;
 
 #endif

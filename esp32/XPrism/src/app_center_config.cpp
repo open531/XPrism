@@ -4,8 +4,6 @@
 #include "Arduino.h"
 
 #define APP_CTRL_CONFIG_PATH "/sys.cfg"
-#define MPU_CONFIG_PATH "/mpu.cfg"
-#define RGB_CONFIG_PATH "/rgb.cfg"
 
 void AppCenter::read_config(SysUtilConfig *cfg)
 {

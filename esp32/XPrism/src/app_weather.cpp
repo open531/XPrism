@@ -5,12 +5,13 @@
 #include "network.h"
 #include "common.h"
 #include "ArduinoJson.h"
+#include "ESP32Time.h"
 #include <esp32-hal-timer.h>
 #include <map>
 
 #define APP_WEATHER_NAME "天气"
 #define APP_WEATHER_INFO "显示天气信息"
-#define WEATHER_API_LATLON "http://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=%s&units=metric&lang=zh_cn"
+#define WEATHER_API_LATLON "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=metric&lang=zh_cn"
 #define WEATHER_API_CITY "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric&lang=zh_cn"
 #define APP_WEATHER_PAGE_SIZE 2
 
@@ -50,7 +51,10 @@ static void readWeatherCfg(WeatherCfg *cfg)
     if (size == 0)
     {
         // 默认值
+        cfg->appid = "c66ce2b79b320564e343d0d77e688026";
         cfg->city = "Beijing";
+        cfg->lat = "40.00";
+        cfg->lon = "116.32";
         cfg->updateInterval = 900000; // 天气更新的时间间隔900000(900s)
         writeWeatherCfg(cfg);
     }
@@ -65,6 +69,13 @@ static void readWeatherCfg(WeatherCfg *cfg)
         cfg->lon = param[3];
         cfg->updateInterval = atol(param[4]);
     }
+    Serial.println("Weather config:");
+    Serial.println(info);
+    Serial.println(cfg->appid);
+    Serial.println(cfg->city);
+    Serial.println(cfg->lat);
+    Serial.println(cfg->lon);
+    Serial.println(cfg->updateInterval);
 }
 
 struct WeatherAppRunData
@@ -131,6 +142,9 @@ static void getWeather()
             weatherRunData->weaInfo.mainTempMax = doc["main"]["temp_max"].as<float>();
             weatherRunData->weaInfo.mainPressure = doc["main"]["pressure"].as<float>();
             weatherRunData->weaInfo.mainHumidity = doc["main"]["humidity"].as<float>();
+            weatherRunData->weaInfo.mainSeaLevel = doc["main"]["sea_level"].as<float>();
+            weatherRunData->weaInfo.mainGrndLevel = doc["main"]["grnd_level"].as<float>();
+            weatherRunData->weaInfo.visibility = doc["visibility"].as<float>();
             weatherRunData->weaInfo.windSpeed = doc["wind"]["speed"].as<float>();
             weatherRunData->weaInfo.windDeg = doc["wind"]["deg"].as<float>();
             weatherRunData->weaInfo.cloudsAll = doc["clouds"]["all"].as<float>();
@@ -138,6 +152,7 @@ static void getWeather()
             weatherRunData->weaInfo.sysSunrise = doc["sys"]["sunrise"].as<unsigned long>();
             weatherRunData->weaInfo.sysSunset = doc["sys"]["sunset"].as<unsigned long>();
             weatherRunData->weaInfo.timezone = doc["timezone"].as<int>();
+            weatherRunData->weaInfo.id = doc["id"].as<int>();
             strcpy(weatherRunData->weaInfo.name, doc["name"].as<char *>());
             weatherRunData->weaInfo.cod = doc["cod"].as<int>();
         }

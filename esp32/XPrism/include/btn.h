@@ -7,9 +7,9 @@
 #define ACTION_HISTORY_BUF_LEN 5
 
 #define BTN_BACK_PIN 25
-#define BTN_FORWARD_PIN 26
-#define BTN_LEFT_PIN 32
-#define BTN_RIGHT_PIN 33
+#define BTN_FORWARD_PIN 32
+#define BTN_LEFT_PIN 33
+#define BTN_RIGHT_PIN 27
 
 extern const char *action_type_info[];
 

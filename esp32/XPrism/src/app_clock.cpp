@@ -84,7 +84,6 @@ static void readClockCfg(ClockCfg *clockCfg)
     }
 }
 
-
 unsigned long StopStart = 0, StopFinish = 0;
 
 // easy to use helper-function for non-blocking timing
@@ -247,7 +246,7 @@ static int clockInit(AppCenter *appCenter)
     clockRunData->lastUpdate = 0;
     clockRunData->forceUpdate = 1;
     clockRunData->currPage = 0;
-    
+
     return 0;
 }
 
@@ -280,7 +279,6 @@ static void clockRoutine(AppCenter *appCenter, const Action *action)
     delay(30);
 }
 
-
 static void clockBackground(AppCenter *appCenter, const Action *action)
 {
 }
@@ -288,7 +286,7 @@ static void clockBackground(AppCenter *appCenter, const Action *action)
 static int clockExit(void *param)
 {
     appClockUiDelete();
-     if (clockRunData->xReturned_task_task_update == pdPASS)
+    if (clockRunData->xReturned_task_task_update == pdPASS)
     {
         vTaskDelete(clockRunData->xHandle_task_task_update);
     }
@@ -301,8 +299,7 @@ static int clockExit(void *param)
     return 0;
 }
 
-
-App ClockApp = {
+App clockApp = {
     APP_CLOCK_NAME,
     &icon_clock,
     APP_CLOCK_INFO,
@@ -310,4 +307,4 @@ App ClockApp = {
     clockRoutine,
     clockBackground,
     clockExit,
-    };
+};

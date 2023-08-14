@@ -16,7 +16,7 @@
 
 // SD_Card
 #define SD_SCK 14
-#define SD_MISO 12
+#define SD_MISO 26
 #define SD_MOSI 13
 #define SD_SS 15
 

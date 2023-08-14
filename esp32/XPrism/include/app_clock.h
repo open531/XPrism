@@ -3,6 +3,6 @@
 
 #include "app.h"
 
-extern App ClockApp;
+extern App clockApp;
 
 #endif

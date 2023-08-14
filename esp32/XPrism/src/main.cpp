@@ -57,13 +57,13 @@ void setup()
 
 // 将APP"安装"到controller里
 #if APP_TIME_USE
-    appCenter->app_install(&TimeApp);
+    appCenter->app_install(&timeApp);
 #endif
 #if APP_WEATHER_USE
     appCenter->app_install(&weatherApp);
 #endif
 #if APP_CLOCK_USE
-    appCenter->app_install(&ClockApp);
+    appCenter->app_install(&clockApp);
 #endif
 
     m_btn.init();
@@ -87,11 +87,6 @@ void setup()
 void loop()
 {
     m_screen.routine();
-
-    Serial.println(digitalRead(BTN_BACK_PIN));
-    Serial.println(digitalRead(BTN_FORWARD_PIN));
-    Serial.println(digitalRead(BTN_LEFT_PIN));
-    Serial.println(digitalRead(BTN_RIGHT_PIN));
 
     if (isCheckAction)
     {

@@ -4,6 +4,9 @@
 #include "app.h"
 #include "Arduino.h"
 
+static String wifi_ssid = "Redmi K50";
+static String wifi_password = "5irmvnfnz5rb6xn";
+
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN", "APP_MESSAGE_WIFI_AP",
                                      "APP_MESSAGE_WIFI_ALIVE", "APP_MESSAGE_WIFI_DISCONN",
                                      "APP_MESSAGE_UPDATE_TIME", "APP_MESSAGE_MQTT_DATA",
@@ -144,11 +147,11 @@ int AppCenter::main_process(Action *act_info)
         this->req_event_deal();
     }
 
-    // wifi自动关闭(在节能模式下)
-    if (0 == sys_cfg.power_mode && true == m_wifi_status && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
-    {
-        send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
-    }
+    // // wifi自动关闭(在节能模式下)
+    // if (0 == sys_cfg.power_mode && true == m_wifi_status && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
+    // {
+    //     send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
+    // }
 
     if (0 == app_exit_flag)
     {
@@ -197,7 +200,6 @@ int AppCenter::main_process(Action *act_info)
     }
     act_info->active = ActionType::BTN_NONE;
     act_info->isValid = 0;
-    Serial.println("act_info is invalid");
     return 0;
 }
 
@@ -329,7 +331,8 @@ bool AppCenter::wifi_event(AppMsgType type)
         // CONN_ERROR == m_network.end_conn_wifi() ||
         if (false == m_wifi_status)
         {
-            m_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str());
+            // m_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str());
+            m_network.start_conn_wifi(wifi_ssid.c_str(), wifi_password.c_str());
             m_wifi_status = true;
         }
         m_preWifiReqMillis = GET_SYS_MILLIS();

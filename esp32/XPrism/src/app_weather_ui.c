@@ -17,13 +17,15 @@ static lv_obj_t *detailScr = NULL;
 static lv_obj_t *weatherImage = NULL;
 static lv_obj_t *weatherLabel = NULL;
 static lv_obj_t *tempLabel = NULL;
+static lv_obj_t *feelsLikeLabel = NULL;
+static lv_obj_t *humidityLabel = NULL;
 static lv_obj_t *cityLabel = NULL;
 static lv_obj_t *airPanel = NULL;
 static lv_obj_t *airLabel = NULL;
 static lv_obj_t *windPanel = NULL;
 static lv_obj_t *windLabel = NULL;
-static lv_obj_t *cloudPanel = NULL;
-static lv_obj_t *cloudLabel = NULL;
+static lv_obj_t *srcPanel = NULL;
+static lv_obj_t *srcLabel = NULL;
 
 void appWeatherUiInit()
 {
@@ -69,17 +71,27 @@ void appWeatherUiDisplayBasicInit(lv_scr_load_anim_t animType)
 
     tempLabel = lv_label_create(basicScr);
     lv_obj_add_style(tempLabel, &numSmallStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(tempLabel, "25 C");
+    lv_label_set_text(tempLabel, "25");
+
+    feelsLikeLabel = lv_label_create(basicScr);
+    lv_obj_add_style(feelsLikeLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(feelsLikeLabel, "体感：25°C");
+
+    humidityLabel = lv_label_create(basicScr);
+    lv_obj_add_style(humidityLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(humidityLabel, "湿度：25%%");
 
     cityLabel = lv_label_create(basicScr);
     lv_obj_add_style(cityLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_recolor(cityLabel, true);
     lv_label_set_text(cityLabel, "北京");
 
-    lv_obj_align(weatherImage, LV_ALIGN_TOP_LEFT, 0, 10);
-    lv_obj_align(cityLabel, LV_ALIGN_TOP_RIGHT, -10, 10);
-    lv_obj_align(tempLabel, LV_ALIGN_LEFT_MID, 0, 10);
-    lv_obj_align(weatherLabel, LV_ALIGN_BOTTOM_LEFT, 10, 0);
+    lv_obj_align(weatherImage, LV_ALIGN_TOP_LEFT, 10, 10);
+    lv_obj_align(weatherLabel, LV_ALIGN_TOP_MID, 20, 40);
+    lv_obj_align(tempLabel, LV_ALIGN_LEFT_MID, 10, 10);
+    lv_obj_align(feelsLikeLabel, LV_ALIGN_LEFT_MID, 10, 60);
+    lv_obj_align(humidityLabel, LV_ALIGN_LEFT_MID, 10, 90);
+    lv_obj_align(cityLabel, LV_ALIGN_TOP_MID, 20, 70);
 }
 
 void appWeatherUiDisplayBasic(struct Weather weaInfo,
@@ -89,10 +101,12 @@ void appWeatherUiDisplayBasic(struct Weather weaInfo,
 
     lv_label_set_text(cityLabel, weaInfo.name);
     lv_label_set_text(weatherLabel, weaInfo.weatherDescription);
-    lv_label_set_text_fmt(tempLabel, "%.1f C", weaInfo.mainTemp);
+    lv_label_set_text_fmt(tempLabel, "%.2f", weaInfo.mainTemp);
+    lv_label_set_text_fmt(feelsLikeLabel, "体感：%.2f°C", weaInfo.mainFeelsLike);
+    lv_label_set_text_fmt(humidityLabel, "湿度：%d%%", weaInfo.mainHumidity);
 
     lv_img_dsc_t *img = NULL;
-    switch (weaInfo.id)
+    switch (weaInfo.weatherId)
     {
     case 200:
     case 201:
@@ -204,7 +218,7 @@ void appWeatherUiDisplayDetailInit(lv_scr_load_anim_t animType)
 
     airLabel = lv_label_create(airPanel);
     lv_obj_add_style(airLabel, &textStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(airLabel, "气压与湿度");
+    lv_label_set_text(airLabel, "气压与云量");
     lv_obj_align(airLabel, LV_ALIGN_CENTER, 0, 0);
 
     windPanel = lv_obj_create(detailScr);
@@ -217,19 +231,19 @@ void appWeatherUiDisplayDetailInit(lv_scr_load_anim_t animType)
     lv_label_set_text(windLabel, "风速与风向");
     lv_obj_align(windLabel, LV_ALIGN_CENTER, 0, 0);
 
-    cloudPanel = lv_obj_create(detailScr);
-    lv_obj_add_style(cloudPanel, &defaultStyle, LV_STATE_DEFAULT);
-    lv_obj_set_width(cloudPanel, 200);
-    lv_obj_set_height(cloudPanel, 70);
+    srcPanel = lv_obj_create(detailScr);
+    lv_obj_add_style(srcPanel, &defaultStyle, LV_STATE_DEFAULT);
+    lv_obj_set_width(srcPanel, 200);
+    lv_obj_set_height(srcPanel, 70);
 
-    cloudLabel = lv_label_create(cloudPanel);
-    lv_obj_add_style(cloudLabel, &textStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(cloudLabel, "云量");
-    lv_obj_align(cloudLabel, LV_ALIGN_CENTER, 0, 0);
+    srcLabel = lv_label_create(srcPanel);
+    lv_obj_add_style(srcLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(srcLabel, "数据来源：\nOpenWeatherMap");
+    lv_obj_align(srcLabel, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_align(airPanel, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_align(windPanel, LV_ALIGN_TOP_MID, 0, 80);
-    lv_obj_align(cloudPanel, LV_ALIGN_TOP_MID, 0, 160);
+    lv_obj_align(srcPanel, LV_ALIGN_TOP_MID, 0, 160);
 
     if (animType != LV_SCR_LOAD_ANIM_NONE)
     {
@@ -246,11 +260,10 @@ void appWeatherUiDisplayDetail(struct Weather weaInfo,
 {
     appWeatherUiDisplayDetailInit(animType);
 
-    lv_label_set_text_fmt(airLabel, "气压：%d hPa\n湿度：%d%%",
-                          weaInfo.mainPressure, weaInfo.mainHumidity);
+    lv_label_set_text_fmt(airLabel, "气压：%d hPa\n云量：%d%%",
+                          weaInfo.mainPressure, weaInfo.cloudsAll);
     lv_label_set_text_fmt(windLabel, "风速：%.1f m/s\n风向：%d°",
                           weaInfo.windSpeed, weaInfo.windDeg);
-    lv_label_set_text_fmt(cloudLabel, "云量：%d%%", weaInfo.cloudsAll);
 }
 
 void appWeatherUiDelete()
