@@ -16,140 +16,62 @@
 
 struct ClockCfg
 {
-    unsigned long updateInterval;
 };
 
 struct ClockRunData
 {
-    unsigned long lastUpdate;
-    unsigned int forceUpdate;
     unsigned int currPage;
-    BaseType_t xReturned_task_task_update;
-    TaskHandle_t xHandle_task_task_update;
-    Clock cloInfo;
-    unsigned int updateInterval;
-
-    long long preNetTimestamp= 1690848000000;;
-    long long errorNetTimestamp = 0; // 网络到显示过程中的时间误差
-    long long preLocalTimestamp= GET_SYS_MILLIS();
-    ESP32Time g_rtc;
+    boolean stopwatchRunning;
+    unsigned long stopwatchBegin;
+    unsigned long stopwatchEnd;
+    unsigned long stopwatchTemp;
+    long long preLocalTimestamp; // 上一次的本地机器时间戳
 };
+
+static void writeClockCfg(ClockCfg *cfg)
+{
+}
+
+static void readClockCfg(ClockCfg *cfg)
+{
+}
+
 static ClockCfg clockCfg;
 static ClockRunData *clockRunData = NULL;
 
-unsigned long MyTestTimer;
-
-long long preLocalTimestamp; // 上一次的本地机器时间戳
-
-Clock *RTC,*RTR,*RTR0,*record;
-
-static void initialdata()
+static long long get_timestamp()
 {
-    clockRunData->lastUpdate = 0;
-    clockCfg.updateInterval = 100;
-    clockRunData->forceUpdate = 0;
+    clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
+    return clockRunData->preLocalTimestamp;
 }
 
-static void writeClockCfg(ClockCfg *clockCfg)
+static void stopwatch_start()
 {
-    char tmp[16];
-    // 将配置数据保存在文件中（持久化）
-    String w_data;
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%lu\n", clockCfg->updateInterval);
-    w_data += tmp;
-    m_flashCfg.writeFile(CLOCK_CFG_PATH, w_data.c_str());
+    clockRunData->stopwatchBegin = get_timestamp();
+    Serial.println("stopwatch_start");
+    Serial.println(clockRunData->stopwatchTemp);
 }
 
-static void readClockCfg(ClockCfg *clockCfg)
+static void stopwatch_stop()
 {
-    char info[128] = {0};
-    uint16_t size = m_flashCfg.readFile(CLOCK_CFG_PATH, (uint8_t *)info);
-    info[size] = 0;
-    if (size == 0)
+    clockRunData->stopwatchEnd = get_timestamp();
+    clockRunData->stopwatchTemp += clockRunData->stopwatchEnd - clockRunData->stopwatchBegin;
+    Serial.println("stopwatch_stop");
+    Serial.println(clockRunData->stopwatchTemp);
+}
+
+static void update_stopwatch()
+{
+    double stopwatchInfo;
+    if (clockRunData->stopwatchRunning)
     {
-        // 默认值
-        clockCfg->updateInterval = 900000; // 时间更新的时间间隔900000(900s)
-        writeClockCfg(clockCfg);
+        stopwatchInfo = clockRunData->stopwatchTemp + get_timestamp() - clockRunData->stopwatchBegin;
     }
     else
     {
-        // 解析数据
-        char *param[1] = {0};
-        analyseParam(info, 1, param);
-        clockCfg->updateInterval = atol(param[0]);
+        stopwatchInfo = clockRunData->stopwatchTemp;
     }
-}
-
-static long long get_timestamp()
-{
-    clockRunData->preNetTimestamp = clockRunData->preNetTimestamp + (GET_SYS_MILLIS() - clockRunData->preLocalTimestamp);
-    clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
-    return clockRunData->preNetTimestamp;
-}
-
-
-
-static void UpdateClock(long long timestamp)
-{
-    struct Clock clo;
-    clockRunData->g_rtc.setTime(timestamp / 1000);
-
-    clo.hour = clockRunData->g_rtc.getHour(true);
-    clo.minute = clockRunData->g_rtc.getMinute();
-    clo.second = clockRunData->g_rtc.getSecond();
-
-    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
-    appClockUiDisplayBasic(clo, LV_SCR_LOAD_ANIM_NONE);
-}
-
-static void ClockClear(int runway)
-{
-    if(runway==1 && RTC!=NULL)
-    {
-        RTC=NULL;
-    }
-    else if(runway==-1 && RTR!=NULL)
-    {
-        RTR=NULL;
-    }
-}
-
-// 需要补充：
-// Clock initialRTR0(Clock *setClock) // 倒计时初始化
-// {
-//    if (clockRunData->currPage==0)
-//    {
-//       appClockUiInit();
-//        appClockUiDisplayBasic(clockRunData->cloInfo);
-//    }
-
-//    else if (clockRunData->currPage==1)
-//    {
-//        RTR_Hour=setClock->hour;
-//        RTR_Minute=setClock->minute;
-//        RTR_Second=setClock->second;
-//    }
-// }
-
-
-static void SoftClock(int runway)
-{   if(runway==1)
-    {
-        clockRunData->g_rtc.setTime(get_timestamp() / 1000);
-        RTC->hour = clockRunData->g_rtc.getHour(true)+record->hour;
-        RTC->minute = clockRunData->g_rtc.getMinute()+record->minute;
-        RTC->second = clockRunData->g_rtc.getSecond()+record->second;
-
-    }
-
-    else if(runway==-1)
-    {
-        clockRunData->g_rtc.setTime(get_timestamp() / 1000);
-        RTR->hour = RTR0->hour-clockRunData->g_rtc.getHour(true)-record->hour;
-        RTR->minute = RTR0->minute-clockRunData->g_rtc.getMinute()-record->minute;
-        RTR->second = RTR0->second-clockRunData->g_rtc.getSecond()-record->second;
-    }
+    appClockUiDisplayStopwatch(stopwatchInfo, LV_SCR_LOAD_ANIM_NONE);
 }
 
 static int clockInit(AppCenter *appCenter)
@@ -158,86 +80,43 @@ static int clockInit(AppCenter *appCenter)
     appClockUiInit();
     readClockCfg(&clockCfg);
     clockRunData = (ClockRunData *)calloc(1, sizeof(ClockRunData));
-    clockRunData->lastUpdate = 0;
-    clockRunData->forceUpdate = 1;
     clockRunData->currPage = 0;
-
+    clockRunData->stopwatchRunning = false;
+    clockRunData->stopwatchBegin = 0;
+    clockRunData->stopwatchEnd = 0;
+    clockRunData->stopwatchTemp = 0;
+    clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
+    Serial.println("clockInit");
     return 0;
 }
 
 static void clockRoutine(AppCenter *appCenter, const Action *action)
 {
-    initialdata();
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
+
     if (action->active == BTN_BACK)
     {
         appCenter->app_exit();
         return;
     }
-
-    else if(action->active==BTN_FORWARD)
+    else if (action->active == BTN_FORWARD)
     {
-        clockRunData->forceUpdate=1-clockRunData->forceUpdate;
-        if(clockRunData->currPage==0)
+        if (clockRunData->stopwatchRunning)
         {
-            if(clockRunData->forceUpdate==0)
-            {
-                record->hour=RTC->hour;
-                record->minute=RTC->minute;
-                record->second=RTC->second;
-            }
-            else if(clockRunData->forceUpdate==1)
-            {
-                clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
-            }
+            clockRunData->stopwatchRunning = false;
+            stopwatch_stop();
         }
-        else if(clockRunData->currPage==1)
+        else
         {
-            if(clockRunData->forceUpdate==0)
-            {
-                record->hour=RTR->hour;
-                record->minute=RTR->minute;
-                record->second=RTR->second;
-            }
-            else if(clockRunData->forceUpdate==1)
-            {
-                clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
-            }
+            clockRunData->stopwatchRunning = true;
+            stopwatch_start();
         }
     }
-    else if(action->active==BTN_LEFT)
-    {
-        clockRunData->currPage=1-clockRunData->currPage;
-        ClockClear(1-clockRunData->currPage);
-    }
-    else if(action->active==BTN_RIGHT)
-    {
-        clockRunData->currPage=1-clockRunData->currPage;
-        ClockClear(1-clockRunData->currPage);
-    }
 
-    if (clockRunData->currPage == 0)
+    if (GET_SYS_MILLIS() - clockRunData->preLocalTimestamp > 400)
     {
-        while (1)
-    {
-        SoftClock(1);
-        appClockUiDisplayBasic(*RTC,LV_SCR_LOAD_ANIM_NONE);
+        update_stopwatch();
     }
-    }
-    else if (clockRunData->currPage == 1)
-    {
-        while(1)
-        {
-            SoftClock(-1);
-            appClockUiDisplayBasic(*RTR,LV_SCR_LOAD_ANIM_NONE);
-        }
-    }
-    else
-    {
-        appCenter->send_to(APP_CLOCK_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
-    }
-
-    clockRunData->forceUpdate = 0;
 
     delay(30);
 }
@@ -249,19 +128,33 @@ static void clockBackground(AppCenter *appCenter, const Action *action)
 static int clockExit(void *param)
 {
     appClockUiDelete();
-    if (clockRunData->xReturned_task_task_update == pdPASS)
-    {
-        vTaskDelete(clockRunData->xHandle_task_task_update);
-    }
 
     if (clockRunData != NULL)
     {
         free(clockRunData);
         clockRunData = NULL;
     }
-    ClockClear(1);
-    ClockClear(-1);
     return 0;
+}
+
+static void clockOnMessage(const char *from, const char *to,
+                           AppMsgType type, void *msg, void *info)
+{
+    if (type == APP_MESSAGE_WIFI_CONN)
+    {
+    }
+    else if (type == APP_MESSAGE_GET_PARAM)
+    {
+    }
+    else if (type == APP_MESSAGE_SET_PARAM)
+    {
+    }
+    else if (type == APP_MESSAGE_READ_CFG)
+    {
+    }
+    else if (type == APP_MESSAGE_WRITE_CFG)
+    {
+    }
 }
 
 App clockApp = {
@@ -272,4 +165,4 @@ App clockApp = {
     clockRoutine,
     clockBackground,
     clockExit,
-};
+    clockOnMessage};

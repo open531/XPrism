@@ -11,7 +11,7 @@ static lv_style_t textStyle;
 static lv_style_t numSmallStyle;
 static lv_style_t numBigStyle;
 
-static lv_obj_t *basicScr = NULL;
+static lv_obj_t *stopwatchScr = NULL;
 static lv_obj_t *detailScr = NULL;
 
 static lv_obj_t *weatherImage = NULL;
@@ -51,7 +51,7 @@ void appWeatherUiInit()
 void appWeatherUiDisplayBasicInit(lv_scr_load_anim_t animType)
 {
     lv_obj_t *actObj = lv_scr_act();
-    if (actObj == basicScr)
+    if (actObj == stopwatchScr)
     {
         return;
     }
@@ -59,29 +59,29 @@ void appWeatherUiDisplayBasicInit(lv_scr_load_anim_t animType)
     appWeatherUiDelete();
     lv_obj_clean(actObj);
 
-    basicScr = lv_obj_create(NULL);
-    lv_obj_add_style(basicScr, &defaultStyle, LV_STATE_DEFAULT);
+    stopwatchScr = lv_obj_create(NULL);
+    lv_obj_add_style(stopwatchScr, &defaultStyle, LV_STATE_DEFAULT);
 
-    weatherImage = lv_img_create(basicScr);
+    weatherImage = lv_img_create(stopwatchScr);
     lv_img_set_src(weatherImage, &weather_sunny);
 
-    weatherLabel = lv_label_create(basicScr);
+    weatherLabel = lv_label_create(stopwatchScr);
     lv_obj_add_style(weatherLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(weatherLabel, "晴");
 
-    tempLabel = lv_label_create(basicScr);
+    tempLabel = lv_label_create(stopwatchScr);
     lv_obj_add_style(tempLabel, &numSmallStyle, LV_STATE_DEFAULT);
     lv_label_set_text(tempLabel, "25");
 
-    feelsLikeLabel = lv_label_create(basicScr);
+    feelsLikeLabel = lv_label_create(stopwatchScr);
     lv_obj_add_style(feelsLikeLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(feelsLikeLabel, "体感：25°C");
 
-    humidityLabel = lv_label_create(basicScr);
+    humidityLabel = lv_label_create(stopwatchScr);
     lv_obj_add_style(humidityLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(humidityLabel, "湿度：25%%");
 
-    cityLabel = lv_label_create(basicScr);
+    cityLabel = lv_label_create(stopwatchScr);
     lv_obj_add_style(cityLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_recolor(cityLabel, true);
     lv_label_set_text(cityLabel, "北京");
@@ -189,11 +189,11 @@ void appWeatherUiDisplayBasic(struct Weather weaInfo,
 
     if (animType != LV_SCR_LOAD_ANIM_NONE)
     {
-        lv_scr_load_anim(basicScr, animType, 300, 300, false);
+        lv_scr_load_anim(stopwatchScr, animType, 300, 300, false);
     }
     else
     {
-        lv_scr_load(basicScr);
+        lv_scr_load(stopwatchScr);
     }
 }
 
@@ -268,10 +268,10 @@ void appWeatherUiDisplayDetail(struct Weather weaInfo,
 
 void appWeatherUiDelete()
 {
-    if (basicScr != NULL)
+    if (stopwatchScr != NULL)
     {
-        lv_obj_clean(basicScr);
-        basicScr = NULL;
+        lv_obj_clean(stopwatchScr);
+        stopwatchScr = NULL;
     }
 
     if (detailScr != NULL)

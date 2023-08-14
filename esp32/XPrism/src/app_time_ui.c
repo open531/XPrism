@@ -11,7 +11,7 @@ static lv_style_t textStyle;
 static lv_style_t numSmallStyle;
 static lv_style_t numBigStyle;
 
-static lv_obj_t *basicScr = NULL;
+static lv_obj_t *scr = NULL;
 
 static lv_obj_t *timeHourLabel = NULL;
 static lv_obj_t *timeMinuteLabel = NULL;
@@ -44,7 +44,7 @@ void appTimeUiInit()
 void appTimeUiDisplayInit(lv_scr_load_anim_t animType)
 {
     lv_obj_t *actObj = lv_scr_act();
-    if (actObj == basicScr)
+    if (actObj == scr)
     {
         return;
     }
@@ -52,25 +52,25 @@ void appTimeUiDisplayInit(lv_scr_load_anim_t animType)
     appTimeUiDelete();
     lv_obj_clean(actObj);
 
-    basicScr = lv_obj_create(NULL);
-    lv_obj_add_style(basicScr, &defaultStyle, LV_STATE_DEFAULT);
+    scr = lv_obj_create(NULL);
+    lv_obj_add_style(scr, &defaultStyle, LV_STATE_DEFAULT);
 
-    timeHourLabel = lv_label_create(basicScr);
+    timeHourLabel = lv_label_create(scr);
     lv_obj_add_style(timeHourLabel, &numBigStyle, LV_STATE_DEFAULT);
     lv_label_set_recolor(timeHourLabel, true);
     lv_label_set_text(timeHourLabel, "00");
 
-    timeMinuteLabel = lv_label_create(basicScr);
+    timeMinuteLabel = lv_label_create(scr);
     lv_obj_add_style(timeMinuteLabel, &numBigStyle, LV_STATE_DEFAULT);
     lv_label_set_recolor(timeMinuteLabel, true);
     lv_label_set_text(timeMinuteLabel, "00");
 
-    timeSecondLabel = lv_label_create(basicScr);
+    timeSecondLabel = lv_label_create(scr);
     lv_obj_add_style(timeSecondLabel, &numSmallStyle, LV_STATE_DEFAULT);
     lv_label_set_recolor(timeSecondLabel, true);
     lv_label_set_text(timeSecondLabel, "00");
 
-    dateLabel = lv_label_create(basicScr);
+    dateLabel = lv_label_create(scr);
     lv_obj_add_style(dateLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(dateLabel, "0000-00-00 星期一");
 
@@ -92,19 +92,19 @@ void appTimeUiDisplay(struct Time timInfo, lv_scr_load_anim_t animType)
 
     if (animType != LV_SCR_LOAD_ANIM_NONE)
     {
-        lv_scr_load_anim(basicScr, animType, 300, 300, false);
+        lv_scr_load_anim(scr, animType, 300, 300, false);
     }
     else
     {
-        lv_scr_load(basicScr);
+        lv_scr_load(scr);
     }
 }
 
 void appTimeUiDelete()
 {
-    if (basicScr != NULL)
+    if (scr != NULL)
     {
-        lv_obj_clean(basicScr);
-        basicScr = NULL;
+        lv_obj_clean(scr);
+        scr = NULL;
     }
 }

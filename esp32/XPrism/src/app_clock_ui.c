@@ -11,11 +11,9 @@ static lv_style_t textStyle;
 static lv_style_t numSmallStyle;
 static lv_style_t numBigStyle;
 
-static lv_obj_t *basicScr = NULL;
+static lv_obj_t *stopwatchScr = NULL;
 
-static lv_obj_t *clockHourLabel = NULL;
-static lv_obj_t *clockMinuteLabel = NULL;
-static lv_obj_t *clockSecondLabel = NULL;
+static lv_obj_t *clockStopwatchLabel = NULL;
 
 void appClockUiInit()
 {
@@ -38,10 +36,10 @@ void appClockUiInit()
     lv_style_set_text_font(&numBigStyle, &lv_font_ubuntu_b_108);
 }
 
-void appClockUiDisplayBasicInit(lv_scr_load_anim_t animType)
+void appClockUiDisplayStopwatchInit(lv_scr_load_anim_t animType)
 {
     lv_obj_t *actObj = lv_scr_act();
-    if (actObj == basicScr)
+    if (actObj == stopwatchScr)
     {
         return;
     }
@@ -49,51 +47,41 @@ void appClockUiDisplayBasicInit(lv_scr_load_anim_t animType)
     appClockUiDelete();
     lv_obj_clean(actObj);
 
-    basicScr = lv_obj_create(NULL);
-    lv_obj_add_style(basicScr, &defaultStyle, LV_STATE_DEFAULT);
+    stopwatchScr = lv_obj_create(NULL);
+    lv_obj_add_style(stopwatchScr, &defaultStyle, LV_STATE_DEFAULT);
 
-    clockHourLabel = lv_label_create(basicScr);
-    lv_obj_add_style(clockHourLabel, &numBigStyle, LV_STATE_DEFAULT);
-    lv_label_set_recolor(clockHourLabel, true);
-    lv_label_set_text(clockHourLabel, "00");
+    clockStopwatchLabel = lv_label_create(stopwatchScr);
+    lv_obj_add_style(clockStopwatchLabel, &numSmallStyle, LV_STATE_DEFAULT);
+    lv_label_set_recolor(clockStopwatchLabel, true);
+    lv_label_set_text(clockStopwatchLabel, "00:00.00");
 
-    clockMinuteLabel = lv_label_create(basicScr);
-    lv_obj_add_style(clockMinuteLabel, &numBigStyle, LV_STATE_DEFAULT);
-    lv_label_set_recolor(clockMinuteLabel, true);
-    lv_label_set_text(clockMinuteLabel, "00");
-
-    clockSecondLabel = lv_label_create(basicScr);
-    lv_obj_add_style(clockSecondLabel, &numSmallStyle, LV_STATE_DEFAULT);
-    lv_label_set_recolor(clockSecondLabel, true);
-    lv_label_set_text(clockSecondLabel, "00");
-
-    lv_obj_align(clockHourLabel, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_align(clockMinuteLabel, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_obj_align(clockSecondLabel, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(clockStopwatchLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
-void appClockUiDisplayBasic(struct Clock cloInfo, lv_scr_load_anim_t animType)
+void appClockUiDisplayStopwatch(unsigned long stopwatchInfo, lv_scr_load_anim_t animType)
 {
-    appTimeUiDisplayInit(animType);
-    lv_label_set_text_fmt(clockHourLabel, "%02d", cloInfo.hour);
-    lv_label_set_text_fmt(clockMinuteLabel, "#ffa500 %02d#", cloInfo.minute);
-    lv_label_set_text_fmt(clockSecondLabel, "#ffd700 %02d#", cloInfo.second);
+    appClockUiDisplayStopwatchInit(animType);
+
+    lv_label_set_text_fmt(clockStopwatchLabel, "%02d:%02d.%02d",
+                          stopwatchInfo / 60000,
+                          (stopwatchInfo % 60000) / 1000,
+                          (stopwatchInfo % 1000) / 10);
 
     if (animType != LV_SCR_LOAD_ANIM_NONE)
     {
-        lv_scr_load_anim(basicScr, animType, 300, 300, false);
+        lv_scr_load_anim(stopwatchScr, animType, 300, 300, false);
     }
     else
     {
-        lv_scr_load(basicScr);
+        lv_scr_load(stopwatchScr);
     }
 }
 
 void appClockUiDelete()
 {
-    if (basicScr != NULL)
+    if (stopwatchScr != NULL)
     {
-        lv_obj_clean(basicScr);
-        basicScr = NULL;
+        lv_obj_clean(stopwatchScr);
+        stopwatchScr = NULL;
     }
 }
