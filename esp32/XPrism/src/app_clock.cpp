@@ -28,29 +28,26 @@ struct ClockRunData
     TaskHandle_t xHandle_task_task_update;
     Clock cloInfo;
     unsigned int updateInterval;
+
+    long long preNetTimestamp= 1690848000000;;
+    long long errorNetTimestamp = 0; // 网络到显示过程中的时间误差
+    long long preLocalTimestamp= GET_SYS_MILLIS();
+    ESP32Time g_rtc;
 };
 static ClockCfg clockCfg;
 static ClockRunData *clockRunData = NULL;
 
 unsigned long MyTestTimer;
 
-static int RTC_Hour;
-static int RTC_Minute;
-static int RTC_Second;
+long long preLocalTimestamp; // 上一次的本地机器时间戳
 
-static int RTR_Hour = 1;
-static int RTR_Minute = 59;
-static int RTR_Second = 59;
-
-static ClockRunData *run_data = NULL;
-
-static ClockRunData *data;
+Clock *RTC,*RTR,*RTR0,*record;
 
 static void initialdata()
 {
-    data->lastUpdate = 0;
+    clockRunData->lastUpdate = 0;
     clockCfg.updateInterval = 100;
-    data->forceUpdate = 0;
+    clockRunData->forceUpdate = 0;
 }
 
 static void writeClockCfg(ClockCfg *clockCfg)
@@ -84,95 +81,42 @@ static void readClockCfg(ClockCfg *clockCfg)
     }
 }
 
-unsigned long StopStart = 0, StopFinish = 0;
-
-// easy to use helper-function for non-blocking timing
-boolean TimePeriodIsOver(unsigned long &periodStartTime,
-                         unsigned long TimePeriod)
+static long long get_timestamp()
 {
+    clockRunData->preNetTimestamp = clockRunData->preNetTimestamp + (GET_SYS_MILLIS() - clockRunData->preLocalTimestamp);
+    clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
+    return clockRunData->preNetTimestamp;
+}
 
-    unsigned long currentMillis = millis();
-    if (data->forceUpdate == 0)
+
+
+static void UpdateClock(long long timestamp)
+{
+    struct Clock clo;
+    clockRunData->g_rtc.setTime(timestamp / 1000);
+
+    clo.hour = clockRunData->g_rtc.getHour(true);
+    clo.minute = clockRunData->g_rtc.getMinute();
+    clo.second = clockRunData->g_rtc.getSecond();
+
+    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
+    appClockUiDisplayBasic(clo, LV_SCR_LOAD_ANIM_NONE);
+}
+
+static void ClockClear(int runway)
+{
+    if(runway==1 && RTC!=NULL)
     {
-        return false;
+        RTC=NULL;
     }
-    else
+    else if(runway==-1 && RTR!=NULL)
     {
-        currentMillis = currentMillis - (StopFinish - StopStart);
-        StopStart = StopFinish;
-        if (currentMillis - periodStartTime >= TimePeriod)
-        {
-            periodStartTime = currentMillis; // set new expireTime
-            return true;                     // more time than TimePeriod) has elapsed since last time if-condition was true
-        }
-        else
-            return false; // not expired
+        RTR=NULL;
     }
-}
-
-unsigned long RTC_Timer;
-
-static void SoftRTC()
-{ // 计时
-    if (TimePeriodIsOver(RTC_Timer, 1000))
-    {                 // once every 100 milliseconds
-        RTC_Second++; // increase 1/10th-seconds counter
-
-        if (RTC_Second == 60)
-        {                   // if seconds counter reaches 60
-            RTC_Minute++;   // increase minutes counter by 1
-            RTC_Second = 0; // reset seconds counter to zero
-        }
-
-        if (RTC_Minute == 60)
-        {                   // if minutes counter reaches 60
-            RTC_Hour++;     // increase hour counter by 1
-            RTC_Minute = 0; // reset minutes counter to zero
-        }
-
-        if (RTC_Hour == 24)
-        {                 // if hours counter reaches 24
-            RTC_Hour = 0; // reset hours counter to zero
-        }
-    }
-}
-
-static void Second_Clear()
-{
-    RTC_Hour = 0;
-    RTC_Minute = 0;
-    RTC_Second = 0;
-}
-
-static void ReSecond_Clear()
-{
-    RTR_Hour = 0;
-    RTR_Minute = 0;
-    RTR_Second = 0;
-}
-
-static void task_update_second(Clock *second_clock)
-{
-    initialdata();
-
-    while (1)
-    {
-        SoftRTC();
-        second_clock->hour = RTC_Hour;
-        second_clock->minute = RTC_Minute;
-        second_clock->second = RTC_Second;
-        appClockUiDisplayBasic(*second_clock);
-    }
-}
-
-static void second_clock() // 秒表
-{
-    Clock *second_clock;
-    task_update_second(second_clock);
 }
 
 // 需要补充：
-// Clock initialRTR(Clock *setClock) // 倒计时初始化
+// Clock initialRTR0(Clock *setClock) // 倒计时初始化
 // {
 //    if (clockRunData->currPage==0)
 //    {
@@ -188,54 +132,25 @@ static void second_clock() // 秒表
 //    }
 // }
 
-unsigned long RTR_Timer;
 
-static void SoftRTR()
-{ // 倒计时
-    if (TimePeriodIsOver(RTR_Timer, 1000))
-    {                 // once every 100 milliseconds
-        RTR_Second--; // increase 1/10th-seconds counter
-
-        if (RTR_Second <= 0 && RTR_Minute > 0 && RTR_Hour > 0)
-        {                    // if seconds counter reaches 60
-            RTR_Minute--;    // increase minutes counter by 1
-            RTR_Second = 60; // reset seconds counter to zero
-        }
-
-        if (RTR_Minute <= 0 && RTR_Hour > 0)
-        {                    // if minutes counter reaches 60
-            RTR_Hour--;      // increase hour counter by 1
-            RTR_Minute = 60; // reset minutes counter to zero
-        }
-
-        if (RTR_Hour <= 0)
-        {                 // if hours counter reaches 24
-            RTR_Hour = 0; // reset hours counter to zero
-        }
-    }
-}
-
-static void task_update_resecond(Clock *resecond_clock)
-{
-    initialdata();
-    while (1)
+static void SoftClock(int runway)
+{   if(runway==1)
     {
-        SoftRTR();
-        resecond_clock->hour = RTR_Hour;
-        resecond_clock->minute = RTR_Minute;
-        resecond_clock->second = RTR_Second;
-        appClockUiDisplayBasic(*resecond_clock);
+        clockRunData->g_rtc.setTime(get_timestamp() / 1000);
+        RTC->hour = clockRunData->g_rtc.getHour(true)+record->hour;
+        RTC->minute = clockRunData->g_rtc.getMinute()+record->minute;
+        RTC->second = clockRunData->g_rtc.getSecond()+record->second;
+
+    }
+
+    else if(runway==-1)
+    {
+        clockRunData->g_rtc.setTime(get_timestamp() / 1000);
+        RTR->hour = RTR0->hour-clockRunData->g_rtc.getHour(true)-record->hour;
+        RTR->minute = RTR0->minute-clockRunData->g_rtc.getMinute()-record->minute;
+        RTR->second = RTR0->second-clockRunData->g_rtc.getSecond()-record->second;
     }
 }
-
-static void resecond_clock() // 计时器
-{
-    Clock *resecond_clock;
-    task_update_resecond(resecond_clock);
-
-    // 需要初始化时间
-}
-//
 
 static int clockInit(AppCenter *appCenter)
 {
@@ -252,6 +167,7 @@ static int clockInit(AppCenter *appCenter)
 
 static void clockRoutine(AppCenter *appCenter, const Action *action)
 {
+    initialdata();
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
     if (action->active == BTN_BACK)
     {
@@ -259,15 +175,62 @@ static void clockRoutine(AppCenter *appCenter, const Action *action)
         return;
     }
 
-    Clock *clock;
-
-    if (data->currPage == 0)
+    else if(action->active==BTN_FORWARD)
     {
-        task_update_second(clock);
+        clockRunData->forceUpdate=1-clockRunData->forceUpdate;
+        if(clockRunData->currPage==0)
+        {
+            if(clockRunData->forceUpdate==0)
+            {
+                record->hour=RTC->hour;
+                record->minute=RTC->minute;
+                record->second=RTC->second;
+            }
+            else if(clockRunData->forceUpdate==1)
+            {
+                clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
+            }
+        }
+        else if(clockRunData->currPage==1)
+        {
+            if(clockRunData->forceUpdate==0)
+            {
+                record->hour=RTR->hour;
+                record->minute=RTR->minute;
+                record->second=RTR->second;
+            }
+            else if(clockRunData->forceUpdate==1)
+            {
+                clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
+            }
+        }
     }
-    else if (data->currPage == 1)
+    else if(action->active==BTN_LEFT)
     {
-        task_update_resecond(clock);
+        clockRunData->currPage=1-clockRunData->currPage;
+        ClockClear(1-clockRunData->currPage);
+    }
+    else if(action->active==BTN_RIGHT)
+    {
+        clockRunData->currPage=1-clockRunData->currPage;
+        ClockClear(1-clockRunData->currPage);
+    }
+
+    if (clockRunData->currPage == 0)
+    {
+        while (1)
+    {
+        SoftClock(1);
+        appClockUiDisplayBasic(*RTC,LV_SCR_LOAD_ANIM_NONE);
+    }
+    }
+    else if (clockRunData->currPage == 1)
+    {
+        while(1)
+        {
+            SoftClock(-1);
+            appClockUiDisplayBasic(*RTR,LV_SCR_LOAD_ANIM_NONE);
+        }
     }
     else
     {
@@ -296,6 +259,8 @@ static int clockExit(void *param)
         free(clockRunData);
         clockRunData = NULL;
     }
+    ClockClear(1);
+    ClockClear(-1);
     return 0;
 }
 

@@ -13,7 +13,9 @@ static lv_style_t numBigStyle;
 
 static lv_obj_t *basicScr = NULL;
 
-static lv_obj_t *ClockLabel = NULL;
+static lv_obj_t *clockHourLabel = NULL;
+static lv_obj_t *clockMinuteLabel = NULL;
+static lv_obj_t *clockSecondLabel = NULL;
 
 void appClockUiInit()
 {
@@ -36,7 +38,7 @@ void appClockUiInit()
     lv_style_set_text_font(&numBigStyle, &lv_font_ubuntu_b_108);
 }
 
-void appClockUiDisplayBasicInit()
+void appClockUiDisplayBasicInit(lv_scr_load_anim_t animType)
 {
     lv_obj_t *actObj = lv_scr_act();
     if (actObj == basicScr)
@@ -50,23 +52,48 @@ void appClockUiDisplayBasicInit()
     basicScr = lv_obj_create(NULL);
     lv_obj_add_style(basicScr, &defaultStyle, LV_STATE_DEFAULT);
 
-    ClockLabel = lv_label_create(basicScr);
-    lv_obj_add_style(ClockLabel, &textStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(ClockLabel, "00:00:00");
-    lv_obj_set_pos(ClockLabel, 0, 0);
+    clockHourLabel = lv_label_create(basicScr);
+    lv_obj_add_style(clockHourLabel, &numBigStyle, LV_STATE_DEFAULT);
+    lv_label_set_recolor(clockHourLabel, true);
+    lv_label_set_text(clockHourLabel, "00");
+
+    clockMinuteLabel = lv_label_create(basicScr);
+    lv_obj_add_style(clockMinuteLabel, &numBigStyle, LV_STATE_DEFAULT);
+    lv_label_set_recolor(clockMinuteLabel, true);
+    lv_label_set_text(clockMinuteLabel, "00");
+
+    clockSecondLabel = lv_label_create(basicScr);
+    lv_obj_add_style(clockSecondLabel, &numSmallStyle, LV_STATE_DEFAULT);
+    lv_label_set_recolor(clockSecondLabel, true);
+    lv_label_set_text(clockSecondLabel, "00");
+
+    lv_obj_align(clockHourLabel, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_align(clockMinuteLabel, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_align(clockSecondLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
-void appClockUiDisplayBasic(struct Clock cloInfo)
+void appClockUiDisplayBasic(struct Clock cloInfo, lv_scr_load_anim_t animType)
 {
+    appTimeUiDisplayInit(animType);
+    lv_label_set_text_fmt(clockHourLabel, "%02d", cloInfo.hour);
+    lv_label_set_text_fmt(clockMinuteLabel, "#ffa500 %02d#", cloInfo.minute);
+    lv_label_set_text_fmt(clockSecondLabel, "#ffd700 %02d#", cloInfo.second);
 
-    lv_label_set_text_fmt(ClockLabel, "%d:%d:%d", cloInfo.hour, cloInfo.minute, cloInfo.second);
+    if (animType != LV_SCR_LOAD_ANIM_NONE)
+    {
+        lv_scr_load_anim(basicScr, animType, 300, 300, false);
+    }
+    else
+    {
+        lv_scr_load(basicScr);
+    }
 }
 
 void appClockUiDelete()
 {
     if (basicScr != NULL)
     {
-        lv_obj_del(basicScr);
+        lv_obj_clean(basicScr);
         basicScr = NULL;
     }
 }
