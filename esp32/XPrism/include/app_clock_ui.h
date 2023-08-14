@@ -19,8 +19,8 @@ extern "C"
     while (lv_anim_count_running()) \
         lv_task_handler(); // 等待动画完成
     void appClockUiInit();
-    void appClockUiDisplayBasicInit();
-    void appClockUiDisplayBasic(struct Clock cloInfo);
+    void appClockUiDisplayBasicInit(lv_scr_load_anim_t animType);
+    void appClockUiDisplayBasic(struct Clock cloInfo,lv_scr_load_anim_t animType);
     void appClockUiDelete();
 
     extern const lv_img_dsc_t icon_clock;
