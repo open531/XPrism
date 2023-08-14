@@ -23,8 +23,8 @@ struct ClockRunData
     unsigned long lastUpdate;
     unsigned int forceUpdate;
     unsigned int currPage;
-    BaseType_t xReturn;
-    TaskHandle_t xHandle;
+    BaseType_t xReturned_task_task_update;
+    TaskHandle_t xHandle_task_task_update;
     Clock cloInfo;
     unsigned int updateInterval;
 };
@@ -147,7 +147,7 @@ static void second_clock() // 秒表
 //       appClockUiInit();
 //        appClockUiDisplayBasic(clockRunData->cloInfo);
 //    }
-    
+
 //    else if (clockRunData->currPage==1)
 //    {
 //        RTR_Hour=setClock->hour;
@@ -220,6 +220,28 @@ static void ClockTask(void *pvParameters)
     }
 }
 
+<<<<<<< HEAD
+=======
+static void getClock()
+{
+    if (clockRunData == NULL)
+    {
+        clockRunData = (ClockRunData *)malloc(sizeof(clockRunData));
+        clockRunData->lastUpdate = 0;
+        clockRunData->forceUpdate = 1;
+        clockRunData->xReturned_task_task_update = xTaskCreate(ClockTask,
+                                            "ClockTask",
+                                            4096,
+                                            clockRunData,
+                                            1,
+                                            &clockRunData->xHandle_task_task_update);
+    }
+    else
+    {
+        clockRunData->forceUpdate = 1;
+    }
+}
+>>>>>>> 2a33900234062605cfb42f03a5147497a017614e
 
 static int clockInit(AppCenter *appCenter)
 {
@@ -246,7 +268,7 @@ static int clockExit(void *param)
     appClockUiDelete();
     if (clockRunData != NULL)
     {
-        vTaskDelete(clockRunData->xHandle);
+        vTaskDelete(clockRunData->xHandle_task_task_update);
         free(clockRunData);
         clockRunData = NULL;
     }

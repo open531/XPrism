@@ -10,66 +10,71 @@
 #define APP_TIME_INFO "显示时间信息"
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
 
-#define TIME_CFG_PATH "/time.cfg"
+#define TIME_CONFIG_PATH "/time.cfg"
 #define TIMEZERO_OFFSIZE (28800000)
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 struct TimeCfg
 {
-    char appid[50];
-    unsigned long lastUpdate;
+    unsigned long updateInterval; // 时间更新的时间间隔(s)
 };
 
 struct TimeRunData
 {
     unsigned long lastUpdate;
     unsigned int forceUpdate;
-    unsigned int currPage;
-    BaseType_t xReturn;
-    TaskHandle_t xHandle;
+    int currPage;
+
+    BaseType_t xReturned_task_task_update;
+    TaskHandle_t xHandle_task_task_update;
     Time timInfo;
 
     long long preNetTimestamp;
-    ESP32Time g_rtc;
     long long errorNetTimestamp; // 网络到显示过程中的时间误差
     long long preLocalTimestamp; // 上一次的本地机器时间戳
-};
 
-static void readTimeCfg(TimeCfg *cfg)
-{
-    FILE *fp = fopen(TIME_CFG_PATH, "rb");
-    if (fp)
-    {
-        fread(cfg, sizeof(TimeCfg), 1, fp);
-        fclose(fp);
-    }
-}
+    ESP32Time g_rtc;
+};
 
 static void writeTimeCfg(TimeCfg *cfg)
 {
-    FILE *fp = fopen(TIME_CFG_PATH, "wb");
-    if (fp)
+    char tmp[16];
+    // 将配置数据保存在文件中（持久化）
+    String w_data;
+    memset(tmp, 0, 16);
+    snprintf(tmp, 16, "%lu\n", cfg->updateInterval);
+    w_data += tmp;
+    m_flashCfg.writeFile(TIME_CONFIG_PATH, w_data.c_str());
+}
+
+static void readTimeCfg(TimeCfg *cfg)
+{
+    char info[128] = {0};
+    uint16_t size = m_flashCfg.readFile(TIME_CONFIG_PATH, (uint8_t *)info);
+    info[size] = 0;
+    if (size == 0)
     {
-        fwrite(cfg, sizeof(TimeCfg), 1, fp);
-        fclose(fp);
+        // 默认值
+        cfg->updateInterval = 900000; // 时间更新的时间间隔900000(900s)
+        writeTimeCfg(cfg);
+    }
+    else
+    {
+        // 解析数据
+        char *param[1] = {0};
+        analyseParam(info, 1, param);
+        cfg->updateInterval = atol(param[0]);
     }
 }
 
 static TimeCfg timeCfg;
 static TimeRunData *timeRunData = NULL;
 
-static void UpdateTime_RTC(long long timestamp)
+static long long get_timestamp()
 {
-    struct Time t;
-    timeRunData->g_rtc.setTime(timestamp / 1000);
-    t.month = timeRunData->g_rtc.getMonth() + 1;
-    t.day = timeRunData->g_rtc.getDay();
-    t.hour = timeRunData->g_rtc.getHour(true);
-    t.minute = timeRunData->g_rtc.getMinute();
-    t.second = timeRunData->g_rtc.getSecond();
-    t.weekday = timeRunData->g_rtc.getDayofWeek();
-    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
-    appTimeUiDisplayBasic(t);
+    timeRunData->preNetTimestamp = timeRunData->preNetTimestamp + (GET_SYS_MILLIS() - timeRunData->preLocalTimestamp);
+    timeRunData->preLocalTimestamp = GET_SYS_MILLIS();
+    return timeRunData->preNetTimestamp;
 }
 
 static long long get_timestamp(String url)
@@ -108,56 +113,59 @@ static long long get_timestamp(String url)
     return timeRunData->preNetTimestamp;
 }
 
-static void TimeTask(void *pvParameters)
+static void UpdateTime_RTC(long long timestamp)
 {
-    TimeRunData *data = (TimeRunData *)pvParameters;
-    while (1)
-    {
-        if (data->forceUpdate || (millis() - data->lastUpdate > 1000))
-        {
-            data->forceUpdate = 0;
-            data->lastUpdate = millis();
-            long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-            UpdateTime_RTC(timestamp);
-        }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-}
-
-static void getTime()
-{
-    if (timeRunData == NULL)
-    {
-        timeRunData = (TimeRunData *)malloc(sizeof(timeRunData));
-        timeRunData->lastUpdate = 0;
-        timeRunData->forceUpdate = 1;
-        timeRunData->xReturn = xTaskCreate(TimeTask,
-                                           "TimeTask",
-                                           4096,
-                                           timeRunData,
-                                           1,
-                                           &timeRunData->xHandle);
-    }
-    else
-    {
-        timeRunData->forceUpdate = 1;
-    }
+    struct Time t;
+    timeRunData->g_rtc.setTime(timestamp / 1000);
+    t.year = timeRunData->g_rtc.getYear();
+    t.month = timeRunData->g_rtc.getMonth() + 1;
+    t.day = timeRunData->g_rtc.getDay();
+    t.hour = timeRunData->g_rtc.getHour(true);
+    t.minute = timeRunData->g_rtc.getMinute();
+    t.second = timeRunData->g_rtc.getSecond();
+    t.weekday = timeRunData->g_rtc.getDayofWeek();
+    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
+    appTimeUiDisplay(t, LV_SCR_LOAD_ANIM_NONE);
 }
 
 static int timeInit(AppCenter *appCenter)
 {
+    m_tft->setSwapBytes(true);
+    appTimeUiInit();
     readTimeCfg(&timeCfg);
-    getTime();
+    timeRunData = (TimeRunData *)calloc(1, sizeof(TimeRunData));
+    timeRunData->lastUpdate = 0;
+    timeRunData->forceUpdate = 1;
+    timeRunData->currPage = 0;
+    timeRunData->preNetTimestamp = 1690848000000;
+    timeRunData->errorNetTimestamp = 0;
+    timeRunData->preLocalTimestamp = GET_SYS_MILLIS();
     return 0;
 }
 
 static void timeRoutine(AppCenter *appCenter, const Action *action)
 {
+    lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
     if (action->active == BTN_BACK)
     {
         appCenter->app_exit();
         return;
     }
+
+    // appTimeUiDisplay(timeRunData->timInfo, animType);
+
+    if (timeRunData->forceUpdate || doDelayMillisTime(timeCfg.updateInterval, &timeRunData->lastUpdate, false))
+    {
+        appCenter->send_to(APP_TIME_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+    }
+    else if (GET_SYS_MILLIS() - timeRunData->preLocalTimestamp > 400)
+    {
+        UpdateTime_RTC(get_timestamp());
+    }
+
+    timeRunData->forceUpdate = 0;
+
+    delay(30);
 }
 
 static void timeBackground(AppCenter *appCenter, const Action *action)
@@ -167,9 +175,14 @@ static void timeBackground(AppCenter *appCenter, const Action *action)
 static int timeExit(void *param)
 {
     appTimeUiDelete();
+
+    if (timeRunData->xReturned_task_task_update == pdPASS)
+    {
+        vTaskDelete(timeRunData->xHandle_task_task_update);
+    }
+
     if (timeRunData != NULL)
     {
-        vTaskDelete(timeRunData->xHandle);
         free(timeRunData);
         timeRunData = NULL;
     }
@@ -181,28 +194,26 @@ static void timeOnMessage(const char *from, const char *to,
 {
     if (type == APP_MESSAGE_WIFI_CONN)
     {
-        getTime();
-        appTimeUiDisplayBasic(timeRunData->timInfo);
+        long long timestamp = get_timestamp(TIME_API);
+        UpdateTime_RTC(timestamp);
     }
     else if (type == APP_MESSAGE_GET_PARAM)
     {
-        snprintf((char *)info, 50, "%s", timeCfg.appid);
+        if (strcmp((char *)info, "updateInterval") == 0)
+        {
+            snprintf((char *)info, 32, "%lu", timeCfg.updateInterval);
+        }
+        else
+        {
+            snprintf((char *)info, 32, "%s", "NULL");
+        }
     }
     else if (type == APP_MESSAGE_SET_PARAM)
     {
-        char *paramKey = (char *)msg;
         char *paramValue = (char *)info;
-        if (strcmp((char *)msg, "appid") == 0)
+        if (strcmp((char *)msg, "updateInterval") == 0)
         {
-            snprintf(timeCfg.appid, 50, "%s", paramValue);
-        }
-        else if (strcmp((char *)msg, "save") == 0)
-        {
-            writeTimeCfg(&timeCfg);
-        }
-        else if (strcmp((char *)msg, "update") == 0)
-        {
-            getTime();
+            timeCfg.updateInterval = atol(paramValue);
         }
     }
     else if (type == APP_MESSAGE_READ_CFG)
