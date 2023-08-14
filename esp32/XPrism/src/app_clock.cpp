@@ -220,28 +220,6 @@ static void ClockTask(void *pvParameters)
     }
 }
 
-<<<<<<< HEAD
-=======
-static void getClock()
-{
-    if (clockRunData == NULL)
-    {
-        clockRunData = (ClockRunData *)malloc(sizeof(clockRunData));
-        clockRunData->lastUpdate = 0;
-        clockRunData->forceUpdate = 1;
-        clockRunData->xReturn = xTaskCreate(ClockTask,
-                                            "ClockTask",
-                                            4096,
-                                            clockRunData,
-                                            1,
-                                            &clockRunData->xHandle);
-    }
-    else
-    {
-        clockRunData->forceUpdate = 1;
-    }
-}
->>>>>>> 15d41c0f547eee8f2cbc745467dcbb084ec72da0
 
 static int clockInit(AppCenter *appCenter)
 {
