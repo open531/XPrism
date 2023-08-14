@@ -16,6 +16,7 @@
 
 struct ClockCfg
 {
+    unsigned long updateInterval;
 };
 
 struct ClockRunData
@@ -28,7 +29,7 @@ struct ClockRunData
     Clock cloInfo;
     unsigned int updateInterval;
 };
-
+static ClockCfg clockCfg;
 static ClockRunData *clockRunData = NULL;
 
 unsigned long MyTestTimer;
@@ -48,9 +49,41 @@ static ClockRunData *data;
 static void initialdata()
 {
     data->lastUpdate = 0;
-    data->updateInterval = 100;
+    clockCfg.updateInterval = 100;
     data->forceUpdate = 0;
 }
+
+static void writeClockCfg(ClockCfg *clockCfg)
+{
+    char tmp[16];
+    // 将配置数据保存在文件中（持久化）
+    String w_data;
+    memset(tmp, 0, 16);
+    snprintf(tmp, 16, "%lu\n", clockCfg->updateInterval);
+    w_data += tmp;
+    m_flashCfg.writeFile(CLOCK_CFG_PATH, w_data.c_str());
+}
+
+static void readClockCfg(ClockCfg *clockCfg)
+{
+    char info[128] = {0};
+    uint16_t size = m_flashCfg.readFile(CLOCK_CFG_PATH, (uint8_t *)info);
+    info[size] = 0;
+    if (size == 0)
+    {
+        // 默认值
+        clockCfg->updateInterval = 900000; // 时间更新的时间间隔900000(900s)
+        writeClockCfg(clockCfg);
+    }
+    else
+    {
+        // 解析数据
+        char *param[1] = {0};
+        analyseParam(info, 1, param);
+        clockCfg->updateInterval = atol(param[0]);
+    }
+}
+
 
 unsigned long StopStart = 0, StopFinish = 0;
 
@@ -201,51 +234,20 @@ static void resecond_clock() // 计时器
     Clock *resecond_clock;
     task_update_resecond(resecond_clock);
 
-    // 初始化时间
+    // 需要初始化时间
 }
 //
 
-static void ClockTask(void *pvParameters)
-{
-    ClockRunData *data = (ClockRunData *)pvParameters;
-    Clock *second_clock, *resecond_clock;
-
-    if (data->currPage == 0)
-    {
-        task_update_second(second_clock);
-    }
-    else if (data->currPage == 1)
-    {
-        task_update_resecond(resecond_clock);
-    }
-}
-
-<<<<<<< HEAD
-=======
-static void getClock()
-{
-    if (clockRunData == NULL)
-    {
-        clockRunData = (ClockRunData *)malloc(sizeof(clockRunData));
-        clockRunData->lastUpdate = 0;
-        clockRunData->forceUpdate = 1;
-        clockRunData->xReturned_task_task_update = xTaskCreate(ClockTask,
-                                            "ClockTask",
-                                            4096,
-                                            clockRunData,
-                                            1,
-                                            &clockRunData->xHandle_task_task_update);
-    }
-    else
-    {
-        clockRunData->forceUpdate = 1;
-    }
-}
->>>>>>> 2a33900234062605cfb42f03a5147497a017614e
-
 static int clockInit(AppCenter *appCenter)
 {
+    m_tft->setSwapBytes(true);
     appClockUiInit();
+    readClockCfg(&clockCfg);
+    clockRunData = (ClockRunData *)calloc(1, sizeof(ClockRunData));
+    clockRunData->lastUpdate = 0;
+    clockRunData->forceUpdate = 1;
+    clockRunData->currPage = 0;
+    
     return 0;
 }
 
@@ -257,7 +259,27 @@ static void clockRoutine(AppCenter *appCenter, const Action *action)
         appCenter->app_exit();
         return;
     }
+
+    Clock *clock;
+
+    if (data->currPage == 0)
+    {
+        task_update_second(clock);
+    }
+    else if (data->currPage == 1)
+    {
+        task_update_resecond(clock);
+    }
+    else
+    {
+        appCenter->send_to(APP_CLOCK_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+    }
+
+    clockRunData->forceUpdate = 0;
+
+    delay(30);
 }
+
 
 static void clockBackground(AppCenter *appCenter, const Action *action)
 {
@@ -266,9 +288,13 @@ static void clockBackground(AppCenter *appCenter, const Action *action)
 static int clockExit(void *param)
 {
     appClockUiDelete();
-    if (clockRunData != NULL)
+     if (clockRunData->xReturned_task_task_update == pdPASS)
     {
         vTaskDelete(clockRunData->xHandle_task_task_update);
+    }
+
+    if (clockRunData != NULL)
+    {
         free(clockRunData);
         clockRunData = NULL;
     }
