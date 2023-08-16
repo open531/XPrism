@@ -11,6 +11,8 @@ IPAddress dns(223, 5, 5, 5);          // Set your network DNS usually your Route
 const char *AP_SSID = "XPrism_AP"; // 热点名称
 const char *HOST_NAME = "XPrism";  // 主机名
 
+WebServer server(80); // 创建一个WebServer实例，端口为80
+
 uint16_t ap_timeout = 0; // ap无连接的超时时间
 
 TimerHandle_t xTimer_ap;
@@ -85,9 +87,19 @@ boolean Network::end_conn_wifi(void)
     if (doDelayMillisTime(10000, &m_preDisWifiConnInfoMillis, false))
     {
         // 这个if为了减少频繁的打印
-        Serial.println(F("\nWiFi connected"));
-        Serial.print(F("IP address: "));
+        Serial.println("\nConnected to the WiFi network");
+        Serial.print("Local ESP32 IP: ");
         Serial.println(WiFi.localIP());
+        Serial.print("Subnet Mask: ");
+        Serial.println(WiFi.subnetMask());
+        Serial.print("Gateway IP: ");
+        Serial.println(WiFi.gatewayIP());
+        Serial.print("DNS 1: ");
+        Serial.println(WiFi.dnsIP(0));
+        Serial.print("DNS 2: ");
+        Serial.println(WiFi.dnsIP(1));
+        Serial.print("MAC address: ");
+        Serial.println(WiFi.macAddress());
     }
     return CONN_SUCC;
 }
@@ -157,4 +169,35 @@ void restCallback(TimerHandle_t xTimer)
         WiFi.softAPdisconnect(true);
         // ESP.restart();
     }
+}
+
+void serverSetup()
+{
+    server.on("/", HTTP_GET, handleRoot);
+    server.onNotFound(handleNotFound);
+    server.on("/navi", HTTP_GET, handleNavi);
+    server.begin();
+    Serial.println("HTTP server started");
+}
+
+void handleRoot()
+{
+    server.send(200, "text/html", "<h1>Hello, XPrism Android App!</h1>");
+}
+
+void handleNotFound()
+{
+    String message = "Not Found\n\n";
+    message += "URI: ";
+    message += server.uri();
+    message += "\nMethod: ";
+    message += (server.method() == HTTP_GET) ? "GET" : "POST";
+    message += "\nArguments: ";
+    message += server.args();
+    message += "\n";
+    for (uint8_t i = 0; i < server.args(); i++)
+    {
+        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    }
+    server.send(404, "text/plain", message);
 }

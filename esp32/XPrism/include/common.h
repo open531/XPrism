@@ -9,10 +9,8 @@
 #include "display.h"
 #include "btn.h"
 #include "network.h"
+#include "gps.h"
 #include <TFT_eSPI.h>
-
-// RGB
-#define RGB_LED_PIN 27
 
 // SD_Card
 #define SD_SCK 14
@@ -26,6 +24,7 @@ extern SdCard m_tf;
 extern Network m_network;  // 网络连接
 extern FlashFS m_flashCfg; // flash中的文件系统（替代原先的Preferences）
 extern Display m_screen;   // 屏幕对象
+extern GPS m_gps;          // GPS对象
 
 boolean doDelayMillisTime(unsigned long interval,
                           unsigned long *previousMillis,

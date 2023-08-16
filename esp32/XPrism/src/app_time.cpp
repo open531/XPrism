@@ -49,22 +49,22 @@ static void writeTimeCfg(TimeCfg *cfg)
 
 static void readTimeCfg(TimeCfg *cfg)
 {
-    char info[128] = {0};
-    uint16_t size = m_flashCfg.readFile(TIME_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
-    if (size == 0)
-    {
-        // 默认值
-        cfg->updateInterval = 900000; // 时间更新的时间间隔900000(900s)
-        writeTimeCfg(cfg);
-    }
-    else
-    {
-        // 解析数据
-        char *param[1] = {0};
-        analyseParam(info, 1, param);
-        cfg->updateInterval = atol(param[0]);
-    }
+    // char info[128] = {0};
+    // uint16_t size = m_flashCfg.readFile(TIME_CONFIG_PATH, (uint8_t *)info);
+    // info[size] = 0;
+    // if (size == 0)
+    // {
+    // 默认值
+    cfg->updateInterval = 900000; // 时间更新的时间间隔900000(900s)
+    writeTimeCfg(cfg);
+    // }
+    // else
+    // {
+    //     // 解析数据
+    //     char *param[1] = {0};
+    //     analyseParam(info, 1, param);
+    //     cfg->updateInterval = atol(param[0]);
+    // }
 }
 
 static TimeCfg timeCfg;

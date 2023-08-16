@@ -23,5 +23,9 @@
 #if APP_CLOCK_USE
 #include "app_clock.h"
 #endif
+#define APP_NAVI_USE 1
+#if APP_NAVI_USE
+#include "app_navi.h"
+#endif
 
 #endif

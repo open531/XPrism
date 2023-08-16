@@ -8,7 +8,7 @@ extern "C"
 
 #include "lvgl.h"
 
-#define WAIT_ANIM                   \
+#define ANIEND_WAIT                   \
     while (lv_anim_count_running()) \
         lv_task_handler(); // 等待动画完成
     void appClockUiInit();

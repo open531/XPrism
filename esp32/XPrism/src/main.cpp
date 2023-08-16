@@ -65,6 +65,9 @@ void setup()
 #if APP_CLOCK_USE
     appCenter->app_install(&clockApp);
 #endif
+#if APP_NAVI_USE
+    appCenter->app_install(&naviApp);
+#endif
 
     m_btn.init();
 

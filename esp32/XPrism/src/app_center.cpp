@@ -4,8 +4,8 @@
 #include "app.h"
 #include "Arduino.h"
 
-static String wifi_ssid = "Redmi K50";
-static String wifi_password = "5irmvnfnz5rb6xn";
+String wifi_ssid = "Redmi K50";
+String wifi_password = "5irmvnfnz5rb6xn";
 
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN", "APP_MESSAGE_WIFI_AP",
                                      "APP_MESSAGE_WIFI_ALIVE", "APP_MESSAGE_WIFI_DISCONN",

@@ -28,6 +28,8 @@ extern IPAddress dns;      // Set your network DNS usually your Router base addr
 
 extern const char *AP_SSID; // 热点名称
 
+extern WebServer server; // Create a webserver object that listens for HTTP request on port 80
+
 void restCallback(TimerHandle_t xTimer);
 
 class Network
@@ -43,5 +45,10 @@ public:
     boolean close_wifi(void);
     boolean open_ap(const char *ap_ssid = AP_SSID, const char *ap_password = NULL);
 };
+
+void serverSetup();
+void handleRoot();
+void handleNotFound();
+void handleNavi();
 
 #endif

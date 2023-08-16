@@ -5,8 +5,6 @@
 #include "network.h"
 #include "common.h"
 #include "ArduinoJson.h"
-#include "ESP32Time.h"
-#include <esp32-hal-timer.h>
 #include <map>
 
 #define APP_WEATHER_NAME "天气"
@@ -45,37 +43,30 @@ static void readWeatherCfg(WeatherCfg *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = m_flashCfg.readFile(WEATHER_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
-    if (size == 0)
-    {
-        // 默认值
-        cfg->appid = "c66ce2b79b320564e343d0d77e688026";
-        cfg->city = "Beijing";
-        cfg->lat = "40.00";
-        cfg->lon = "116.32";
-        cfg->updateInterval = 900000; // 天气更新的时间间隔900000(900s)
-        writeWeatherCfg(cfg);
-    }
-    else
-    {
-        // 解析数据
-        char *param[5] = {0};
-        analyseParam(info, 5, param);
-        cfg->appid = param[0];
-        cfg->city = param[1];
-        cfg->lat = param[2];
-        cfg->lon = param[3];
-        cfg->updateInterval = atol(param[4]);
-    }
-    Serial.println("Weather config:");
-    Serial.println(info);
-    Serial.println(cfg->appid);
-    Serial.println(cfg->city);
-    Serial.println(cfg->lat);
-    Serial.println(cfg->lon);
-    Serial.println(cfg->updateInterval);
+    // char info[128] = {0};
+    // uint16_t size = m_flashCfg.readFile(WEATHER_CONFIG_PATH, (uint8_t *)info);
+    // info[size] = 0;
+    // if (size == 0)
+    // {
+    // 默认值
+    cfg->appid = "c66ce2b79b320564e343d0d77e688026";
+    cfg->city = "Beijing";
+    cfg->lat = "40.00";
+    cfg->lon = "116.32";
+    cfg->updateInterval = 900000; // 天气更新的时间间隔900000(900s)
+    writeWeatherCfg(cfg);
+    // }
+    // else
+    // {
+    //     // 解析数据
+    //     char *param[5] = {0};
+    //     analyseParam(info, 5, param);
+    //     cfg->appid = param[0];
+    //     cfg->city = param[1];
+    //     cfg->lat = param[2];
+    //     cfg->lon = param[3];
+    //     cfg->updateInterval = atol(param[4]);
+    // }
 }
 
 struct WeatherAppRunData
