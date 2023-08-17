@@ -81,19 +81,6 @@ void decodePath(char *encoded)
 
 void handleNavi()
 {
-    String message = "Navi\n\n";
-    message += "URI: ";
-    message += server.uri();
-    message += "\nMethod: ";
-    message += (server.method() == HTTP_GET) ? "GET" : "POST";
-    message += "\nArguments: ";
-    message += server.args();
-    message += "\n";
-    for (uint8_t i = 0; i < server.args(); i++)
-    {
-        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-    }
-    server.send(404, "text/plain", message);
     naviAppRunData->navInfo.pointEncoded = (char *)malloc(server.arg("pointEncoded").length() + 1);
     strcpy(naviAppRunData->navInfo.pointEncoded, server.arg("pointEncoded").c_str());
     decodePath(naviAppRunData->navInfo.pointEncoded);
@@ -155,6 +142,20 @@ void handleNavi()
         i++;
     }
     naviAppRunData->navInfo.instructionIntervalEnd[i] = instructionIntervalEnd.toInt();
+
+    String message = "Navi\n\n";
+    message += "URI: ";
+    message += server.uri();
+    message += "\nMethod: ";
+    message += (server.method() == HTTP_GET) ? "GET" : "POST";
+    message += "\nArguments: ";
+    message += server.args();
+    message += "\n";
+    for (uint8_t i = 0; i < server.args(); i++)
+    {
+        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    }
+    server.send(200, "text/plain", message);
 }
 
 static void getRoute()
@@ -177,6 +178,11 @@ static int naviInit(AppCenter *appCenter)
     naviAppRunData->currLon = 0;
     naviAppRunData->lastUpdate = 0;
     naviAppRunData->forceUpdate = 1;
+    naviAppRunData->navInfo.currLat = 0;
+    naviAppRunData->navInfo.currLon = 0;
+    naviAppRunData->navInfo.currAlt = 0;
+    naviAppRunData->navInfo.currSpeed = 0;
+    naviAppRunData->navInfo.currSatellites = 0;
     readNaviCfg(&naviCfg);
     return 0;
 }
@@ -191,7 +197,7 @@ static void naviRoutine(AppCenter *appCenter, const Action *action)
     }
 
     appNaviUiDisplay(naviAppRunData->navInfo, animType);
-    delay(300);
+    delay(30);
 }
 
 static void naviBackground(AppCenter *appCenter, const Action *action)

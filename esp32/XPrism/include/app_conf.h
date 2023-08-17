@@ -27,5 +27,9 @@
 #if APP_NAVI_USE
 #include "app_navi.h"
 #endif
+#define APP_INFO_USE 1
+#if APP_INFO_USE
+#include "app_info.h"
+#endif
 
 #endif

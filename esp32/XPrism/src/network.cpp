@@ -175,6 +175,7 @@ void serverSetup()
 {
     server.on("/", HTTP_GET, handleRoot);
     server.onNotFound(handleNotFound);
+    server.on("/weather", HTTP_GET, handleWeather);
     server.on("/navi", HTTP_GET, handleNavi);
     server.begin();
     Serial.println("HTTP server started");
@@ -199,5 +200,5 @@ void handleNotFound()
     {
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     }
-    server.send(404, "text/plain", message);
+    server.send(200, "text/plain", message);
 }

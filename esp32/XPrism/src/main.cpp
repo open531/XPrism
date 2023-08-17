@@ -68,8 +68,13 @@ void setup()
 #if APP_NAVI_USE
     appCenter->app_install(&naviApp);
 #endif
+#if APP_INFO_USE
+    appCenter->app_install(&infoApp);
+#endif
 
     m_btn.init();
+
+    m_gps.init();
 
     // 自启动APP
     appCenter->app_auto_start();

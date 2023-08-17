@@ -49,6 +49,7 @@ public:
 void serverSetup();
 void handleRoot();
 void handleNotFound();
+void handleWeather();
 void handleNavi();
 
 #endif

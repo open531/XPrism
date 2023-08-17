@@ -12,6 +12,11 @@ struct Navi
     int *instructionSign;
     int *instructionIntervalBegin;
     int *instructionIntervalEnd;
+    double currLat;
+    double currLon;
+    double currAlt;
+    double currSpeed;
+    int currSatellites;
 };
 
 #ifdef __cplusplus

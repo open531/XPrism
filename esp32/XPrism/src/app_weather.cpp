@@ -155,6 +155,68 @@ static void getWeather()
     http.end();
 }
 
+void handleWeather()
+{
+    weatherCfg.city = server.arg("city");
+    weatherCfg.lat = "";
+    weatherCfg.lon = "";
+    Serial.print("city: ");
+    Serial.println(weatherCfg.city);
+    Serial.print("lat: ");
+    Serial.println(weatherCfg.lat);
+    Serial.print("lon: ");
+    Serial.println(weatherCfg.lon);
+
+    String message = "Weather\n\n";
+    message += "URI: ";
+    message += server.uri();
+    message += "\nMethod: ";
+    message += (server.method() == HTTP_GET) ? "GET" : "POST";
+    message += "\nArguments: ";
+    message += server.args();
+    message += "\n";
+    for (uint8_t i = 0; i < server.args(); i++)
+    {
+        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    }
+    server.send(200, "text/plain", message);
+    weatherRunData->forceUpdate = 1;
+}
+
+static void serverWeatherSetup()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    server.on("/", handleRoot);
+    server.onNotFound(handleNotFound);
+    server.on("/weather", handleWeather);
+    server.begin();
+    Serial.println("HTTP server Weather started");
+}
+
+static void serverWeatherLoop()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    server.handleClient();
+}
+
+static void serverWeatherStop()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    server.stop();
+}
+
 static int weatherInit(AppCenter *appCenter)
 {
     m_tft->setSwapBytes(true);
@@ -169,6 +231,7 @@ static int weatherInit(AppCenter *appCenter)
     strcpy(weatherRunData->weaInfo.weatherDescription, "晴");
     weatherRunData->weaInfo.mainTemp = 25.0;
     readWeatherCfg(&weatherCfg);
+    serverWeatherSetup();
     getWeather();
     return 0;
 }
@@ -198,6 +261,15 @@ static void weatherRoutine(AppCenter *appCenter, const Action *action)
         weatherRunData->currPage = (weatherRunData->currPage + APP_WEATHER_PAGE_SIZE - 1) % APP_WEATHER_PAGE_SIZE;
     }
 
+    serverWeatherLoop();
+
+    if (weatherRunData->forceUpdate == 1 || (millis() - weatherRunData->lastUpdate) > weatherCfg.updateInterval)
+    {
+        weatherRunData->forceUpdate = 0;
+        weatherRunData->lastUpdate = millis();
+        getWeather();
+    }
+
     if (weatherRunData->currPage == 0)
     {
         appWeatherUiDisplayBasic(weatherRunData->weaInfo, animType);
@@ -217,10 +289,14 @@ static void weatherBackground(AppCenter *appCenter, const Action *action)
 static int weatherExit(void *param)
 {
     appWeatherUiDelete();
+
     // if (weatherRunData->xReturned_task_task_update == pdPASS)
     // {
     //     vTaskDelete(weatherRunData->xHandle_task_task_update);
     // }
+
+    serverWeatherStop();
+
     if (weatherRunData != NULL)
     {
         free(weatherRunData);
