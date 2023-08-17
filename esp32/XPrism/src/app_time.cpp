@@ -25,8 +25,8 @@ struct TimeRunData
     unsigned int forceUpdate;
     int currPage;
 
-    BaseType_t xReturned_task_task_update;
-    TaskHandle_t xHandle_task_task_update;
+    // BaseType_t xReturned_task_task_update;
+    // TaskHandle_t xHandle_task_task_update;
     Time timInfo;
 
     long long preNetTimestamp;
@@ -176,10 +176,10 @@ static int timeExit(void *param)
 {
     appTimeUiDelete();
 
-    if (timeRunData->xReturned_task_task_update == pdPASS)
-    {
-        vTaskDelete(timeRunData->xHandle_task_task_update);
-    }
+    // if (timeRunData->xReturned_task_task_update == pdPASS)
+    // {
+    //     vTaskDelete(timeRunData->xHandle_task_task_update);
+    // }
 
     if (timeRunData != NULL)
     {

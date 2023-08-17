@@ -16,7 +16,7 @@
 #define SD_SCK 14
 #define SD_MISO 26
 #define SD_MOSI 13
-#define SD_SS 15
+#define SD_SS 5
 
 extern Buttons m_btn; // 原则上只提供给主程序调用
 extern SdCard m_tf;

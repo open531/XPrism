@@ -84,7 +84,7 @@ void SdCard::init()
 {
     SPIClass *sd_spi = new SPIClass(HSPI);          // another SPI
     sd_spi->begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS); // Replace default HSPI pins
-    if (!SD.begin(SD_SS, *sd_spi, 80000000))        // SD-Card SS pin is 15
+    if (!SD.begin(SD_SS, *sd_spi))        // SD-Card SS pin is 5
     {
         Serial.println("Card Mount Failed");
         return;

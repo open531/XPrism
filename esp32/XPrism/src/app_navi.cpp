@@ -29,8 +29,8 @@ struct NaviAppRunData
     unsigned int forceUpdate;
     int currPage;
 
-    BaseType_t xReturned_task_task_update; // 更新数据的异步任务
-    TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
+    // BaseType_t xReturned_task_task_update; // 更新数据的异步任务
+    // TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
 
     Navi navInfo;
     double currLat;

@@ -63,6 +63,7 @@ void AppCenter::init(void)
     app_control_display_scr(appList[cur_app_index]->app_image,
                             appList[cur_app_index]->app_name,
                             LV_SCR_LOAD_ANIM_NONE, true);
+    send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
     // Display();
 }
 

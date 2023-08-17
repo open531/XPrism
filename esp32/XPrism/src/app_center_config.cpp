@@ -9,38 +9,44 @@ void AppCenter::read_config(SysUtilConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = m_flashCfg.readFile(APP_CTRL_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
-    if (size == 0)
-    {
-        // 默认值
-        cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
-        cfg->backLight = 100;          // 屏幕亮度（1-100）
-        cfg->rotation = 0;             // 屏幕旋转方向
-        cfg->auto_calibration_mpu = 1; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
-        cfg->mpu_order = 0;            // 操作方向
-        cfg->auto_start_app = "None";  // 无指定开机自启APP
-        this->write_config(cfg);
-    }
-    else
-    {
-        // 解析数据
-        char *param[12] = {0};
-        analyseParam(info, 12, param);
-        cfg->ssid_0 = param[0];
-        cfg->password_0 = param[1];
-        cfg->ssid_1 = param[2];
-        cfg->password_1 = param[3];
-        cfg->ssid_2 = param[4];
-        cfg->password_2 = param[5];
-        cfg->power_mode = atol(param[6]);
-        cfg->backLight = atol(param[7]);
-        cfg->rotation = atol(param[8]);
-        cfg->auto_calibration_mpu = atol(param[9]);
-        cfg->mpu_order = atol(param[10]);
-        cfg->auto_start_app = param[11]; // 开机自启APP的name
-    }
+    // char info[128] = {0};
+    // uint16_t size = m_flashCfg.readFile(APP_CTRL_CONFIG_PATH, (uint8_t *)info);
+    // info[size] = 0;
+    // if (size == 0)
+    // {
+    // 默认值
+    cfg->ssid_0 = "Redmi K50";
+    cfg->password_0 = "5irmvnfnz5rb6xn";
+    cfg->ssid_1 = "";
+    cfg->password_1 = "";
+    cfg->ssid_2 = "";
+    cfg->password_2 = "";
+    cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
+    cfg->backLight = 100;          // 屏幕亮度（1-100）
+    cfg->rotation = 0;             // 屏幕旋转方向
+    cfg->auto_calibration_mpu = 1; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
+    cfg->mpu_order = 0;            // 操作方向
+    cfg->auto_start_app = "时间";  // 无指定开机自启APP
+    this->write_config(cfg);
+    // }
+    // else
+    // {
+    //     // 解析数据
+    //     char *param[12] = {0};
+    //     analyseParam(info, 12, param);
+    //     cfg->ssid_0 = param[0];
+    //     cfg->password_0 = param[1];
+    //     cfg->ssid_1 = param[2];
+    //     cfg->password_1 = param[3];
+    //     cfg->ssid_2 = param[4];
+    //     cfg->password_2 = param[5];
+    //     cfg->power_mode = atol(param[6]);
+    //     cfg->backLight = atol(param[7]);
+    //     cfg->rotation = atol(param[8]);
+    //     cfg->auto_calibration_mpu = atol(param[9]);
+    //     cfg->mpu_order = atol(param[10]);
+    //     cfg->auto_start_app = param[11]; // 开机自启APP的name
+    // }
 }
 
 void AppCenter::write_config(SysUtilConfig *cfg)
@@ -79,7 +85,7 @@ void AppCenter::write_config(SysUtilConfig *cfg)
     m_flashCfg.writeFile(APP_CTRL_CONFIG_PATH, w_data.c_str());
 
     // 立即生效相关配置
-    m_screen.setBackLight(cfg->backLight / 100.0);
+    // m_screen.setBackLight(cfg->backLight / 100.0);
     m_tft->setRotation(cfg->rotation);
 }
 

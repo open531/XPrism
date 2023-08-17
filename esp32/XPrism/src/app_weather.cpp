@@ -75,8 +75,8 @@ struct WeatherAppRunData
     unsigned int forceUpdate; // 强制更新标志
     int currPage;
 
-    BaseType_t xReturned_task_task_update; // 更新数据的异步任务
-    TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
+    // BaseType_t xReturned_task_task_update; // 更新数据的异步任务
+    // TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
 
     Weather weaInfo; // 保存天气状况
 };
@@ -201,12 +201,12 @@ static void weatherRoutine(AppCenter *appCenter, const Action *action)
     if (weatherRunData->currPage == 0)
     {
         appWeatherUiDisplayBasic(weatherRunData->weaInfo, animType);
-        delay(300);
+        delay(100);
     }
     else
     {
         appWeatherUiDisplayDetail(weatherRunData->weaInfo, animType);
-        delay(300);
+        delay(100);
     }
 }
 
@@ -217,10 +217,10 @@ static void weatherBackground(AppCenter *appCenter, const Action *action)
 static int weatherExit(void *param)
 {
     appWeatherUiDelete();
-    if (weatherRunData->xReturned_task_task_update == pdPASS)
-    {
-        vTaskDelete(weatherRunData->xHandle_task_task_update);
-    }
+    // if (weatherRunData->xReturned_task_task_update == pdPASS)
+    // {
+    //     vTaskDelete(weatherRunData->xHandle_task_task_update);
+    // }
     if (weatherRunData != NULL)
     {
         free(weatherRunData);
