@@ -51,5 +51,6 @@ void handleRoot();
 void handleNotFound();
 void handleWeather();
 void handleNavi();
+void handleNoti();
 
 #endif
