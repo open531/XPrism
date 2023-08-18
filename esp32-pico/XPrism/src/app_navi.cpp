@@ -33,8 +33,6 @@ struct NaviAppRunData
     // TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
 
     Navi navInfo;
-    double currLat;
-    double currLon;
 };
 
 static NaviCfg naviCfg;
@@ -79,70 +77,22 @@ void decodePath(char *encoded)
     }
 }
 
+static void updateNavi()
+{
+    m_gps.update();
+    naviAppRunData->navInfo.currLat = m_gps.getLatitude();
+    naviAppRunData->navInfo.currLon = m_gps.getLongitude();
+    naviAppRunData->navInfo.currAlt = m_gps.getAltitude();
+    naviAppRunData->navInfo.currSpeed = m_gps.getSpeed();
+    naviAppRunData->navInfo.currSatellites = m_gps.getSatellites();
+    if (naviAppRunData->navInfo.pointLength > 0 && naviAppRunData->navInfo.instructionLength > 0)
+    {
+        // TODO: 计算导航信息
+    }
+}
+
 void handleNavi()
 {
-    naviAppRunData->navInfo.pointEncoded = (char *)malloc(server.arg("pointEncoded").length() + 1);
-    strcpy(naviAppRunData->navInfo.pointEncoded, server.arg("pointEncoded").c_str());
-    decodePath(naviAppRunData->navInfo.pointEncoded);
-    naviAppRunData->navInfo.instructionLength = server.arg("instructionLength").toInt();
-    naviAppRunData->navInfo.instructionText = (char **)malloc(naviAppRunData->navInfo.instructionLength * sizeof(char *));
-    naviAppRunData->navInfo.instructionSign = (int *)malloc(naviAppRunData->navInfo.instructionLength * sizeof(int));
-    naviAppRunData->navInfo.instructionIntervalBegin = (int *)malloc(naviAppRunData->navInfo.instructionLength * sizeof(int));
-    naviAppRunData->navInfo.instructionIntervalEnd = (int *)malloc(naviAppRunData->navInfo.instructionLength * sizeof(int));
-    String instructionText = server.arg("instructionText");
-    String instructionSign = server.arg("instructionSign");
-    String instructionIntervalBegin = server.arg("instructionIntervalBegin");
-    String instructionIntervalEnd = server.arg("instructionIntervalEnd");
-
-    int pos = instructionText.indexOf(',');
-    int i = 0;
-    while (pos != -1)
-    {
-        String text = instructionText.substring(0, pos);
-        instructionText.remove(0, pos + 1);
-        naviAppRunData->navInfo.instructionText[i] = (char *)malloc(text.length() + 1);
-        strcpy(naviAppRunData->navInfo.instructionText[i], text.c_str());
-        pos = instructionText.indexOf(',');
-        i++;
-    }
-    strcpy(naviAppRunData->navInfo.instructionText[i], instructionText.c_str());
-
-    pos = instructionSign.indexOf(',');
-    i = 0;
-    while (pos != -1)
-    {
-        String sign = instructionSign.substring(0, pos);
-        instructionSign.remove(0, pos + 1);
-        naviAppRunData->navInfo.instructionSign[i] = sign.toInt();
-        pos = instructionSign.indexOf(',');
-        i++;
-    }
-    naviAppRunData->navInfo.instructionSign[i] = instructionSign.toInt();
-
-    pos = instructionIntervalBegin.indexOf(',');
-    i = 0;
-    while (pos != -1)
-    {
-        String begin = instructionIntervalBegin.substring(0, pos);
-        instructionIntervalBegin.remove(0, pos + 1);
-        naviAppRunData->navInfo.instructionIntervalBegin[i] = begin.toInt();
-        pos = instructionIntervalBegin.indexOf(',');
-        i++;
-    }
-    naviAppRunData->navInfo.instructionIntervalBegin[i] = instructionIntervalBegin.toInt();
-
-    pos = instructionIntervalEnd.indexOf(',');
-    i = 0;
-    while (pos != -1)
-    {
-        String end = instructionIntervalEnd.substring(0, pos);
-        instructionIntervalEnd.remove(0, pos + 1);
-        naviAppRunData->navInfo.instructionIntervalEnd[i] = end.toInt();
-        pos = instructionIntervalEnd.indexOf(',');
-        i++;
-    }
-    naviAppRunData->navInfo.instructionIntervalEnd[i] = instructionIntervalEnd.toInt();
-
     String message = "Navi\n\n";
     message += "URI: ";
     message += server.uri();
@@ -156,6 +106,113 @@ void handleNavi()
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     }
     server.send(200, "text/plain", message);
+
+    naviAppRunData->navInfo.pointEncoded = (char *)malloc(server.arg("pointEncoded").length() + 1);
+    strcpy(naviAppRunData->navInfo.pointEncoded, server.arg("pointEncoded").c_str());
+    naviAppRunData->navInfo.instructionLength = server.arg("instructionLength").toInt();
+    naviAppRunData->navInfo.instructionText = (char **)malloc(naviAppRunData->navInfo.instructionLength * sizeof(char *));
+    naviAppRunData->navInfo.instructionSign = (int *)malloc(naviAppRunData->navInfo.instructionLength * sizeof(int));
+    naviAppRunData->navInfo.instructionIntervalBegin = (int *)malloc(naviAppRunData->navInfo.instructionLength * sizeof(int));
+    naviAppRunData->navInfo.instructionIntervalEnd = (int *)malloc(naviAppRunData->navInfo.instructionLength * sizeof(int));
+    String instructionText = server.arg("instructionText");
+    String instructionSign = server.arg("instructionSign");
+    String instructionIntervalBegin = server.arg("instructionIntervalBegin");
+    String instructionIntervalEnd = server.arg("instructionIntervalEnd");
+    Serial.println("instructionText: " + instructionText);
+    Serial.println("instructionSign: " + instructionSign);
+    Serial.println("instructionIntervalBegin: " + instructionIntervalBegin);
+    Serial.println("instructionIntervalEnd: " + instructionIntervalEnd);
+
+    int pos = instructionText.indexOf('|');
+    int i = 0;
+    while (pos != -1)
+    {
+        String text = instructionText.substring(0, pos);
+        instructionText.remove(0, pos + 1);
+        naviAppRunData->navInfo.instructionText[i] = (char *)malloc(text.length() + 1);
+        strcpy(naviAppRunData->navInfo.instructionText[i], text.c_str());
+        pos = instructionText.indexOf('|');
+        i++;
+    }
+    Serial.println("i: " + String(i));
+    Serial.println("naviAppRunData->navInfo.instructionText[0]: " + String(naviAppRunData->navInfo.instructionText[0]));
+    Serial.println("naviAppRunData->navInfo.instructionText[i - 1]: " + String(naviAppRunData->navInfo.instructionText[i - 1]));
+
+    pos = instructionSign.indexOf('|');
+    i = 0;
+    while (pos != -1)
+    {
+        String sign = instructionSign.substring(0, pos);
+        instructionSign.remove(0, pos + 1);
+        naviAppRunData->navInfo.instructionSign[i] = sign.toInt();
+        pos = instructionSign.indexOf('|');
+        i++;
+    }
+    Serial.println("naviAppRunData->navInfo.instructionSign[0]: " + String(naviAppRunData->navInfo.instructionSign[0]));
+
+    pos = instructionIntervalBegin.indexOf('|');
+    i = 0;
+    while (pos != -1)
+    {
+        String begin = instructionIntervalBegin.substring(0, pos);
+        instructionIntervalBegin.remove(0, pos + 1);
+        naviAppRunData->navInfo.instructionIntervalBegin[i] = begin.toInt();
+        pos = instructionIntervalBegin.indexOf('|');
+        i++;
+    }
+    Serial.println("naviAppRunData->navInfo.instructionIntervalBegin[0]: " + String(naviAppRunData->navInfo.instructionIntervalBegin[0]));
+
+    pos = instructionIntervalEnd.indexOf('|');
+    i = 0;
+    while (pos != -1)
+    {
+        String end = instructionIntervalEnd.substring(0, pos);
+        instructionIntervalEnd.remove(0, pos + 1);
+        naviAppRunData->navInfo.instructionIntervalEnd[i] = end.toInt();
+        pos = instructionIntervalEnd.indexOf('|');
+        i++;
+    }
+    Serial.println("naviAppRunData->navInfo.instructionIntervalEnd[0]: " + String(naviAppRunData->navInfo.instructionIntervalEnd[0]));
+
+    naviAppRunData->navInfo.pointLength = naviAppRunData->navInfo.instructionIntervalEnd[i - 1] + 1;
+    Serial.println("naviAppRunData->navInfo.pointLength: " + String(naviAppRunData->navInfo.pointLength));
+    naviAppRunData->navInfo.pointLat = (double *)realloc(naviAppRunData->navInfo.pointLat, naviAppRunData->navInfo.pointLength * sizeof(double));
+    naviAppRunData->navInfo.pointLon = (double *)realloc(naviAppRunData->navInfo.pointLon, naviAppRunData->navInfo.pointLength * sizeof(double));
+    decodePath(naviAppRunData->navInfo.pointEncoded);
+}
+
+static void serverNaviSetup()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    server.on("/", handleRoot);
+    server.onNotFound(handleNotFound);
+    server.on("/navi", handleNavi);
+    server.begin();
+    Serial.println("HTTP server Navi started");
+}
+
+static void serverNaviLoop()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    server.handleClient();
+}
+
+static void serverNaviStop()
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        return;
+    }
+
+    server.stop();
 }
 
 static void getRoute()
@@ -174,8 +231,6 @@ static int naviInit(AppCenter *appCenter)
     naviAppRunData = (NaviAppRunData *)malloc(sizeof(NaviAppRunData));
     memset((char *)&naviAppRunData->navInfo, 0, sizeof(Navi));
     naviAppRunData->currPage = 0;
-    naviAppRunData->currLat = 0;
-    naviAppRunData->currLon = 0;
     naviAppRunData->lastUpdate = 0;
     naviAppRunData->forceUpdate = 1;
     naviAppRunData->navInfo.currLat = 0;
@@ -184,6 +239,7 @@ static int naviInit(AppCenter *appCenter)
     naviAppRunData->navInfo.currSpeed = 0;
     naviAppRunData->navInfo.currSatellites = 0;
     readNaviCfg(&naviCfg);
+    serverNaviSetup();
     return 0;
 }
 
@@ -196,6 +252,8 @@ static void naviRoutine(AppCenter *appCenter, const Action *action)
         return;
     }
 
+    serverNaviLoop();
+
     appNaviUiDisplay(naviAppRunData->navInfo, animType);
     delay(30);
 }
@@ -207,6 +265,8 @@ static void naviBackground(AppCenter *appCenter, const Action *action)
 static int naviExit(void *param)
 {
     appNaviUiDelete();
+
+    serverNaviStop();
 
     if (naviAppRunData != NULL)
     {

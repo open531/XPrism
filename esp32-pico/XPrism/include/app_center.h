@@ -37,7 +37,7 @@ public:
     // 将APP从app_controller中卸载（删除）
     int app_uninstall(const App *app);
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
-    int remove_backgroud_task(void);
+    int remove_background_task(void);
     int main_process(Action *act_info);
     void app_exit(void); // 提供给app退出的系统调用
     // 消息发送

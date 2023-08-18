@@ -19,10 +19,18 @@ namespace XPrism
             var text = notification.Extras.GetString(Notification.ExtraText);
             var time = notification.When;
 
+            if (text.Length > 120)
+            {
+                text = text.Substring(0, 120);
+            }
+
+            time += 8 * 60 * 60 * 1000;
+
             // Log the notification information for debugging
             Log.Debug("NotificationListener", $"Title: {title}, Text: {text}, Time: {time}");
 
             // TODO: Send the notification information to ESP32 via Bluetooth or Wi-Fi
+            ESP32Info.GetResponseAsync("http://" + ESP32Info.picoIPAddress + "/noti?action=append&title=" + title + "&text=" + text + "&time=" + time);
         }
 
         public override void OnNotificationRemoved(StatusBarNotification sbn)

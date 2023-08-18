@@ -71,6 +71,9 @@ void setup()
 #if APP_INFO_USE
     appCenter->app_install(&infoApp);
 #endif
+#if APP_NOTI_USE
+    appCenter->app_install(&notiApp);
+#endif
 
     m_btn.init();
 

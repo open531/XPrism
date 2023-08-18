@@ -10,6 +10,8 @@
             <Label />
             <Button Text="导航信息" ImageSource="material_navigation_white.png" ContentLayout="Left, 0" Clicked="OnNaviClicked" FontSize="18" />
             <Label />
+            <Button Text="相机" ImageSource="material_navigation_white.png" ContentLayout="Left, 0" Clicked="OnCamClicked" FontSize="18" />
+            <Label />
             <Button Text="信息串口" ImageSource="material_message_white.png" ContentLayout="Left, 0" Clicked="OnSerialClicked" FontSize="18" />
             <Label />
             <Button Text="眼镜设置" ImageSource="material_wrench_white.png" ContentLayout="Left, 0" Clicked="OnSettingClicked" FontSize="18" />

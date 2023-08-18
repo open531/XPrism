@@ -17,6 +17,11 @@ public partial class MainPage : ContentPage
         // 打开导航页面
         await Navigation.PushAsync(new NaviPage());
     }
+    public async void OnCamClicked(object sender, System.EventArgs e)
+    {
+        // 打开摄像头页面
+        await Navigation.PushAsync(new CamPage());
+    }
     public async void OnSerialClicked(object sender, System.EventArgs e)
     {
         // 打开发送页面

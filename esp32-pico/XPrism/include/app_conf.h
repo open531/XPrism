@@ -31,5 +31,9 @@
 #if APP_INFO_USE
 #include "app_info.h"
 #endif
+#define APP_NOTI_USE 1
+#if APP_NOTI_USE
+#include "app_noti.h"
+#endif
 
 #endif

@@ -105,7 +105,7 @@ int AppCenter::app_install(App *app, AppType app_type)
 }
 
 // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
-int AppCenter::remove_backgroud_task(void)
+int AppCenter::remove_background_task(void)
 {
     return 0; // 安装成功
 }

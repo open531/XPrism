@@ -3,14 +3,15 @@
 
 struct Notification
 {
-    char *title;
-    char *text;
-    unsigned long time;
+    char title[32];
+    char text[128];
+    unsigned long long time;
+    char timeStr[32];
 };
 
 struct NotiStream
 {
-    Notification *notis;
+    struct Notification *notis;
     unsigned int size;
 };
 
@@ -26,11 +27,11 @@ extern "C"
         lv_task_handler(); // 等待动画完成
 
     void appNotiUiInit();
-    void appNotiUiDisplayInit(lv_scr_load_anim_t animType);
-    void appNotiUiDisplay(struct Notification notInfo, lv_scr_load_anim_t animType);
+    void appNotiUiDisplayInit(struct Notification notInfo);
+    void appNotiUiDisplay(struct Notification notInfo, lv_scr_load_anim_t animType, bool force);
     void appNotiUiDelete();
 
-    extern const lv_img_dsc_t icon_map;
+    extern const lv_img_dsc_t icon_noti;
 
 #ifdef __cplusplus
 } /* extern "C" */

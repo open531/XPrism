@@ -17,6 +17,8 @@ struct Navi
     double currAlt;
     double currSpeed;
     int currSatellites;
+    int currPoint;
+    int currInstruction;
 };
 
 #ifdef __cplusplus
