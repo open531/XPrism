@@ -1,14 +1,13 @@
-#ifndef APP_INFO_UI_H
-#define APP_INFO_UI_H
+#ifndef APP_SPORT_UI_H
+#define APP_SPORT_UI_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    struct Info
+    struct Sport
     {
-        int ip[4];
         double gpsLat;
         double gpsLon;
         double gpsAlt;
@@ -22,12 +21,12 @@ extern "C"
     while (lv_anim_count_running()) \
         lv_task_handler(); // 等待动画完成
 
-    void appInfoUiInit();
-    void appInfoUiDisplayInit(lv_scr_load_anim_t animType);
-    void appInfoUiDisplay(struct Info infInfo, lv_scr_load_anim_t animType);
-    void appInfoUiDelete();
+    void appSportUiInit();
+    void appSportUiDisplayInit(lv_scr_load_anim_t animType);
+    void appSportUiDisplay(struct Sport spoInfo, lv_scr_load_anim_t animType);
+    void appSportUiDelete();
 
-    extern const lv_img_dsc_t icon_about;
+    extern const lv_img_dsc_t icon_sport;
 
 #ifdef __cplusplus
 } /* extern "C" */

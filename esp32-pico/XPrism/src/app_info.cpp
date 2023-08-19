@@ -40,7 +40,6 @@ void updateInfo()
     infoAppRunData->infoInfo.ip[1] = ip[1];
     infoAppRunData->infoInfo.ip[2] = ip[2];
     infoAppRunData->infoInfo.ip[3] = ip[3];
-    m_gps.update();
     infoAppRunData->infoInfo.gpsLat = m_gps.getLatitude();
     infoAppRunData->infoInfo.gpsLon = m_gps.getLongitude();
     infoAppRunData->infoInfo.gpsAlt = m_gps.getAltitude();

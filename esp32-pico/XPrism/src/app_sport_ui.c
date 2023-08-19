@@ -1,4 +1,4 @@
-#include "app_info_ui.h"
+#include "app_sport_ui.h"
 #include "lvgl.h"
 #include "lv_xprism_color.h"
 
@@ -13,8 +13,11 @@ static lv_style_t numBigStyle;
 
 static lv_obj_t *scr;
 
-static lv_obj_t *ipLabel;
-static lv_obj_t *gpsLabel;
+static lv_obj_t *latLabel;
+static lv_obj_t *lonLabel;
+static lv_obj_t *altLabel;
+static lv_obj_t *spdLabel;
+static lv_obj_t *satLabel;
 
 static int getDegree(double latlon)
 {
@@ -57,7 +60,7 @@ static int getDistance(double lat1, double lon1, double lat2, double lon2)
     return (int)s;
 }
 
-void appInfoUiInit()
+void appSportUiInit()
 {
     lv_style_init(&defaultStyle);
     lv_style_set_bg_color(&defaultStyle, LV_COLOR_BLACK);
@@ -78,7 +81,7 @@ void appInfoUiInit()
     lv_style_set_text_font(&numBigStyle, &lv_font_ubuntu_b_108);
 }
 
-void appInfoUiDisplayInit(lv_scr_load_anim_t animType)
+void appSportUiDisplayInit(lv_scr_load_anim_t animType)
 {
     lv_obj_t *actObj = lv_scr_act();
     if (actObj == scr)
@@ -86,36 +89,52 @@ void appInfoUiDisplayInit(lv_scr_load_anim_t animType)
         return;
     }
 
-    appInfoUiDelete();
+    appSportUiDelete();
     lv_obj_clean(actObj);
 
     scr = lv_obj_create(NULL);
     lv_obj_add_style(scr, &defaultStyle, LV_STATE_DEFAULT);
 
-    ipLabel = lv_label_create(scr);
-    lv_obj_add_style(ipLabel, &textStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(ipLabel, "IP: ");
+    latLabel = lv_label_create(scr);
+    lv_obj_add_style(latLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(latLabel, "Lat: 0°00'00.0\"N");
 
-    gpsLabel = lv_label_create(scr);
-    lv_obj_add_style(gpsLabel, &textStyle, LV_STATE_DEFAULT);
-    lv_label_set_text(gpsLabel, "Lat: \nLon: \nAlt: \nSpd: \nSat:");
+    lonLabel = lv_label_create(scr);
+    lv_obj_add_style(lonLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(lonLabel, "Lon: 0°00'00.0\"E");
 
-    lv_obj_align(ipLabel, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_align(gpsLabel, LV_ALIGN_TOP_MID, 0, 100);
+    altLabel = lv_label_create(scr);
+    lv_obj_add_style(altLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(altLabel, "Alt: 0.0m");
+
+    spdLabel = lv_label_create(scr);
+    lv_obj_add_style(spdLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(spdLabel, "Spd: 0.0km/h");
+
+    satLabel = lv_label_create(scr);
+    lv_obj_add_style(satLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(satLabel, "Sat: 0");
+
+    lv_obj_align(latLabel, LV_ALIGN_TOP_LEFT, 20, 20);
+    lv_obj_align(lonLabel, LV_ALIGN_TOP_LEFT, 20, 60);
+    lv_obj_align(altLabel, LV_ALIGN_TOP_LEFT, 20, 100);
+    lv_obj_align(spdLabel, LV_ALIGN_TOP_LEFT, 20, 140);
+    lv_obj_align(satLabel, LV_ALIGN_TOP_LEFT, 20, 180);
 }
 
-void appInfoUiDisplay(struct Info infInfo, lv_scr_load_anim_t animType)
+void appSportUiDisplay(struct Sport spoInfo, lv_scr_load_anim_t animType)
 {
-    appInfoUiDisplayInit(animType);
+    appSportUiDisplayInit(animType);
 
-    lv_label_set_text_fmt(ipLabel, "IP: %d.%d.%d.%d",
-                          infInfo.ip[0], infInfo.ip[1], infInfo.ip[2], infInfo.ip[3]);
-    lv_label_set_text_fmt(gpsLabel, "Lat: %d°%d'%d\"%c\nLon: %d°%d'%d\"%c\nAlt: %f m\nSpd: %f km/h\nSat: %d",
-                          getDegree(infInfo.gpsLat), getMinute(infInfo.gpsLat),
-                          getSecond(infInfo.gpsLat), getLatNS(infInfo.gpsLat),
-                          getDegree(infInfo.gpsLon), getMinute(infInfo.gpsLon),
-                          getSecond(infInfo.gpsLon), getLonEW(infInfo.gpsLon),
-                          infInfo.gpsAlt, infInfo.gpsSpd, infInfo.gpsSat);
+    lv_label_set_text_fmt(latLabel, "Lat: %d°%d'%d\"%c",
+                          getDegree(spoInfo.gpsLat), getMinute(spoInfo.gpsLat),
+                          getSecond(spoInfo.gpsLat), getLatNS(spoInfo.gpsLat));
+    lv_label_set_text_fmt(lonLabel, "Lon: %d°%d'%d\"%c",
+                          getDegree(spoInfo.gpsLon), getMinute(spoInfo.gpsLon),
+                          getSecond(spoInfo.gpsLon), getLonEW(spoInfo.gpsLon));
+    lv_label_set_text_fmt(altLabel, "Alt: %f m", spoInfo.gpsAlt);
+    lv_label_set_text_fmt(spdLabel, "Spd: %f km/h", spoInfo.gpsSpd);
+    lv_label_set_text_fmt(satLabel, "Sat: %d", spoInfo.gpsSat);
 
     if (animType != LV_SCR_LOAD_ANIM_NONE)
     {
@@ -127,7 +146,7 @@ void appInfoUiDisplay(struct Info infInfo, lv_scr_load_anim_t animType)
     }
 }
 
-void appInfoUiDelete()
+void appSportUiDelete()
 {
     if (scr != NULL)
     {

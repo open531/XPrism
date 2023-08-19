@@ -1,4 +1,16 @@
-
+// Copyright 2015-2016 Espressif Systems (Shanghai) PTE LTD
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "esp_http_server.h"
 #include "esp_timer.h"
 #include "esp_camera.h"
@@ -6,15 +18,17 @@
 #include "fb_gfx.h"
 #include "esp32-hal-ledc.h"
 #include "sdkconfig.h"
-#include "FrontPage.h"
+#include "camera_index.h"
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
 #endif
 
+// Face Detection will not work on boards without (or with disabled) PSRAM
 #ifdef BOARD_HAS_PSRAM
 #define CONFIG_ESP_FACE_DETECT_ENABLED 1
-
+// Face Recognition takes upward from 15 seconds per frame on chips other than ESP32S3
+// Makes no sense to have it enabled for them
 #if CONFIG_IDF_TARGET_ESP32S3
 #define CONFIG_ESP_FACE_RECOGNITION_ENABLED 1
 #else
@@ -31,14 +45,15 @@
 #include "human_face_detect_msr01.hpp"
 #include "human_face_detect_mnp01.hpp"
 
-#define TWO_STAGE 1
+#define TWO_STAGE 1 /*<! 1: detect by two-stage which is more accurate but slower(with keypoints). */
+                    /*<! 0: detect by one-stage which is less accurate but faster(without keypoints). */
 
 #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
 #include "face_recognition_tool.hpp"
 #include "face_recognition_112_v1_s16.hpp"
 #include "face_recognition_112_v1_s8.hpp"
 
-#define QUANT_TYPE 0
+#define QUANT_TYPE 0 // if set to 1 => very large firmware, very slow, reboots when streaming...
 
 #define FACE_ID_SAVE_NUMBER 7
 #endif
@@ -63,7 +78,7 @@
 #define CONFIG_LED_MAX_INTENSITY 255
 
 int led_duty = 0;
-bool Streaming = false;
+bool isStreaming = false;
 
 #endif
 
@@ -85,6 +100,13 @@ httpd_handle_t camera_httpd = NULL;
 
 static int8_t detection_enabled = 0;
 
+// #if TWO_STAGE
+// static HumanFaceDetectMSR01 s1(0.1F, 0.5F, 10, 0.2F);
+// static HumanFaceDetectMNP01 s2(0.5F, 0.3F, 5);
+// #else
+// static HumanFaceDetectMSR01 s1(0.3F, 0.5F, 10, 0.2F);
+// #endif
+
 #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
 static int8_t recognition_enabled = 0;
 static int8_t is_enrolling = 0;
@@ -102,11 +124,11 @@ FaceRecognition112V1S8 recognizer;
 
 typedef struct
 {
-    size_t size;
-    size_t index;
-    size_t count;
+    size_t size;  // number of values used for filtering
+    size_t index; // current value index
+    size_t count; // value count
     int sum;
-    int *values;
+    int *values; // array to be filled with values
 } ra_filter_t;
 
 static ra_filter_t ra_filter;
@@ -196,13 +218,13 @@ static void draw_face_boxes(fb_data_t *fb, std::list<dl::detect::result_t> *resu
     }
     if (fb->bytes_per_pixel == 2)
     {
-
+        // color = ((color >> 8) & 0xF800) | ((color >> 3) & 0x07E0) | (color & 0x001F);
         color = ((color >> 16) & 0x001F) | ((color >> 3) & 0x07E0) | ((color << 8) & 0xF800);
     }
     int i = 0;
     for (std::list<dl::detect::result_t>::iterator prediction = results->begin(); prediction != results->end(); prediction++, i++)
     {
-
+        // rectangle box
         x = (int)prediction->box[0];
         y = (int)prediction->box[1];
         w = (int)prediction->box[2] - x + 1;
@@ -220,7 +242,7 @@ static void draw_face_boxes(fb_data_t *fb, std::list<dl::detect::result_t> *resu
         fb_gfx_drawFastVLine(fb, x, y, h, color);
         fb_gfx_drawFastVLine(fb, x + w - 1, y, h, color);
 #if TWO_STAGE
-
+        // landmarks (left eye, mouth left, nose, right eye, mouth right)
         int x0, y0, j;
         for (j = 0; j < 10; j += 2)
         {
@@ -266,14 +288,15 @@ static int run_face_recognition(fb_data_t *fb, std::list<dl::detect::result_t> *
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
 void enable_led(bool en)
-{
+{ // Turn LED On or Off
     int duty = en ? led_duty : 0;
-    if (en && Streaming && (led_duty > CONFIG_LED_MAX_INTENSITY))
+    if (en && isStreaming && (led_duty > CONFIG_LED_MAX_INTENSITY))
     {
         duty = CONFIG_LED_MAX_INTENSITY;
     }
     ledcWrite(LED_LEDC_CHANNEL, duty);
-
+    // ledc_set_duty(CONFIG_LED_LEDC_SPEED_MODE, CONFIG_LED_LEDC_CHANNEL, duty);
+    // ledc_update_duty(CONFIG_LED_LEDC_SPEED_MODE, CONFIG_LED_LEDC_CHANNEL);
     log_i("Set LED intensity to %d", duty);
 }
 #endif
@@ -555,7 +578,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
     httpd_resp_set_hdr(req, "X-Framerate", "60");
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
-    Streaming = true;
+    isStreaming = true;
     enable_led(true);
 #endif
 
@@ -793,7 +816,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
     }
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
-    Streaming = false;
+    isStreaming = false;
     enable_led(false);
 #endif
 
@@ -906,7 +929,7 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if (!strcmp(variable, "led_intensity"))
     {
         led_duty = val;
-        if (Streaming)
+        if (isStreaming)
             enable_led(true);
     }
 #endif
@@ -965,7 +988,37 @@ static esp_err_t status_handler(httpd_req_t *req)
     sensor_t *s = esp_camera_sensor_get();
     char *p = json_response;
     *p++ = '{';
-    if (s->id.PID == OV2640_PID)
+
+    if (s->id.PID == OV5640_PID || s->id.PID == OV3660_PID)
+    {
+        for (int reg = 0x3400; reg < 0x3406; reg += 2)
+        {
+            p += print_reg(p, s, reg, 0xFFF); // 12 bit
+        }
+        p += print_reg(p, s, 0x3406, 0xFF);
+
+        p += print_reg(p, s, 0x3500, 0xFFFF0); // 16 bit
+        p += print_reg(p, s, 0x3503, 0xFF);
+        p += print_reg(p, s, 0x350a, 0x3FF);  // 10 bit
+        p += print_reg(p, s, 0x350c, 0xFFFF); // 16 bit
+
+        for (int reg = 0x5480; reg <= 0x5490; reg++)
+        {
+            p += print_reg(p, s, reg, 0xFF);
+        }
+
+        for (int reg = 0x5380; reg <= 0x538b; reg++)
+        {
+            p += print_reg(p, s, reg, 0xFF);
+        }
+
+        for (int reg = 0x5580; reg < 0x558a; reg++)
+        {
+            p += print_reg(p, s, reg, 0xFF);
+        }
+        p += print_reg(p, s, 0x558a, 0x1FF); // 9 bit
+    }
+    else if (s->id.PID == OV2640_PID)
     {
         p += print_reg(p, s, 0xd3, 0xFF);
         p += print_reg(p, s, 0x111, 0xFF);
@@ -1203,9 +1256,17 @@ static esp_err_t index_handler(httpd_req_t *req)
     sensor_t *s = esp_camera_sensor_get();
     if (s != NULL)
     {
-        if (s->id.PID == OV2640_PID)
+        if (s->id.PID == OV3660_PID)
         {
-            return httpd_resp_sendstr(req, FrontPage);
+            return httpd_resp_send(req, (const char *)index_ov3660_html_gz, index_ov3660_html_gz_len);
+        }
+        else if (s->id.PID == OV5640_PID)
+        {
+            return httpd_resp_send(req, (const char *)index_ov5640_html_gz, index_ov5640_html_gz_len);
+        }
+        else
+        {
+            return httpd_resp_send(req, (const char *)index_ov2640_html_gz, index_ov2640_html_gz_len);
         }
     }
     else

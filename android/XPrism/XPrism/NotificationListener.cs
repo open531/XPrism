@@ -18,16 +18,35 @@ namespace XPrism
             var title = notification.Extras.GetString(Notification.ExtraTitle);
             var text = notification.Extras.GetString(Notification.ExtraText);
             var time = notification.When;
+            var category = notification.Category;
 
-            if (text.Length > 120)
+            // Truncate the title and text if they are too long
+
+            if (title.Length > 32)
             {
-                text = text.Substring(0, 120);
+                title = title.Substring(0, 28);
+                title += "...";
+            }
+            if (text.Length > 128)
+            {
+                text = text.Substring(0, 124);
+                text += "...";
             }
 
             time += 8 * 60 * 60 * 1000;
 
             // Log the notification information for debugging
-            Log.Debug("NotificationListener", $"Title: {title}, Text: {text}, Time: {time}");
+            Log.Debug("NotificationListener", $"Title: {title}, Text: {text}, Time: {time}, Category={category}");
+
+            // Get rid of media control notifications
+            if (category == Notification.CategoryTransport)
+            {
+                return;
+            }
+            if (category == Notification.CategoryCall)
+            {
+                return;
+            }
 
             // TODO: Send the notification information to ESP32 via Bluetooth or Wi-Fi
             ESP32Info.GetResponseAsync("http://" + ESP32Info.picoIPAddress + "/noti?action=append&title=" + title + "&text=" + text + "&time=" + time);
@@ -44,9 +63,10 @@ namespace XPrism
             var title = notification.Extras.GetString(Notification.ExtraTitle);
             var text = notification.Extras.GetString(Notification.ExtraText);
             var time = notification.When;
+            var category = notification.Category;
 
             // Log the notification information for debugging
-            Log.Debug("NotificationListener", $"Removed: Title: {title}, Text: {text}, Time: {time}");
+            Log.Debug("NotificationListener", $"Removed: Title: {title}, Text: {text}, Time: {time}, Category={category}");
 
             // TODO: Handle the notification removal event on ESP32
         }

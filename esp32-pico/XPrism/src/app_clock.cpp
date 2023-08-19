@@ -118,7 +118,6 @@ static void clockRoutine(AppCenter *appCenter, const Action *action)
         update_stopwatch();
     }
 
-    delay(30);
 }
 
 static void clockBackground(AppCenter *appCenter, const Action *action)

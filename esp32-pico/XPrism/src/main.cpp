@@ -11,8 +11,9 @@
 #include <esp32-hal-timer.h>
 
 static bool isCheckAction = false;
+static bool isCheckGPS = false;
 
-Action *act_info;     // 存放mpu6050返回的数据
+Action *act_info;     // 存放按键返回的数据
 AppCenter *appCenter; // APP控制器
 
 TimerHandle_t xTimerAction = NULL;
@@ -21,11 +22,11 @@ void actionCheckHandle(TimerHandle_t xTimer)
     // 标志需要检测动作
     isCheckAction = true;
 }
-
-void my_print(const char *buf)
+TimerHandle_t xTimerGPS = NULL;
+void gpsCheckHandle(TimerHandle_t xTimer)
 {
-    Serial.printf("%s", buf);
-    Serial.flush();
+    // 标志需要检测动作
+    isCheckGPS = true;
 }
 
 void setup()
@@ -50,7 +51,6 @@ void setup()
 
     /*** Init micro SD-Card ***/
     m_tf.init();
-    m_tf.listDir("/", 0);
 
     lv_fs_fatfs_init();
 
@@ -78,6 +78,9 @@ void setup()
 #if APP_FILE_USE
     appCenter->app_install(&fileApp);
 #endif
+#if APP_SPORT_USE
+    appCenter->app_install(&sportApp);
+#endif
 
     m_btn.init();
 
@@ -92,11 +95,16 @@ void setup()
     // 先初始化一次动作数据 防空指针
     act_info = m_btn.getAction();
 
-    // 定义一个mpu6050的动作检测定时器
+    // 定义一个按键检测定时器
     xTimerAction = xTimerCreate("Action Check",
                                 200 / portTICK_PERIOD_MS,
                                 pdTRUE, (void *)0, actionCheckHandle);
+    // 定义一个GPS检测定时器
+    xTimerGPS = xTimerCreate("GPS Check",
+                             2000 / portTICK_PERIOD_MS,
+                             pdTRUE, (void *)0, gpsCheckHandle);
     xTimerStart(xTimerAction, 0);
+    xTimerStart(xTimerGPS, 0);
 }
 
 void loop()
@@ -107,6 +115,11 @@ void loop()
     {
         isCheckAction = false;
         act_info = m_btn.getAction();
+    }
+    if (isCheckGPS)
+    {
+        isCheckGPS = false;
+        m_gps.update();
     }
     appCenter->main_process(act_info); // 运行当前进程
 }

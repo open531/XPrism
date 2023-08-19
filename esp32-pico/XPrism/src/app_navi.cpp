@@ -79,7 +79,6 @@ void decodePath(char *encoded)
 
 static void updateNavi()
 {
-    m_gps.update();
     naviAppRunData->navInfo.currLat = m_gps.getLatitude();
     naviAppRunData->navInfo.currLon = m_gps.getLongitude();
     naviAppRunData->navInfo.currAlt = m_gps.getAltitude();
@@ -87,7 +86,22 @@ static void updateNavi()
     naviAppRunData->navInfo.currSatellites = m_gps.getSatellites();
     if (naviAppRunData->navInfo.pointLength > 0 && naviAppRunData->navInfo.instructionLength > 0)
     {
-        // TODO: 计算导航信息
+        for (int i = naviAppRunData->navInfo.currPoint; i < naviAppRunData->navInfo.pointLength; i++)
+        {
+            if (abs(naviAppRunData->navInfo.pointLat[i] - naviAppRunData->navInfo.currLat) + abs(naviAppRunData->navInfo.pointLon[i] - naviAppRunData->navInfo.currLon) < 0.0001)
+            {
+                naviAppRunData->navInfo.currPoint = i;
+                break;
+            }
+        }
+        for (int i = naviAppRunData->navInfo.currInstruction; i < naviAppRunData->navInfo.instructionLength; i++)
+        {
+            if (naviAppRunData->navInfo.instructionIntervalBegin[i] == naviAppRunData->navInfo.currPoint)
+            {
+                naviAppRunData->navInfo.currInstruction = i;
+                break;
+            }
+        }
     }
 }
 
@@ -215,15 +229,6 @@ static void serverNaviStop()
     server.stop();
 }
 
-static void getRoute()
-{
-    if (WiFi.status() != WL_CONNECTED)
-    {
-        return;
-    }
-    serverSetup();
-}
-
 static int naviInit(AppCenter *appCenter)
 {
     m_tft->setSwapBytes(true);
@@ -238,6 +243,8 @@ static int naviInit(AppCenter *appCenter)
     naviAppRunData->navInfo.currAlt = 0;
     naviAppRunData->navInfo.currSpeed = 0;
     naviAppRunData->navInfo.currSatellites = 0;
+    naviAppRunData->navInfo.currPoint = 0;
+    naviAppRunData->navInfo.currInstruction = 0;
     readNaviCfg(&naviCfg);
     serverNaviSetup();
     return 0;

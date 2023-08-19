@@ -35,9 +35,13 @@
 #if APP_NOTI_USE
 #include "app_noti.h"
 #endif
-#define APP_FILE_USE 1
+#define APP_FILE_USE 0
 #if APP_FILE_USE
 #include "app_file.h"
+#endif
+#define APP_SPORT_USE 1
+#if APP_SPORT_USE
+#include "app_sport.h"
 #endif
 
 #endif

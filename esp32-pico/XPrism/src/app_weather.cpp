@@ -79,6 +79,7 @@ struct WeatherAppRunData
     // TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
 
     Weather weaInfo; // 保存天气状况
+    boolean useGPS;  // 是否使用GPS
 };
 
 static WeatherCfg weatherCfg;
@@ -94,7 +95,13 @@ static void getWeather()
     HTTPClient http;
     http.setTimeout(1000);
     char url[128] = {0};
-    if (weatherCfg.lat.length() > 0 && weatherCfg.lon.length() > 0)
+    if (weatherRunData->useGPS && m_gps.getSatellites() > 0)
+    {
+        snprintf(url, 128, WEATHER_API_LATLON,
+                 String(m_gps.getLatitude()).c_str(), String(m_gps.getLongitude()).c_str(),
+                 weatherCfg.appid.c_str());
+    }
+    else if (weatherCfg.lat.length() > 0 && weatherCfg.lon.length() > 0)
     {
         snprintf(url, 128, WEATHER_API_LATLON,
                  weatherCfg.lat.c_str(), weatherCfg.lon.c_str(),
@@ -157,6 +164,7 @@ static void getWeather()
 
 void handleWeather()
 {
+    weatherRunData->useGPS = server.arg("gps");
     weatherCfg.city = server.arg("city");
     weatherCfg.lat = "";
     weatherCfg.lon = "";
@@ -226,6 +234,7 @@ static int weatherInit(AppCenter *appCenter)
     weatherRunData->currPage = 0;
     weatherRunData->lastUpdate = 0;
     weatherRunData->forceUpdate = 1;
+    weatherRunData->useGPS = 0;
     strcpy(weatherRunData->weaInfo.name, "北京");
     weatherRunData->weaInfo.weatherId = 800;
     strcpy(weatherRunData->weaInfo.weatherDescription, "晴");
