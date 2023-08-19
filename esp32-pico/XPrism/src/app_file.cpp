@@ -8,6 +8,11 @@
 
 #define FILE_CONFIG_PATH "/file.cfg"
 
+#define ROOT "/" // 根目录
+
+static File_Info *file_info=NULL;
+
+
 struct FileCfg
 {
 };
@@ -22,6 +27,7 @@ static void readfileCfg(FileCfg *cfg)
 
 struct FileAppRunData
 {
+    String path;
 };
 
 static FileCfg fileCfg;
@@ -33,6 +39,9 @@ static int fileInit(AppCenter *appCenter)
     appFileUiInit();
     fileAppRunData = (FileAppRunData *)malloc(sizeof(FileAppRunData));
     readfileCfg(&fileCfg);
+    file_ui_type uiType = file_ui_explorer;
+    file_info= m_tf.listDir(ROOT);
+    fileAppRunData->path=ROOT;
     return 0;
 }
 
@@ -44,8 +53,18 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
         appCenter->app_exit();
         return;
     }
+    
 
-    // appFileUiDisplayExplorer(animType);
+    
+
+    const char* firstfile_name="..";
+    appFileUiDisplayExplorerInit(firstfile_name,file_info->file_name,file_info->next_node->file_name,LV_SCR_LOAD_ANIM_NONE);
+
+    if(action->active==BTN_LEFT)//向上滚动
+    {
+        appFileUiDisplayExplorer(path,firstfile_name,file_info->file_name,file_info->next_node->file_name,LV_SCR_LOAD_ANIM_MOVE_TOP,true);
+    }
+
     delay(100);
 }
 
