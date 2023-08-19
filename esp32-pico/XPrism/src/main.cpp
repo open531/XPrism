@@ -50,6 +50,7 @@ void setup()
 
     /*** Init micro SD-Card ***/
     m_tf.init();
+    m_tf.listDir("/", 0);
 
     lv_fs_fatfs_init();
 
@@ -73,6 +74,9 @@ void setup()
 #endif
 #if APP_NOTI_USE
     appCenter->app_install(&notiApp);
+#endif
+#if APP_FILE_USE
+    appCenter->app_install(&fileApp);
 #endif
 
     m_btn.init();

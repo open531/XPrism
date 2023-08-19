@@ -10,7 +10,6 @@
         return RET;                                   \
     }
 
-int photo_file_num = 0;
 char file_name_list[DIR_FILE_NUM][DIR_FILE_NAME_MAX_LEN];
 
 static fs::FS *tf_vfs = NULL;
@@ -84,7 +83,7 @@ void SdCard::init()
 {
     SPIClass *sd_spi = new SPIClass(HSPI);          // another SPI
     sd_spi->begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS); // Replace default HSPI pins
-    if (!SD.begin(SD_SS, *sd_spi))        // SD-Card SS pin is 5
+    if (!SD.begin(SD_SS, *sd_spi))                  // SD-Card SS pin is 5
     {
         Serial.println("Card Mount Failed");
         return;
@@ -133,7 +132,6 @@ void SdCard::listDir(const char *dirname, uint8_t levels)
     TF_VFS_IS_NULL()
 
     Serial.printf("Listing directory: %s\n", dirname);
-    photo_file_num = 0;
 
     File root = tf_vfs->open(dirname);
     if (!root)
@@ -150,7 +148,7 @@ void SdCard::listDir(const char *dirname, uint8_t levels)
     int dir_len = strlen(dirname) + 1;
 
     File file = root.openNextFile();
-    while (file && photo_file_num < DIR_FILE_NUM)
+    while (file)
     {
         if (file.isDirectory())
         {
@@ -164,20 +162,15 @@ void SdCard::listDir(const char *dirname, uint8_t levels)
         else
         {
             Serial.print("  FILE: ");
-            // 只取文件名 保存到file_name_list中
-            strncpy(file_name_list[photo_file_num], file.name() + dir_len, DIR_FILE_NAME_MAX_LEN - 1);
-            file_name_list[photo_file_num][strlen(file_name_list[photo_file_num]) - 4] = 0;
 
             char file_name[FILENAME_MAX_LEN] = {0};
-            sprintf(file_name, "%s/%s.bin", dirname, file_name_list[photo_file_num]);
+            sprintf(file_name, "%s", file.name());
             Serial.print(file_name);
-            ++photo_file_num;
             Serial.print("  SIZE: ");
             Serial.println(file.size());
         }
         file = root.openNextFile();
     }
-    Serial.println(photo_file_num);
 }
 
 File_Info *SdCard::listDir(const char *dirname)
