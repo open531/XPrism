@@ -16,7 +16,6 @@ void GPS::update()
     while (gpsSerial.available() > 0)
     {
         char c = gpsSerial.read();
-        Serial.print(c);
         if (gps.encode(c))
         {
             if (gps.location.isValid())
