@@ -13,7 +13,7 @@ extern char file_name_list[DIR_FILE_NUM][DIR_FILE_NAME_MAX_LEN];
 
 enum FILE_TYPE : unsigned char
 {
-    FILE_TYPE_UNKNOW = 0,
+    FILE_TYPE_UNKNOWN = 0,
     FILE_TYPE_FILE,
     FILE_TYPE_FOLDER
 };

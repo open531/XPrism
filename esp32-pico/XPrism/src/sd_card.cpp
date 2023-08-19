@@ -228,7 +228,7 @@ File_Info *SdCard::listDir(const char *dirname)
         // file_node指针移向节点
         file_node = file_node->next_node;
 
-        // 船家创建新节点的文件名
+        // 创建新节点的文件名
         file_node->file_name = (char *)malloc(filename_len);
         strncpy(file_node->file_name, fn, filename_len); //
         file_node->file_name[filename_len] = 0;          //

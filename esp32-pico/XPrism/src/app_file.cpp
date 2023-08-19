@@ -10,9 +10,6 @@
 
 #define ROOT "/" // 根目录
 
-static File_Info *file_info=NULL;
-
-
 struct FileCfg
 {
 };
@@ -27,11 +24,54 @@ static void readfileCfg(FileCfg *cfg)
 
 struct FileAppRunData
 {
-    String path;
+    FileUiType uiType;
+
+    String currPath;
+    File_Info *fileInfo;
+    File_Info *currFile;
+
+    int temp;
 };
 
 static FileCfg fileCfg;
 static FileAppRunData *fileAppRunData = NULL;
+
+static void openDir(String dirName)
+{
+    if (fileAppRunData->currPath != ROOT)
+    {
+        fileAppRunData->currPath += "/" + dirName;
+    }
+    else
+    {
+        fileAppRunData->currPath += dirName;
+    }
+    fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
+    fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
+    if (fileAppRunData->currFile == NULL)
+    {
+        fileAppRunData->currFile = new File_Info;
+        fileAppRunData->currFile->file_name = "空文件夹";
+        fileAppRunData->currFile->file_type = FILE_TYPE_UNKNOWN;
+        fileAppRunData->currFile->next_node = fileAppRunData->currFile;
+        fileAppRunData->currFile->front_node = fileAppRunData->currFile;
+    }
+}
+
+static void upDir()
+{
+    int index = fileAppRunData->currPath.lastIndexOf("/");
+    if (index != -1 && index != 0)
+    {
+        fileAppRunData->currPath = fileAppRunData->currPath.substring(0, index);
+    }
+    else
+    {
+        fileAppRunData->currPath = ROOT;
+    }
+    fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
+    fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
+}
 
 static int fileInit(AppCenter *appCenter)
 {
@@ -39,30 +79,77 @@ static int fileInit(AppCenter *appCenter)
     appFileUiInit();
     fileAppRunData = (FileAppRunData *)malloc(sizeof(FileAppRunData));
     readfileCfg(&fileCfg);
-    file_ui_type uiType = file_ui_explorer;
-    file_info= m_tf.listDir(ROOT);
-    fileAppRunData->path=ROOT;
+    fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
+    fileAppRunData->currPath = ROOT;
+    fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
+    fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
+    fileAppRunData->temp = 0;
+    appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
+                             fileAppRunData->currFile->file_name,
+                             fileAppRunData->currFile->next_node->file_name,
+                             fileAppRunData->currFile->next_node->next_node->file_name,
+                             fileAppRunData->temp, LV_SCR_LOAD_ANIM_NONE, true);
+    Serial.print("currFile: ");
+    Serial.println(fileAppRunData->currFile->file_name);
+    Serial.print("currFile->next_node: ");
+    Serial.println(fileAppRunData->currFile->next_node->file_name);
+    Serial.print("currFile->next_node->next_node: ");
+    Serial.println(fileAppRunData->currFile->next_node->next_node->file_name);
+    Serial.print("currFile->next_node->next_node->next_node: ");
+    Serial.println(fileAppRunData->currFile->next_node->next_node->next_node->file_name);
+    Serial.print("currFile->next_node->next_node->next_node->next_node: ");
+    Serial.println(fileAppRunData->currFile->next_node->next_node->next_node->next_node->file_name);
+    Serial.print("currFile->next_node->next_node->next_node->next_node->next_node: ");
+    Serial.println(fileAppRunData->currFile->next_node->next_node->next_node->next_node->next_node->file_name);
     return 0;
 }
 
 static void fileRoutine(AppCenter *appCenter, const Action *action)
 {
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
-    if (action->active == BTN_BACK)
+    bool force = false;
+
+    if (fileAppRunData->uiType == FILE_UI_TYPE_EXPLORER)
     {
-        appCenter->app_exit();
-        return;
-    }
-    
+        if (action->active == BTN_BACK)
+        {
+            if (fileAppRunData->currPath == ROOT)
+            {
+                appCenter->app_exit();
+                return;
+            }
+            else
+            {
+                upDir();
+                force = true;
+            }
+        }
+        else if (action->active == BTN_FORWARD)
+        {
+            if (fileAppRunData->currFile->file_type == FILE_TYPE_FOLDER)
+            {
+                openDir(fileAppRunData->currFile->file_name);
+                force = true;
+            }
+        }
+        else if (action->active == BTN_LEFT)
+        {
+            animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
+            fileAppRunData->currFile = fileAppRunData->currFile->front_node;
+            fileAppRunData->temp--;
+        }
+        else if (action->active == BTN_RIGHT)
+        {
+            animType = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
+            fileAppRunData->currFile = fileAppRunData->currFile->next_node;
+            fileAppRunData->temp++;
+        }
 
-    
-
-    const char* firstfile_name="..";
-    appFileUiDisplayExplorerInit(firstfile_name,file_info->file_name,file_info->next_node->file_name,LV_SCR_LOAD_ANIM_NONE);
-
-    if(action->active==BTN_LEFT)//向上滚动
-    {
-        appFileUiDisplayExplorer(path,firstfile_name,file_info->file_name,file_info->next_node->file_name,LV_SCR_LOAD_ANIM_MOVE_TOP,true);
+        appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
+                                 fileAppRunData->currFile->file_name,
+                                 fileAppRunData->currFile->next_node->file_name,
+                                 fileAppRunData->currFile->next_node->next_node->file_name,
+                                 fileAppRunData->temp, animType, force);
     }
 
     delay(100);

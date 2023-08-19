@@ -1,7 +1,13 @@
 #ifndef APP_FILE_UI_H
 #define APP_FILE_UI_H
 
-
+enum FileUiType
+{
+    FILE_UI_TYPE_EXPLORER,
+    FILE_UI_TYPE_IMAGE,
+    FILE_UI_TYPE_VIDEO,
+    FILE_UI_TYPE_TEXT,
+};
 
 #ifdef __cplusplus
 extern "C"
@@ -15,10 +21,12 @@ extern "C"
         lv_task_handler(); // 等待动画完成
 
     void appFileUiInit();
-    void appFileUiDisplayExplorerInit(const char* file1Name,const char* file2Name,const char* file3Name,lv_scr_load_anim_t animType);
-    void appFileUiDisplayExplorer(const char *path,const char* _file1Name,
-                                  const char* _file2Name, const char* _file3Name,const char* _file4Name,
-                                  lv_scr_load_anim_t animType,bool force);
+    void appFileUiDisplayExplorerInit(const char *path, const char *file1Name,
+                                      const char *file2Name, const char *file3Name,
+                                      int temp, lv_scr_load_anim_t animType);
+    void appFileUiDisplayExplorer(const char *path, const char *file1Name,
+                                  const char *file2Name, const char *file3Name,
+                                  int temp, lv_scr_load_anim_t animType, bool force);
     void appFileUiDisplayImageInit(lv_scr_load_anim_t animType);
     void appFileUiDisplayImage(const char *file_name, lv_scr_load_anim_t animType);
     void appFileUiDisplayVideoInit(lv_scr_load_anim_t animType);
