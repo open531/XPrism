@@ -151,8 +151,8 @@ void app_control_display_scr(const void *src_img, const char *app_name, lv_scr_l
 
     lv_anim_start(&now_app);
     lv_anim_start(&pre_app);
-    ANIEND_WAIT
-    lv_task_handler(); // 消除 ANIEND_WAIT 执行完后依然"卡顿一下"的问题
+    // ANIEND_WAIT
+    // lv_task_handler(); // 消除 ANIEND_WAIT 执行完后依然"卡顿一下"的问题
 
     lv_obj_del(pre_app_image); // 删除原先的图像
     pre_app_image = now_app_image;

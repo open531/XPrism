@@ -36,6 +36,26 @@ struct FileAppRunData
 static FileCfg fileCfg;
 static FileAppRunData *fileAppRunData = NULL;
 
+static void freeFileInfo()
+{
+    File_Info *temp = fileAppRunData->fileInfo->next_node;
+    if (temp != NULL)
+    {
+        do
+        {
+            File_Info *next = temp->next_node;
+            free(temp);
+            Serial.print("freeFileInfo: ");
+            Serial.println(temp->file_name);
+            temp = next;
+        } while (temp != fileAppRunData->fileInfo->next_node);
+    }
+    free(fileAppRunData->fileInfo);
+    Serial.print("freeFileInfo: ");
+    Serial.println(fileAppRunData->fileInfo->file_name);
+    fileAppRunData->fileInfo = NULL;
+}
+
 static void openDir(String dirName)
 {
     if (fileAppRunData->currPath != ROOT)
@@ -46,6 +66,7 @@ static void openDir(String dirName)
     {
         fileAppRunData->currPath += dirName;
     }
+    freeFileInfo();
     fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
     fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
     if (fileAppRunData->currFile == NULL)
@@ -69,8 +90,35 @@ static void upDir()
     {
         fileAppRunData->currPath = ROOT;
     }
+    freeFileInfo();
     fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
     fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
+}
+
+static void openFile()
+{
+    if (fileAppRunData->currFile->file_type == FILE_TYPE_FOLDER)
+    {
+        openDir(fileAppRunData->currFile->file_name);
+    }
+    else
+    {
+        String fileName = fileAppRunData->currPath + "/" + fileAppRunData->currFile->file_name;
+        int index = fileName.lastIndexOf(".");
+        String suffix = fileName.substring(index + 1);
+        if (suffix == "jpg" || suffix == "jpeg" || suffix == "bin")
+        {
+        }
+        else if (suffix == "mjpeg")
+        {
+        }
+        else if (suffix == "txt")
+        {
+        }
+        else
+        {
+        }
+    }
 }
 
 static int fileInit(AppCenter *appCenter)
@@ -89,18 +137,6 @@ static int fileInit(AppCenter *appCenter)
                              fileAppRunData->currFile->next_node->file_name,
                              fileAppRunData->currFile->next_node->next_node->file_name,
                              fileAppRunData->temp, LV_SCR_LOAD_ANIM_NONE, true);
-    Serial.print("currFile: ");
-    Serial.println(fileAppRunData->currFile->file_name);
-    Serial.print("currFile->next_node: ");
-    Serial.println(fileAppRunData->currFile->next_node->file_name);
-    Serial.print("currFile->next_node->next_node: ");
-    Serial.println(fileAppRunData->currFile->next_node->next_node->file_name);
-    Serial.print("currFile->next_node->next_node->next_node: ");
-    Serial.println(fileAppRunData->currFile->next_node->next_node->next_node->file_name);
-    Serial.print("currFile->next_node->next_node->next_node->next_node: ");
-    Serial.println(fileAppRunData->currFile->next_node->next_node->next_node->next_node->file_name);
-    Serial.print("currFile->next_node->next_node->next_node->next_node->next_node: ");
-    Serial.println(fileAppRunData->currFile->next_node->next_node->next_node->next_node->next_node->file_name);
     return 0;
 }
 

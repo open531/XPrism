@@ -193,8 +193,8 @@ void appNotiUiDisplay(struct Notification notInfo,
     lv_anim_start(&prevTitleAnim);
     lv_anim_start(&prevTextAnim);
     lv_anim_start(&prevTimeAnim);
-    ANIEND_WAIT
-    lv_task_handler();
+    // ANIEND_WAIT
+    // lv_task_handler();
 
     lv_obj_del(prevTitleLabel);
     lv_obj_del(prevTextLabel);

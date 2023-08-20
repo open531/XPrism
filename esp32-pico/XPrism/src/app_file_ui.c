@@ -58,7 +58,7 @@ void appFileUiDisplayExplorerInit(const char *path, const char *file1Name,
     //     return;
     // }
 
-    appFileUiDelete();
+    // appFileUiDelete();
     lv_obj_clean(actObj);
 
     check = temp;
@@ -69,6 +69,7 @@ void appFileUiDisplayExplorerInit(const char *path, const char *file1Name,
     pathLabel = lv_label_create(explorerScr);
     lv_obj_add_style(pathLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_long_mode(pathLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(pathLabel, 200);
     lv_label_set_text(pathLabel, path);
 
     selectPanel = lv_obj_create(explorerScr);
