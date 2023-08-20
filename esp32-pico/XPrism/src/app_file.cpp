@@ -3,6 +3,8 @@
 #include "icons.h"
 #include "app_center.h"
 #include <TJpg_Decoder.h>
+#include "player.h"
+#include "dmadrawer.h"
 
 #define APP_FILE_NAME "文件"
 #define APP_FILE_INFO "文件信息"
@@ -34,6 +36,9 @@ struct FileAppRunData
     File_Info *currFile;
 
     int temp;
+
+    PlayDecoderBase *decoder;
+    File currVideoFile;
 
     std::vector<int> textPageStartIndex;
     int textCurrPage;
@@ -124,6 +129,32 @@ static void upDir()
     fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
 }
 
+static void videoStart()
+{
+    String fileName;
+    if (fileAppRunData->currPath != ROOT)
+    {
+        fileName = fileAppRunData->currPath + "/" + fileAppRunData->currFile->file_name;
+    }
+    else
+    {
+        fileName = fileAppRunData->currPath + fileAppRunData->currFile->file_name;
+    }
+    int index = fileName.lastIndexOf(".");
+    String suffix = fileName.substring(index + 1);
+
+    if (suffix == "mjpeg")
+    {
+        fileAppRunData->currVideoFile = m_tf.open(fileName.c_str());
+        fileAppRunData->decoder = new MjpegPlayDecoder(&fileAppRunData->currVideoFile, true);
+    }
+    else if (suffix == "rgb")
+    {
+        fileAppRunData->currVideoFile = m_tf.open(fileName.c_str());
+        fileAppRunData->decoder = new RgbPlayDecoder(&fileAppRunData->currVideoFile, true);
+    }
+}
+
 static void getTextPage()
 {
     String fileName;
@@ -137,6 +168,8 @@ static void getTextPage()
         fileName = fileAppRunData->currPath + fileAppRunData->currFile->file_name;
     }
     File file = SD.open(fileName.c_str());
+
+    fileAppRunData->textIsEnd = false;
 
     if (!file)
     {
@@ -233,6 +266,14 @@ static void openFile()
         else if (suffix == "mjpeg")
         {
             fileAppRunData->uiType = FILE_UI_TYPE_VIDEO;
+            appFileUiDisplayVideoInit(LV_SCR_LOAD_ANIM_NONE);
+            videoStart();
+        }
+        else if (suffix == "rgb")
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_VIDEO;
+            appFileUiDisplayVideoInit(LV_SCR_LOAD_ANIM_NONE);
+            videoStart();
         }
         else if (suffix == "txt")
         {
@@ -273,6 +314,7 @@ static int fileInit(AppCenter *appCenter)
     fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
     fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
     fileAppRunData->temp = 0;
+    fileAppRunData->decoder = NULL;
     fileAppRunData->textBuffer = NULL;
     fileAppRunData->textIsEnd = false;
     fileAppRunData->textCurrPage = 0;
@@ -339,6 +381,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                  fileAppRunData->currFile->next_node->file_name,
                                  fileAppRunData->currFile->next_node->next_node->file_name,
                                  fileAppRunData->temp, animType, force);
+        delay(100);
     }
     else if (fileAppRunData->uiType == FILE_UI_TYPE_IMAGE)
     {
@@ -350,6 +393,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                      fileAppRunData->currFile->next_node->file_name,
                                      fileAppRunData->currFile->next_node->next_node->file_name,
                                      fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
+            return;
         }
         else if (action->active == BTN_FORWARD)
         {
@@ -366,11 +410,13 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
         if (action->active == BTN_BACK)
         {
             fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
+            setCpuFrequencyMhz(80);
             appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
                                      fileAppRunData->currFile->file_name,
                                      fileAppRunData->currFile->next_node->file_name,
                                      fileAppRunData->currFile->next_node->next_node->file_name,
                                      fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
+            return;
         }
         else if (action->active == BTN_FORWARD)
         {
@@ -380,6 +426,23 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
         }
         else if (action->active == BTN_RIGHT)
         {
+        }
+
+        setCpuFrequencyMhz(240);
+
+        if (fileAppRunData->currVideoFile.available())
+        {
+            fileAppRunData->decoder->video_play_screen();
+        }
+        else
+        {
+            if (fileAppRunData->decoder != NULL)
+            {
+                delete fileAppRunData->decoder;
+                fileAppRunData->decoder = NULL;
+            }
+            fileAppRunData->currVideoFile.close();
+            videoStart();
         }
     }
     else if (fileAppRunData->uiType == FILE_UI_TYPE_TEXT)
@@ -392,6 +455,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                      fileAppRunData->currFile->next_node->file_name,
                                      fileAppRunData->currFile->next_node->next_node->file_name,
                                      fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
+            return;
         }
         else if (action->active == BTN_FORWARD)
         {
@@ -402,10 +466,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
             {
                 fileAppRunData->textCurrPage--;
             }
-            getTextPage();
-            appFileUiDisplayText(fileAppRunData->textBuffer,
-                                 fileAppRunData->textCurrPage,
-                                 LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
+            animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
         }
         else if (action->active == BTN_RIGHT)
         {
@@ -413,11 +474,12 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
             {
                 fileAppRunData->textCurrPage++;
             }
-            getTextPage();
-            appFileUiDisplayText(fileAppRunData->textBuffer,
-                                 fileAppRunData->textCurrPage,
-                                 LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
+            animType = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
         }
+        getTextPage();
+        appFileUiDisplayText(fileAppRunData->textBuffer,
+                             fileAppRunData->textCurrPage,
+                             animType, false);
     }
 
     delay(100);

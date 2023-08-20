@@ -14,6 +14,7 @@ static lv_style_t style_line;
 
 static lv_obj_t *explorerScr;
 static lv_obj_t *imageScr;
+static lv_obj_t *videoScr;
 static lv_obj_t *textScr;
 
 static lv_obj_t *pathLabel;
@@ -257,6 +258,22 @@ void appFileUiDisplayImage(const char *fileName, lv_scr_load_anim_t animType)
     lv_img_set_src(image, path);
     lv_obj_align(image, LV_ALIGN_CENTER, 0, 0);
     lv_scr_load_anim(imageScr, animType, 0, 0, false);
+}
+
+void appFileUiDisplayVideoInit(lv_scr_load_anim_t animType)
+{
+    lv_obj_t *actObj = lv_scr_act();
+    if (actObj == videoScr)
+    {
+        return;
+    }
+
+    lv_obj_clean(actObj);
+
+    videoScr = lv_obj_create(NULL);
+    lv_obj_add_style(videoScr, &defaultStyle, LV_STATE_DEFAULT);
+
+    lv_scr_load_anim(videoScr, animType, 0, 0, false);
 }
 
 void appFileUiDisplayTextInit(unsigned char *text, int page,
