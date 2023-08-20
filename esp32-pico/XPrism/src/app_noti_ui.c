@@ -104,17 +104,17 @@ void appNotiUiDisplay(struct Notification notInfo,
 
     if (animType == LV_SCR_LOAD_ANIM_MOVE_LEFT)
     {
-        currStartX = -120 - 64;
+        currStartX = -120 - 100;
         currEndX = 0;
         prevStartX = 0;
-        prevEndX = 120 + 64;
+        prevEndX = 120 + 100;
     }
     else
     {
-        currStartX = 120 + 64;
+        currStartX = 120 + 100;
         currEndX = 0;
         prevStartX = 0;
-        prevEndX = -120 - 64;
+        prevEndX = -120 - 100;
     }
 
     currTitleLabel = lv_label_create(scr);

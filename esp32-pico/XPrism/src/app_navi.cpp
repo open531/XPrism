@@ -260,7 +260,7 @@ static void naviRoutine(AppCenter *appCenter, const Action *action)
     }
 
     serverNaviLoop();
-
+    updateNavi();
     appNaviUiDisplay(naviAppRunData->navInfo, animType);
     delay(30);
 }

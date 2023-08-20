@@ -13,6 +13,8 @@ static lv_style_t numBigStyle;
 static lv_style_t style_line;
 
 static lv_obj_t *explorerScr;
+static lv_obj_t *imageScr;
+static lv_obj_t *textScr;
 
 static lv_obj_t *pathLabel;
 static lv_obj_t *currFile1Label;
@@ -21,8 +23,14 @@ static lv_obj_t *currFile3Label;
 static lv_obj_t *prevFile1Label;
 static lv_obj_t *prevFile2Label;
 static lv_obj_t *prevFile3Label;
-
 static lv_obj_t *selectPanel;
+
+static lv_obj_t *image;
+
+static lv_obj_t *prevTextLabel;
+static lv_obj_t *currTextLabel;
+static lv_obj_t *pageLabel;
+static int currTextPage;
 
 static int check;
 
@@ -225,11 +233,141 @@ void appFileUiDisplayExplorer(const char *path, const char *file1Name,
     prevFile3Label = currFile3Label;
 }
 
+void appFileUiDisplayImageInit(lv_scr_load_anim_t animType)
+{
+    lv_obj_t *actObj = lv_scr_act();
+    if (actObj == imageScr)
+    {
+        return;
+    }
+
+    lv_obj_clean(actObj);
+
+    imageScr = lv_obj_create(NULL);
+    lv_obj_add_style(imageScr, &defaultStyle, LV_STATE_DEFAULT);
+
+    image = lv_img_create(imageScr);
+}
+
+void appFileUiDisplayImage(const char *fileName, lv_scr_load_anim_t animType)
+{
+    appFileUiDisplayImageInit(animType);
+    char path[128];
+    sprintf(path, "S:%s", fileName);
+    lv_img_set_src(image, path);
+    lv_obj_align(image, LV_ALIGN_CENTER, 0, 0);
+    lv_scr_load_anim(imageScr, animType, 0, 0, false);
+}
+
+void appFileUiDisplayTextInit(unsigned char *text, int page,
+                              lv_scr_load_anim_t animType)
+{
+    lv_obj_t *actObj = lv_scr_act();
+    if (actObj == textScr)
+    {
+        return;
+    }
+
+    lv_obj_clean(actObj);
+
+    textScr = lv_obj_create(NULL);
+    lv_obj_add_style(textScr, &defaultStyle, LV_STATE_DEFAULT);
+
+    currTextPage = page;
+
+    prevTextLabel = lv_label_create(textScr);
+    lv_obj_add_style(prevTextLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_long_mode(prevTextLabel, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(prevTextLabel, 220);
+    lv_label_set_text(prevTextLabel, text);
+
+    pageLabel = lv_label_create(textScr);
+    lv_obj_add_style(pageLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text_fmt(pageLabel, "第%d页", page + 1);
+
+    lv_obj_align(prevTextLabel, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(pageLabel, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+    lv_scr_load_anim(textScr, LV_SCR_LOAD_ANIM_NONE, 300, 300, false);
+}
+
+void appFileUiDisplayText(unsigned char *text, int page,
+                          lv_scr_load_anim_t animType, bool force)
+{
+    if (force == true)
+    {
+        appFileUiDisplayTextInit(text, page, animType);
+    }
+
+    if (currTextPage == page)
+    {
+        return;
+    }
+
+    currTextPage = page;
+
+    int currStartX, currEndX, prevStartX, prevEndX;
+
+    if (animType == LV_SCR_LOAD_ANIM_MOVE_LEFT)
+    {
+        currStartX = -120 - 110;
+        currEndX = 0;
+        prevStartX = 0;
+        prevEndX = 120 + 110;
+    }
+    else
+    {
+        currStartX = 120 + 110;
+        currEndX = 0;
+        prevStartX = 0;
+        prevEndX = -120 - 110;
+    }
+
+    currTextLabel = lv_label_create(textScr);
+    lv_obj_add_style(currTextLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_long_mode(currTextLabel, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(currTextLabel, 220);
+    lv_label_set_text(currTextLabel, text);
+
+    lv_obj_align(currTextLabel, LV_ALIGN_CENTER, 0, 0);
+
+    static lv_anim_t currTextAnim;
+    lv_anim_init(&currTextAnim);
+    lv_anim_set_exec_cb(&currTextAnim, (lv_anim_exec_xcb_t)lv_obj_set_x);
+    lv_anim_set_var(&currTextAnim, currTextLabel);
+    lv_anim_set_values(&currTextAnim, currStartX, currEndX);
+    lv_anim_set_time(&currTextAnim, 300);
+    lv_anim_set_path_cb(&currTextAnim, lv_anim_path_linear);
+
+    static lv_anim_t prevTextAnim;
+    lv_anim_init(&prevTextAnim);
+    lv_anim_set_exec_cb(&prevTextAnim, (lv_anim_exec_xcb_t)lv_obj_set_x);
+    lv_anim_set_var(&prevTextAnim, prevTextLabel);
+    lv_anim_set_values(&prevTextAnim, prevStartX, prevEndX);
+    lv_anim_set_time(&prevTextAnim, 300);
+    lv_anim_set_path_cb(&prevTextAnim, lv_anim_path_linear);
+
+    lv_anim_start(&currTextAnim);
+    lv_anim_start(&prevTextAnim);
+    // ANIEND_WAIT
+    // lv_task_handler();
+
+    lv_obj_del(prevTextLabel);
+    lv_label_set_text_fmt(pageLabel, "第%d页", page + 1);
+    prevTextLabel = currTextLabel;
+}
+
 void appFileUiDelete()
 {
     if (explorerScr != NULL)
     {
         lv_obj_clean(explorerScr);
         explorerScr = NULL;
+    }
+
+    if (imageScr != NULL)
+    {
+        lv_obj_clean(imageScr);
+        imageScr = NULL;
     }
 }

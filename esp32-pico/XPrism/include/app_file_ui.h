@@ -28,11 +28,13 @@ extern "C"
                                   const char *file2Name, const char *file3Name,
                                   int temp, lv_scr_load_anim_t animType, bool force);
     void appFileUiDisplayImageInit(lv_scr_load_anim_t animType);
-    void appFileUiDisplayImage(const char *file_name, lv_scr_load_anim_t animType);
+    void appFileUiDisplayImage(const char *fileName, lv_scr_load_anim_t animType);
     void appFileUiDisplayVideoInit(lv_scr_load_anim_t animType);
-    void appFileUiDisplayVideo(const char *file_name, lv_scr_load_anim_t animType);
-    void appFileUiDisplayTextInit(lv_scr_load_anim_t animType);
-    void appFileUiDisplayText(const char *file_name, lv_scr_load_anim_t animType);
+    void appFileUiDisplayVideo(const char *fileName, lv_scr_load_anim_t animType);
+    void appFileUiDisplayTextInit(unsigned char *text, int page,
+                                  lv_scr_load_anim_t animType);
+    void appFileUiDisplayText(unsigned char *text, int page,
+                              lv_scr_load_anim_t animType, bool force);
     void appFileUiDelete();
 
     extern const lv_img_dsc_t icon_file;

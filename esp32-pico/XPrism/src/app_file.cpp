@@ -2,6 +2,7 @@
 #include "app_file_ui.h"
 #include "icons.h"
 #include "app_center.h"
+#include <TJpg_Decoder.h>
 
 #define APP_FILE_NAME "文件"
 #define APP_FILE_INFO "文件信息"
@@ -9,6 +10,8 @@
 #define FILE_CONFIG_PATH "/file.cfg"
 
 #define ROOT "/" // 根目录
+
+#define TEXT_PAGE_SIZE 128 // 文本每页大小
 
 struct FileCfg
 {
@@ -31,10 +34,36 @@ struct FileAppRunData
     File_Info *currFile;
 
     int temp;
+
+    std::vector<int> textPageStartIndex;
+    int textCurrPage;
+    unsigned char *textBuffer;
+    boolean textIsEnd;
 };
 
 static FileCfg fileCfg;
 static FileAppRunData *fileAppRunData = NULL;
+
+static boolean isFirstByte(unsigned char c)
+{
+    // 单字节字符的最高位为 0
+    if ((c & 0x80) == 0)
+        return 1;
+    // 多字节字符的第一个字节的最高位为 1，并且有几个连续的 1 就表示该字符占用几个字节
+    int count = 0;
+    while (c & 0x80)
+    {
+        count++;
+        c <<= 1;
+    }
+    return count >= 2 && count <= 4;
+}
+
+static boolean isLastByte(unsigned char c)
+{
+    // 多字节字符的最后一个字节的最高位为 10
+    return (c & 0xC0) == 0x80;
+}
 
 static void freeFileInfo()
 {
@@ -95,6 +124,83 @@ static void upDir()
     fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
 }
 
+static void getTextPage()
+{
+    String fileName;
+
+    if (fileAppRunData->currPath != ROOT)
+    {
+        fileName = fileAppRunData->currPath + "/" + fileAppRunData->currFile->file_name;
+    }
+    else
+    {
+        fileName = fileAppRunData->currPath + fileAppRunData->currFile->file_name;
+    }
+    File file = SD.open(fileName.c_str());
+
+    if (!file)
+    {
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    file.seek(fileAppRunData->textPageStartIndex[fileAppRunData->textCurrPage]);
+
+    if (fileAppRunData->textBuffer != NULL)
+    {
+        free(fileAppRunData->textBuffer);
+    }
+
+    fileAppRunData->textBuffer = (unsigned char *)malloc(TEXT_PAGE_SIZE + 1);
+    int length = file.read(fileAppRunData->textBuffer, TEXT_PAGE_SIZE);
+
+    if (length == -1)
+    {
+        Serial.println("Failed to read file");
+        return;
+    }
+
+    if (length < TEXT_PAGE_SIZE - 1)
+    {
+        fileAppRunData->textIsEnd = true;
+    }
+
+    fileAppRunData->textBuffer[length] = '\0';
+
+    while (length > 0 && !isFirstByte(fileAppRunData->textBuffer[length - 1]))
+    {
+        length--;
+        fileAppRunData->textBuffer[length - 1] = '\0';
+    }
+
+    if (length > 0 && isFirstByte(fileAppRunData->textBuffer[length - 1]) && (isLastByte(fileAppRunData->textBuffer[length - 2] || isFirstByte(fileAppRunData->textBuffer[length - 2]))))
+    {
+        length--;
+        fileAppRunData->textBuffer[length - 1] = '\0';
+    }
+
+    if (fileAppRunData->textIsEnd == false)
+    {
+        if (fileAppRunData->textPageStartIndex.size() > fileAppRunData->textCurrPage + 1)
+        {
+            fileAppRunData->textPageStartIndex[fileAppRunData->textCurrPage + 1] = fileAppRunData->textPageStartIndex[fileAppRunData->textCurrPage] + length - 1;
+        }
+        else
+        {
+            fileAppRunData->textPageStartIndex.push_back(fileAppRunData->textPageStartIndex[fileAppRunData->textCurrPage] + length - 1);
+        }
+    }
+
+    file.close();
+
+    Serial.print("length: ");
+    Serial.println(length);
+    Serial.print("textPageStartIndex: ");
+    Serial.println(fileAppRunData->textPageStartIndex[fileAppRunData->textCurrPage]);
+    Serial.print("textBuffer: ");
+    Serial.println((char *)fileAppRunData->textBuffer);
+}
+
 static void openFile()
 {
     if (fileAppRunData->currFile->file_type == FILE_TYPE_FOLDER)
@@ -103,22 +209,57 @@ static void openFile()
     }
     else
     {
-        String fileName = fileAppRunData->currPath + "/" + fileAppRunData->currFile->file_name;
-        int index = fileName.lastIndexOf(".");
-        String suffix = fileName.substring(index + 1);
-        if (suffix == "jpg" || suffix == "jpeg" || suffix == "bin")
+        String fileName;
+        if (fileAppRunData->currPath != ROOT)
         {
-        }
-        else if (suffix == "mjpeg")
-        {
-        }
-        else if (suffix == "txt")
-        {
+            fileName = fileAppRunData->currPath + "/" + fileAppRunData->currFile->file_name;
         }
         else
         {
+            fileName = fileAppRunData->currPath + fileAppRunData->currFile->file_name;
+        }
+        int index = fileName.lastIndexOf(".");
+        String suffix = fileName.substring(index + 1);
+        if (suffix == "jpg")
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_IMAGE;
+            TJpgDec.drawSdJpg(0, 0, fileName);
+        }
+        else if (suffix == "bin")
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_IMAGE;
+            appFileUiDisplayImage(fileName.c_str(), LV_SCR_LOAD_ANIM_NONE);
+        }
+        else if (suffix == "mjpeg")
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_VIDEO;
+        }
+        else if (suffix == "txt")
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_TEXT;
+            fileAppRunData->textPageStartIndex.clear();
+            fileAppRunData->textPageStartIndex.push_back(0);
+            fileAppRunData->textCurrPage = 0;
+            getTextPage();
+            appFileUiDisplayText(fileAppRunData->textBuffer,
+                                 fileAppRunData->textCurrPage,
+                                 LV_SCR_LOAD_ANIM_NONE, true);
+        }
+        else
+        {
+            return;
         }
     }
+}
+
+bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap)
+{
+    if (y >= m_tft->height())
+        return 0;
+
+    m_tft->pushImage(x, y, w, h, bitmap);
+
+    return 1;
 }
 
 static int fileInit(AppCenter *appCenter)
@@ -132,6 +273,13 @@ static int fileInit(AppCenter *appCenter)
     fileAppRunData->fileInfo = m_tf.listDir(fileAppRunData->currPath.c_str());
     fileAppRunData->currFile = fileAppRunData->fileInfo->next_node;
     fileAppRunData->temp = 0;
+    fileAppRunData->textBuffer = NULL;
+    fileAppRunData->textIsEnd = false;
+    fileAppRunData->textCurrPage = 0;
+    fileAppRunData->textPageStartIndex.clear();
+    fileAppRunData->textPageStartIndex.push_back(0);
+    TJpgDec.setJpgScale(1);
+    TJpgDec.setCallback(tft_output);
     appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
                              fileAppRunData->currFile->file_name,
                              fileAppRunData->currFile->next_node->file_name,
@@ -167,6 +315,11 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                 openDir(fileAppRunData->currFile->file_name);
                 force = true;
             }
+            else
+            {
+                openFile();
+                return;
+            }
         }
         else if (action->active == BTN_LEFT)
         {
@@ -186,6 +339,85 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                  fileAppRunData->currFile->next_node->file_name,
                                  fileAppRunData->currFile->next_node->next_node->file_name,
                                  fileAppRunData->temp, animType, force);
+    }
+    else if (fileAppRunData->uiType == FILE_UI_TYPE_IMAGE)
+    {
+        if (action->active == BTN_BACK)
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
+            appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
+                                     fileAppRunData->currFile->file_name,
+                                     fileAppRunData->currFile->next_node->file_name,
+                                     fileAppRunData->currFile->next_node->next_node->file_name,
+                                     fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
+        }
+        else if (action->active == BTN_FORWARD)
+        {
+        }
+        else if (action->active == BTN_LEFT)
+        {
+        }
+        else if (action->active == BTN_RIGHT)
+        {
+        }
+    }
+    else if (fileAppRunData->uiType == FILE_UI_TYPE_VIDEO)
+    {
+        if (action->active == BTN_BACK)
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
+            appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
+                                     fileAppRunData->currFile->file_name,
+                                     fileAppRunData->currFile->next_node->file_name,
+                                     fileAppRunData->currFile->next_node->next_node->file_name,
+                                     fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
+        }
+        else if (action->active == BTN_FORWARD)
+        {
+        }
+        else if (action->active == BTN_LEFT)
+        {
+        }
+        else if (action->active == BTN_RIGHT)
+        {
+        }
+    }
+    else if (fileAppRunData->uiType == FILE_UI_TYPE_TEXT)
+    {
+        if (action->active == BTN_BACK)
+        {
+            fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
+            appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
+                                     fileAppRunData->currFile->file_name,
+                                     fileAppRunData->currFile->next_node->file_name,
+                                     fileAppRunData->currFile->next_node->next_node->file_name,
+                                     fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
+        }
+        else if (action->active == BTN_FORWARD)
+        {
+        }
+        else if (action->active == BTN_LEFT)
+        {
+            if (fileAppRunData->textCurrPage > 0)
+            {
+                fileAppRunData->textCurrPage--;
+            }
+            getTextPage();
+            appFileUiDisplayText(fileAppRunData->textBuffer,
+                                 fileAppRunData->textCurrPage,
+                                 LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
+        }
+        else if (action->active == BTN_RIGHT)
+        {
+            if (fileAppRunData->textIsEnd == false)
+            {
+                fileAppRunData->textCurrPage++;
+            }
+            getTextPage();
+            appFileUiDisplayText(fileAppRunData->textBuffer,
+                                 fileAppRunData->textCurrPage,
+                                 LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
+        }
     }
 
     delay(100);
