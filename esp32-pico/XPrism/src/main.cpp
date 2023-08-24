@@ -11,7 +11,7 @@
 #include <esp32-hal-timer.h>
 
 static bool isCheckAction = false;
-static bool isCheckGPS = false;
+// static bool isCheckGPS = false;
 
 Action *act_info;     // 存放按键返回的数据
 AppCenter *appCenter; // APP控制器
@@ -22,12 +22,12 @@ void actionCheckHandle(TimerHandle_t xTimer)
     // 标志需要检测动作
     isCheckAction = true;
 }
-TimerHandle_t xTimerGPS = NULL;
-void gpsCheckHandle(TimerHandle_t xTimer)
-{
-    // 标志需要检测动作
-    isCheckGPS = true;
-}
+// TimerHandle_t xTimerGPS = NULL;
+// void gpsCheckHandle(TimerHandle_t xTimer)
+// {
+//     // 标志需要检测动作
+//     isCheckGPS = true;
+// }
 
 void setup()
 {
@@ -99,12 +99,12 @@ void setup()
     xTimerAction = xTimerCreate("Action Check",
                                 200 / portTICK_PERIOD_MS,
                                 pdTRUE, (void *)0, actionCheckHandle);
-    // 定义一个GPS检测定时器
-    xTimerGPS = xTimerCreate("GPS Check",
-                             2000 / portTICK_PERIOD_MS,
-                             pdTRUE, (void *)0, gpsCheckHandle);
+    // // 定义一个GPS检测定时器
+    // xTimerGPS = xTimerCreate("GPS Check",
+    //                          2000 / portTICK_PERIOD_MS,
+    //                          pdTRUE, (void *)0, gpsCheckHandle);
     xTimerStart(xTimerAction, 0);
-    xTimerStart(xTimerGPS, 0);
+    // xTimerStart(xTimerGPS, 0);
 }
 
 void loop()
@@ -116,10 +116,10 @@ void loop()
         isCheckAction = false;
         act_info = m_btn.getAction();
     }
-    if (isCheckGPS)
-    {
-        isCheckGPS = false;
+    // if (isCheckGPS)
+    // {
+    //     isCheckGPS = false;
         m_gps.update();
-    }
+    // }
     appCenter->main_process(act_info); // 运行当前进程
 }

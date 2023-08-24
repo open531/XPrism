@@ -18,6 +18,7 @@ static lv_obj_t *latLabel;
 static lv_obj_t *lonLabel;
 static lv_obj_t *arrowImg;
 static lv_obj_t *textLabel;
+static lv_obj_t *distanceLabel;
 
 static int getDegree(double latlon)
 {
@@ -57,7 +58,7 @@ static int getDistance(double lat1, double lon1, double lat2, double lon2)
                              cos(radLat1) * cos(radLat2) * pow(sin(b / 2), 2)));
     s = s * EARTH_RADIUS;
     s = round(s * 10000) / 10000;
-    return (int)s;
+    return (int)(s * 1000);
 }
 
 void appNaviUiInit()
@@ -110,10 +111,15 @@ void appNaviUiDisplayInit(lv_scr_load_anim_t animType)
     lv_obj_add_style(textLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(textLabel, "请使用手机进行导航");
 
+    distanceLabel = lv_label_create(scr);
+    lv_obj_add_style(distanceLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_text(distanceLabel, "");
+
     lv_obj_align(latLabel, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_align(lonLabel, LV_ALIGN_TOP_MID, 0, 30);
     lv_obj_align(arrowImg, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_align(textLabel, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_align(textLabel, LV_ALIGN_BOTTOM_MID, 0, -30);
+    lv_obj_align(distanceLabel, LV_ALIGN_BOTTOM_MID, 0, 0);
 }
 
 void appNaviUiDisplay(struct Navi navInfo, lv_scr_load_anim_t animType)
@@ -129,12 +135,20 @@ void appNaviUiDisplay(struct Navi navInfo, lv_scr_load_anim_t animType)
                               getDegree(navInfo.currLon), getMinute(navInfo.currLon),
                               getSecond(navInfo.currLon), getLonEW(navInfo.currLon));
         lv_label_set_text(textLabel, navInfo.instructionText[navInfo.currInstruction]);
+        if (navInfo.currInstruction < navInfo.instructionLength - 1)
+        {
+            lv_label_set_text_fmt(distanceLabel, "%d米后%s", getDistance(navInfo.currLat, navInfo.currLon, navInfo.pointLat[navInfo.instructionIntervalBegin[navInfo.currInstruction + 1]], navInfo.pointLon[navInfo.instructionIntervalBegin[navInfo.currInstruction + 1]]),
+                                  navInfo.instructionText[navInfo.currInstruction + 1]);
+        }
+        else
+        {
+            lv_label_set_text(distanceLabel, "");
+        }
         switch (navInfo.instructionSign[navInfo.currInstruction])
         {
         case -8:
             lv_img_set_src(arrowImg, &icon_left_uturn);
             break;
-        case -7:
         case -3:
         case -2:
             lv_img_set_src(arrowImg, &icon_left);
@@ -142,7 +156,9 @@ void appNaviUiDisplay(struct Navi navInfo, lv_scr_load_anim_t animType)
         case -1:
             lv_img_set_src(arrowImg, &icon_left_slight);
             break;
+        case -7:
         case 0:
+        case 7:
             lv_img_set_src(arrowImg, &icon_continue);
             break;
         case 1:
@@ -150,7 +166,6 @@ void appNaviUiDisplay(struct Navi navInfo, lv_scr_load_anim_t animType)
             break;
         case 2:
         case 3:
-        case 7:
             lv_img_set_src(arrowImg, &icon_right);
             break;
         case 8:

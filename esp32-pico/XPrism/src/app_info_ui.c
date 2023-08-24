@@ -54,7 +54,7 @@ static int getDistance(double lat1, double lon1, double lat2, double lon2)
                              cos(radLat1) * cos(radLat2) * pow(sin(b / 2), 2)));
     s = s * EARTH_RADIUS;
     s = round(s * 10000) / 10000;
-    return (int)s;
+    return (int)(s * 1000);
 }
 
 void appInfoUiInit()
