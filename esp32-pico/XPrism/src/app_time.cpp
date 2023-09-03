@@ -70,14 +70,14 @@ static void readTimeCfg(TimeCfg *cfg)
 static TimeCfg timeCfg;
 static TimeRunData *timeRunData = NULL;
 
-static long long get_timestamp()
+static long long getTimestamp()
 {
     timeRunData->preNetTimestamp = timeRunData->preNetTimestamp + (GET_SYS_MILLIS() - timeRunData->preLocalTimestamp);
     timeRunData->preLocalTimestamp = GET_SYS_MILLIS();
     return timeRunData->preNetTimestamp;
 }
 
-static long long get_timestamp(String url)
+static long long getTimestamp(String url)
 {
     if (WL_CONNECTED != WiFi.status())
         return 0;
@@ -160,7 +160,7 @@ static void timeRoutine(AppCenter *appCenter, const Action *action)
     }
     else if (GET_SYS_MILLIS() - timeRunData->preLocalTimestamp > 400)
     {
-        UpdateTime_RTC(get_timestamp());
+        UpdateTime_RTC(getTimestamp());
     }
 
     timeRunData->forceUpdate = 0;
@@ -194,7 +194,7 @@ static void timeOnMessage(const char *from, const char *to,
 {
     if (type == APP_MESSAGE_WIFI_CONN)
     {
-        long long timestamp = get_timestamp(TIME_API);
+        long long timestamp = getTimestamp(TIME_API);
         UpdateTime_RTC(timestamp);
     }
     else if (type == APP_MESSAGE_GET_PARAM)

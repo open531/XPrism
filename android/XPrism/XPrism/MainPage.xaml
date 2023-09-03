@@ -12,13 +12,15 @@
             <Label />
             <Button Text="相机" ImageSource="material_navigation_white.png" ContentLayout="Left, 0" Clicked="OnCamClicked" FontSize="18" />
             <Label />
-            <Button Text="信息串口" ImageSource="material_message_white.png" ContentLayout="Left, 0" Clicked="OnSerialClicked" FontSize="18" />
+            <!--<Button Text="信息串口" ImageSource="material_message_white.png" ContentLayout="Left, 0" Clicked="OnSerialClicked" FontSize="18" />
+            <Label />-->
+            <Button Text="蓝牙" ImageSource="material_wrench_white.png" ContentLayout="Left, 0" Clicked="OnBluetoothClicked" FontSize="18" />
             <Label />
             <Button Text="眼镜设置" ImageSource="material_wrench_white.png" ContentLayout="Left, 0" Clicked="OnSettingClicked" FontSize="18" />
             <Label />
             <Button Text="关于 XPrism" ImageSource="material_information_white.png" ContentLayout="Left, 0" Clicked="OnAboutClicked" FontSize="18" />
             <Label />
-            <Button Text="DebugPage" ImageSource="material_bug_white.png" ContentLayout="Left, 0" Clicked="OnDebugClicked" FontSize="18" />
+            <!--<Button Text="DebugPage" ImageSource="material_bug_white.png" ContentLayout="Left, 0" Clicked="OnDebugClicked" FontSize="18" />-->
         </VerticalStackLayout>
     </ScrollView>
 

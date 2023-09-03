@@ -39,39 +39,39 @@ static void readClockCfg(ClockCfg *cfg)
 static ClockCfg clockCfg;
 static ClockRunData *clockRunData = NULL;
 
-static long long get_timestamp()
+static long long getTimestamp()
 {
     clockRunData->preLocalTimestamp = GET_SYS_MILLIS();
     return clockRunData->preLocalTimestamp;
 }
 
-static void stopwatch_start()
+static void stopwatchStart()
 {
-    clockRunData->stopwatchBegin = get_timestamp();
-    Serial.println("stopwatch_start");
+    clockRunData->stopwatchBegin = getTimestamp();
+    Serial.println("stopwatchStart");
     Serial.println(clockRunData->stopwatchTemp);
 }
 
-static void stopwatch_stop()
+static void stopwatchStop()
 {
-    clockRunData->stopwatchEnd = get_timestamp();
+    clockRunData->stopwatchEnd = getTimestamp();
     clockRunData->stopwatchTemp += clockRunData->stopwatchEnd - clockRunData->stopwatchBegin;
-    Serial.println("stopwatch_stop");
+    Serial.println("stopwatchStop");
     Serial.println(clockRunData->stopwatchTemp);
 }
 
-static void update_stopwatch()
+static void updateStopwatch()
 {
     double stopwatchInfo;
     if (clockRunData->stopwatchRunning)
     {
-        stopwatchInfo = clockRunData->stopwatchTemp + get_timestamp() - clockRunData->stopwatchBegin;
+        stopwatchInfo = clockRunData->stopwatchTemp + getTimestamp() - clockRunData->stopwatchBegin;
     }
     else
     {
         stopwatchInfo = clockRunData->stopwatchTemp;
     }
-    appClockUiDisplayStopwatch(stopwatchInfo, LV_SCR_LOAD_ANIM_NONE);
+    appClockUiDisplayStopwatch(stopwatchInfo, clockRunData->stopwatchTemp, LV_SCR_LOAD_ANIM_NONE);
 }
 
 static int clockInit(AppCenter *appCenter)
@@ -104,20 +104,19 @@ static void clockRoutine(AppCenter *appCenter, const Action *action)
         if (clockRunData->stopwatchRunning)
         {
             clockRunData->stopwatchRunning = false;
-            stopwatch_stop();
+            stopwatchStop();
         }
         else
         {
             clockRunData->stopwatchRunning = true;
-            stopwatch_start();
+            stopwatchStart();
         }
     }
 
     if (GET_SYS_MILLIS() - clockRunData->preLocalTimestamp > 400)
     {
-        update_stopwatch();
+        updateStopwatch();
     }
-
 }
 
 static void clockBackground(AppCenter *appCenter, const Action *action)

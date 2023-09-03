@@ -27,6 +27,11 @@ public partial class MainPage : ContentPage
         // 打开发送页面
         await Navigation.PushAsync(new SerialPage());
     }
+    public async void OnBluetoothClicked(object sender, System.EventArgs e)
+    {
+        // 打开蓝牙页面
+        await Navigation.PushAsync(new BluetoothPage());
+    }
     public async void OnSettingClicked(object sender, System.EventArgs e)
     {
         // 打开设置页面

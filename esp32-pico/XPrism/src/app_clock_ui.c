@@ -14,6 +14,7 @@ static lv_style_t numBigStyle;
 static lv_obj_t *stopwatchScr = NULL;
 
 static lv_obj_t *clockStopwatchLabel = NULL;
+static lv_obj_t *clockTempLabel = NULL;
 
 void appClockUiInit()
 {
@@ -55,10 +56,16 @@ void appClockUiDisplayStopwatchInit(lv_scr_load_anim_t animType)
     lv_label_set_recolor(clockStopwatchLabel, true);
     lv_label_set_text(clockStopwatchLabel, "00:00.00");
 
+    clockTempLabel = lv_label_create(stopwatchScr);
+    lv_obj_add_style(clockTempLabel, &textStyle, LV_STATE_DEFAULT);
+    lv_label_set_recolor(clockTempLabel, true);
+    lv_label_set_text(clockTempLabel, "00:00.00");
+
     lv_obj_align(clockStopwatchLabel, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(clockTempLabel, LV_ALIGN_CENTER, 0, 100);
 }
 
-void appClockUiDisplayStopwatch(unsigned long stopwatchInfo, lv_scr_load_anim_t animType)
+void appClockUiDisplayStopwatch(unsigned long stopwatchInfo, unsigned long stopwatchTemp, lv_scr_load_anim_t animType)
 {
     appClockUiDisplayStopwatchInit(animType);
 
@@ -66,6 +73,11 @@ void appClockUiDisplayStopwatch(unsigned long stopwatchInfo, lv_scr_load_anim_t 
                           stopwatchInfo / 60000,
                           (stopwatchInfo % 60000) / 1000,
                           (stopwatchInfo % 1000) / 10);
+
+    lv_label_set_text_fmt(clockTempLabel, "%02d:%02d.%02d",
+                          stopwatchTemp / 60000,
+                          (stopwatchTemp % 60000) / 1000,
+                          (stopwatchTemp % 1000) / 10);
 
     if (animType != LV_SCR_LOAD_ANIM_NONE)
     {

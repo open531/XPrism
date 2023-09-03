@@ -5,18 +5,15 @@
              Title="眼镜设置">
     <ScrollView>
         <VerticalStackLayout Margin="16">
-            <Label Text="时间设置" FontSize="Title" HorizontalOptions="Center" />
+            <Label Text="网络设置" FontSize="Title" HorizontalOptions="Center" />
             <Label />
-            <HorizontalStackLayout HorizontalOptions="Center">
-                <DatePicker x:Name="datePicker" FontSize="18" TextColor="#7430da" HorizontalOptions="Center" />
-                <Label Text="    "/>
-                <TimePicker x:Name="timePicker" FontSize="18" TextColor="#7430da" HorizontalOptions="Center" />
-            </HorizontalStackLayout>
-            <HorizontalStackLayout HorizontalOptions="Center">
-                <Button Text="本机时间" Clicked="OnTimeRefreshClicked" />
-                <Label Text="    "/>
-                <Button Text="设置时间" Clicked="OnTimeSetClicked" />
-            </HorizontalStackLayout>
+            <Label Text="Pico IP" FontSize="18" HorizontalTextAlignment="Center" />
+            <Entry x:Name="picoIPEntry" Placeholder="Pico IP" FontSize="18" HorizontalTextAlignment="Center" />
+            <Button Text="更新" Clicked="OnPicoIPClicked" />
+            <Label />
+            <Label Text="Cam IP" FontSize="18" HorizontalTextAlignment="Center" />
+            <Entry x:Name="camIPEntry" Placeholder="Cam IP" FontSize="18" HorizontalTextAlignment="Center" />
+            <Button Text="更新" Clicked="OnCamIPClicked" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
