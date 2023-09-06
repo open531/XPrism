@@ -110,6 +110,8 @@ static long long getTimestamp(String url)
     }
     http.end();
 
+    m_timestamp = timeRunData->preNetTimestamp;
+
     return timeRunData->preNetTimestamp;
 }
 

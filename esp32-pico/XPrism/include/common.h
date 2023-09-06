@@ -8,23 +8,29 @@
 #include "sd_card.h"
 #include "display.h"
 #include "btn.h"
-#include "network.h"
 #include "gps.h"
+#include "imu.h"
+#include "network.h"
 #include <TFT_eSPI.h>
 
-// SD_Card
+// SDCard
 #define SD_SCK 14
 #define SD_MISO 26
 #define SD_MOSI 13
 #define SD_SS 5
 
+// MPU6050
+#define MPU_SDA 21
+#define MPU_SCL 22
+
 extern Buttons m_btn; // 原则上只提供给主程序调用
 extern SdCard m_tf;
 // extern Config g_cfg;       // 全局配置文件
-extern Network m_network;  // 网络连接
-extern FlashFS m_flashCfg; // flash中的文件系统（替代原先的Preferences）
-extern Display m_screen;   // 屏幕对象
-extern GPS m_gps;          // GPS对象
+extern Network m_network;    // 网络连接
+extern FlashFS m_flashCfg;   // flash中的文件系统（替代原先的Preferences）
+extern Display m_screen;     // 屏幕对象
+extern GPS m_gps;            // GPS对象
+extern uint64_t m_timestamp; // 时间戳
 
 boolean doDelayMillisTime(unsigned long interval,
                           unsigned long *previousMillis,

@@ -13,7 +13,7 @@ const void *pre_img_path = NULL;
 static lv_style_t default_style;
 static lv_style_t app_name_style;
 
-LV_FONT_DECLARE(lv_font_wqy_microhei_24);
+LV_FONT_DECLARE(lv_font_source_han_sans_24);
 
 void app_control_gui_init(void)
 {
@@ -31,7 +31,7 @@ void app_control_gui_init(void)
     lv_style_init(&app_name_style);
     lv_style_set_text_opa(&app_name_style, LV_OPA_COVER);
     lv_style_set_text_color(&app_name_style, lv_color_white());
-    lv_style_set_text_font(&app_name_style, &lv_font_wqy_microhei_24);
+    lv_style_set_text_font(&app_name_style, &lv_font_source_han_sans_24);
 
     // APP图标页
     app_scr = lv_obj_create(NULL);

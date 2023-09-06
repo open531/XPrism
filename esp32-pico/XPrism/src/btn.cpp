@@ -1,7 +1,11 @@
 #include "btn.h"
 #include "common.h"
 
-const char *action_type_info[] = {"BTN_NONE", "BTN_BACK", "BTN_FORWARD", "BTN_LEFT", "BTN_RIGHT"};
+const char *action_type_info[] = {"BTN_NONE",
+                                  "BTN_BACK",
+                                  "BTN_FORWARD",
+                                  "BTN_LEFT",
+                                  "BTN_RIGHT"};
 
 Buttons::Buttons()
 {

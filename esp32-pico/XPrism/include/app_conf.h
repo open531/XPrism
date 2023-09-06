@@ -43,5 +43,9 @@
 #if APP_SPORT_USE
 #include "app_sport.h"
 #endif
+#define APP_CALENDAR_USE 1
+#if APP_CALENDAR_USE
+#include "app_calendar.h"
+#endif
 
 #endif

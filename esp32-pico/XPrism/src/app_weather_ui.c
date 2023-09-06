@@ -4,7 +4,7 @@
 
 LV_FONT_DECLARE(lv_font_ubuntu_b_108)
 LV_FONT_DECLARE(lv_font_ubuntu_b_64)
-LV_FONT_DECLARE(lv_font_wqy_microhei_24);
+LV_FONT_DECLARE(lv_font_source_han_sans_24);
 
 static lv_style_t defaultStyle;
 static lv_style_t textStyle;
@@ -35,7 +35,7 @@ void appWeatherUiInit()
     lv_style_init(&textStyle);
     lv_style_set_text_opa(&textStyle, LV_OPA_COVER);
     lv_style_set_text_color(&textStyle, lv_color_hex(0xffffff));
-    lv_style_set_text_font(&textStyle, &lv_font_wqy_microhei_24);
+    lv_style_set_text_font(&textStyle, &lv_font_source_han_sans_24);
 
     lv_style_init(&numSmallStyle);
     lv_style_set_text_opa(&numSmallStyle, LV_OPA_COVER);

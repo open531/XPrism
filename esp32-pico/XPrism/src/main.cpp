@@ -81,6 +81,9 @@ void setup()
 #if APP_SPORT_USE
     appCenter->app_install(&sportApp);
 #endif
+#if APP_CALENDAR_USE
+    appCenter->app_install(&calendarApp);
+#endif
 
     m_btn.init();
 
@@ -119,7 +122,7 @@ void loop()
     // if (isCheckGPS)
     // {
     //     isCheckGPS = false;
-        m_gps.update();
+    m_gps.update();
     // }
     appCenter->main_process(act_info); // 运行当前进程
 }
