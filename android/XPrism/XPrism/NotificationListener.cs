@@ -22,14 +22,14 @@ namespace XPrism
 
             // Truncate the title and text if they are too long
 
-            if (title.Length > 32)
+            if (title.Length > 10)
             {
-                title = title.Substring(0, 28);
+                title = title.Substring(0, 9);
                 title += "...";
             }
-            if (text.Length > 128)
+            if (text.Length > 42)
             {
-                text = text.Substring(0, 124);
+                text = text.Substring(0, 40);
                 text += "...";
             }
 

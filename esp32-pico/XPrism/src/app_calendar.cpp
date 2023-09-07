@@ -70,10 +70,31 @@ static void calendarRoutine(AppCenter *appCenter, const Action *action)
     else if (action->action == ACT_LEFT)
     {
         calendarAppRunData->currDate.month--;
+        if (calendarAppRunData->currDate.month < 1)
+        {
+            calendarAppRunData->currDate.month = 12;
+            calendarAppRunData->currDate.year--;
+        }
     }
     else if (action->action == ACT_RIGHT)
     {
         calendarAppRunData->currDate.month++;
+        if (calendarAppRunData->currDate.month > 12)
+        {
+            calendarAppRunData->currDate.month = 1;
+            calendarAppRunData->currDate.year++;
+        }
+    }
+
+    if (calendarAppRunData->currDate.year < 1900)
+    {
+        calendarAppRunData->currDate.year = 1900;
+        calendarAppRunData->currDate.month = 1;
+    }
+    else if (calendarAppRunData->currDate.year > 2099)
+    {
+        calendarAppRunData->currDate.year = 2099;
+        calendarAppRunData->currDate.month = 12;
     }
 
     appCalendarUiDisplay(calendarAppRunData->today,

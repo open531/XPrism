@@ -2,6 +2,7 @@
 #include "app_center_ui.h"
 #include "common.h"
 #include "app.h"
+#include "icons.h"
 #include "Arduino.h"
 
 String wifi_ssid = "Redmi K50";
@@ -65,7 +66,7 @@ void AppCenter::centerInit(void)
 
     app_control_gui_init();
     appList[0] = new App();
-    appList[0]->app_image = &app_loading;
+    appList[0]->app_image = &icon_loading;
     appList[0]->app_name = "Loading...";
     appTypeList[0] = APP_TYPE_REAL_TIME;
     app_control_display_scr(appList[currAppIndex]->app_image,

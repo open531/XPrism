@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XPrism.MemoPage"
+             Title="备忘笔记">
+    <ScrollView>
+        <VerticalStackLayout Margin="16">
+            <Label Text="添加备忘" FontSize="Title" HorizontalTextAlignment="Center" />
+            <Label />
+            <Label Text="标题" FontSize="18" HorizontalTextAlignment="Center" />
+            <Entry x:Name="titleEntry" Placeholder="请输入备忘标题" FontSize="18" HorizontalTextAlignment="Center" ClearButtonVisibility="WhileEditing" />
+            <Label />
+            <Label Text="内容" FontSize="18" HorizontalTextAlignment="Center" />
+            <Editor x:Name="contentEditor" Placeholder="请输入备忘内容" FontSize="18" HorizontalTextAlignment="Center" AutoSize="TextChanges" />
+            <Label />
+            <Button Text="添加" Clicked="OnAddMemoClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
