@@ -203,18 +203,18 @@ static int notiInit(AppCenter *appCenter)
 static void notiRoutine(AppCenter *appCenter, const Action *action)
 {
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
-    if (action->active == BTN_BACK)
+    if (action->action == ACT_BACK)
     {
-        appCenter->app_exit();
+        appCenter->exitApp();
         return;
     }
-    else if (action->active == BTN_RIGHT)
+    else if (action->action == ACT_RIGHT)
     {
         animType = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
         notiAppRunData->prevNoti = notiAppRunData->currNoti;
         notiAppRunData->currNoti = (notiAppRunData->currNoti + 1) % notiAppRunData->notiStream.size;
     }
-    else if (action->active == BTN_LEFT)
+    else if (action->action == ACT_LEFT)
     {
         animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
         notiAppRunData->prevNoti = notiAppRunData->currNoti;

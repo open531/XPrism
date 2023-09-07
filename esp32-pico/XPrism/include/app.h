@@ -31,30 +31,15 @@ struct Action;
 
 struct App
 {
-    // 应用程序名称 及title
     const char *app_name;
-
-    // APP的图片存放地址    APP应用图标 128*128
     const void *app_image;
-
-    // 应用程序的其他信息 如作者、版本号等等
     const char *app_info;
-
-    // APP的初始化函数 也可以为空或什么都不做（作用等效于arduino setup()函数）
     int (*app_init)(AppCenter *sys);
-
-    // APP的主程序函数入口指针
     void (*main_process)(AppCenter *sys,
-                         const Action *act_info);
-
-    // APP的任务的入口指针（一般一分钟内会调用一次）
+                         const Action *action);
     void (*background_task)(AppCenter *sys,
-                            const Action *act_info);
-
-    // 退出之前需要处理的回调函数 可为空
+                            const Action *action);
     int (*exit_callback)(void *param);
-
-    // 消息处理机制
     void (*message_handle)(const char *from, const char *to,
                            AppMsgType type, void *message,
                            void *ext_info);

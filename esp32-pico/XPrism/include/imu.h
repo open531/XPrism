@@ -6,6 +6,8 @@
 
 #define IMU_ACTION_HISTORY_BUF_LEN 5
 
+extern const char *imuActionTypeInfo[];
+
 enum IMUActionType
 {
     IMU_NONE,

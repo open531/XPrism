@@ -7,6 +7,16 @@
 String wifi_ssid = "Redmi K50";
 String wifi_password = "5irmvnfnz5rb6xn";
 
+const char *actionTypeInfo[] = {
+    "ACT_NONE",
+    "ACT_BACK",
+    "ACT_FORWARD",
+    "ACT_LEFT",
+    "ACT_RIGHT",
+    "ACT_UP",
+    "ACT_DOWN",
+};
+
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN", "APP_MESSAGE_WIFI_AP",
                                      "APP_MESSAGE_WIFI_ALIVE", "APP_MESSAGE_WIFI_DISCONN",
                                      "APP_MESSAGE_UPDATE_TIME", "APP_MESSAGE_MQTT_DATA",
@@ -24,11 +34,10 @@ void eventDealHandle(TimerHandle_t xTimer)
 AppCenter::AppCenter(const char *name)
 {
     strncpy(this->name, name, APP_CENTER_NAME_LEN);
-    app_num = 0;
-    app_exit_flag = 0;
-    cur_app_index = 0;
-    pre_app_index = 0;
-    // appList = new App[APP_MAX_NUM];
+    appNum = 0;
+    appExitFlag = 0;
+    currAppIndex = 0;
+    prevAppIndex = 0;
     m_wifi_status = false;
     m_preWifiReqMillis = GET_SYS_MILLIS();
 
@@ -40,10 +49,10 @@ AppCenter::AppCenter(const char *name)
     xTimerStart(xTimerEventDeal, 0);
 }
 
-void AppCenter::init(void)
+void AppCenter::centerInit(void)
 {
     // 设置CPU主频
-    if (1 == this->sys_cfg.power_mode)
+    if (1 == this->sysCfg.power_mode)
     {
         setCpuFrequencyMhz(240);
     }
@@ -51,7 +60,6 @@ void AppCenter::init(void)
     {
         setCpuFrequencyMhz(80);
     }
-    // uint32_t freq = getXtalFrequencyMhz(); // In MHz
     Serial.print(F("CpuFrequencyMhz: "));
     Serial.println(getCpuFrequencyMhz());
 
@@ -60,18 +68,16 @@ void AppCenter::init(void)
     appList[0]->app_image = &app_loading;
     appList[0]->app_name = "Loading...";
     appTypeList[0] = APP_TYPE_REAL_TIME;
-    app_control_display_scr(appList[cur_app_index]->app_image,
-                            appList[cur_app_index]->app_name,
+    app_control_display_scr(appList[currAppIndex]->app_image,
+                            appList[currAppIndex]->app_name,
                             LV_SCR_LOAD_ANIM_NONE, true);
-    send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
-    // Display();
+    sendMsgTo(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
 }
 
 void AppCenter::Display()
 {
-    // appList[0].app_image = &app_loading;
-    app_control_display_scr(appList[cur_app_index]->app_image,
-                            appList[cur_app_index]->app_name,
+    app_control_display_scr(appList[currAppIndex]->app_image,
+                            appList[currAppIndex]->app_name,
                             LV_SCR_LOAD_ANIM_NONE, true);
 }
 
@@ -79,134 +85,123 @@ AppCenter::~AppCenter()
 {
 }
 
-int AppCenter::app_is_legal(const App *app_obj)
+int AppCenter::isAppLegal(const App *app_obj)
 {
     // APP的合法性检测
     if (NULL == app_obj)
         return 1;
-    if (APP_MAX_NUM <= app_num)
+    if (APP_MAX_NUM <= appNum)
         return 2;
     return 0;
 }
 
-// 将APP安装到app_controller中
-int AppCenter::app_install(App *app, AppType app_type)
+int AppCenter::installApp(App *app, AppType app_type)
 {
-    int ret_code = app_is_legal(app);
+    int ret_code = isAppLegal(app);
     if (0 != ret_code)
     {
         return ret_code;
     }
 
-    appList[app_num] = app;
-    appTypeList[app_num] = app_type;
-    ++app_num;
+    appList[appNum] = app;
+    appTypeList[appNum] = app_type;
+    ++appNum;
     return 0; // 安装成功
 }
 
-// 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
-int AppCenter::remove_background_task(void)
+int AppCenter::removeBackgroundTask(void)
 {
-    return 0; // 安装成功
+    return 0;
 }
 
-// 将APP从app_controller中卸载（删除）
-int AppCenter::app_uninstall(const App *app)
+int AppCenter::uninstallApp(const App *app)
 {
     // todo
     return 0;
 }
 
-int AppCenter::app_auto_start()
+int AppCenter::autoStart()
 {
     // APP自启动
-    int index = this->getAppIdxByName(sys_cfg.auto_start_app.c_str());
+    int index = this->getAppIdxByName(sysCfg.auto_start_app.c_str());
     if (index < 0)
     {
         // 没找到相关的APP
         return 0;
     }
     // 进入自启动的APP
-    app_exit_flag = 1; // 进入app, 如果已经在
-    cur_app_index = index;
-    (*(appList[cur_app_index]->app_init))(this); // 执行APP初始化
+    appExitFlag = 1;
+    currAppIndex = index;
+    (*(appList[currAppIndex]->app_init))(this); // 执行APP初始化
     return 0;
 }
 
-int AppCenter::main_process(Action *act_info)
+int AppCenter::centerRoutine(Action *action)
 {
-    if (ActionType::BTN_NONE != act_info->active)
+    if (action->action != ACT_NONE)
     {
-        Serial.print(F("[Operate]\tact_info->active: "));
-        Serial.println(action_type_info[act_info->active]);
+        Serial.print(F("[Operate]\taction->active: "));
+        Serial.println(actionTypeInfo[action->action]);
     }
 
     if (isRunEventDeal)
     {
         isRunEventDeal = false;
         // 扫描事件
-        this->req_event_deal();
+        this->dealEvent();
     }
 
-    // // wifi自动关闭(在节能模式下)
-    // if (0 == sys_cfg.power_mode && true == m_wifi_status && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
-    // {
-    //     send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
-    // }
-
-    if (0 == app_exit_flag)
+    if (0 == appExitFlag)
     {
         // 当前没有进入任何app
         lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-        if (ActionType::BTN_RIGHT == act_info->active)
+        if (action->action == ACT_RIGHT)
         {
             anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-            pre_app_index = cur_app_index;
-            cur_app_index = (cur_app_index + 1) % app_num;
-            Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
+            prevAppIndex = currAppIndex;
+            currAppIndex = (currAppIndex + 1) % appNum;
+            Serial.println(String("Current App: ") + appList[currAppIndex]->app_name);
         }
-        else if (ActionType::BTN_LEFT == act_info->active)
+        else if (action->action == ACT_LEFT)
         {
             anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-            pre_app_index = cur_app_index;
-            // 以下等效与 processId = (processId - 1 + APP_NUM) % 4;
-            // +3为了不让数据溢出成负数，而导致取模逻辑错误
-            cur_app_index = (cur_app_index - 1 + app_num) % app_num; // 此处的3与p_processList的长度一致
-            Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
+            prevAppIndex = currAppIndex;
+            currAppIndex = (currAppIndex - 1 + appNum) % appNum;
+            Serial.println(String("Current App: ") + appList[currAppIndex]->app_name);
         }
-        else if (ActionType::BTN_FORWARD == act_info->active)
+        else if (action->action == ACT_FORWARD)
         {
-            app_exit_flag = 1; // 进入app
-            if (NULL != appList[cur_app_index]->app_init)
+            appExitFlag = 1; // 进入app
+            if (NULL != appList[currAppIndex]->app_init)
             {
-                (*(appList[cur_app_index]->app_init))(this); // 执行APP初始化
+                (*(appList[currAppIndex]->app_init))(this); // 执行APP初始化
             }
         }
 
-        if (ActionType::BTN_FORWARD != act_info->active) // && UNKNOWN != act_info->active
+        if (action->action != ACT_FORWARD)
         {
-            app_control_display_scr(appList[cur_app_index]->app_image,
-                                    appList[cur_app_index]->app_name,
+            app_control_display_scr(appList[currAppIndex]->app_image,
+                                    appList[currAppIndex]->app_name,
                                     anim_type, false);
             vTaskDelay(200 / portTICK_PERIOD_MS);
         }
     }
     else
     {
-        app_control_display_scr(appList[cur_app_index]->app_image,
-                                appList[cur_app_index]->app_name,
+        app_control_display_scr(appList[currAppIndex]->app_image,
+                                appList[currAppIndex]->app_name,
                                 LV_SCR_LOAD_ANIM_NONE, false);
         // 运行APP进程 等效于把控制权交给当前APP
-        (*(appList[cur_app_index]->main_process))(this, act_info);
+        (*(appList[currAppIndex]->main_process))(this, action);
     }
-    act_info->active = ActionType::BTN_NONE;
-    act_info->isValid = 0;
+    action->action = ACT_NONE;
+    action->isValid = 0;
     return 0;
 }
 
 App *AppCenter::getAppByName(const char *name)
 {
-    for (int pos = 0; pos < app_num; ++pos)
+    for (int pos = 0; pos < appNum; ++pos)
     {
         if (!strcmp(name, appList[pos]->app_name))
         {
@@ -219,7 +214,7 @@ App *AppCenter::getAppByName(const char *name)
 
 int AppCenter::getAppIdxByName(const char *name)
 {
-    for (int pos = 0; pos < app_num; ++pos)
+    for (int pos = 0; pos < appNum; ++pos)
     {
         if (!strcmp(name, appList[pos]->app_name))
         {
@@ -231,9 +226,9 @@ int AppCenter::getAppIdxByName(const char *name)
 }
 
 // 通信中心（消息转发）
-int AppCenter::send_to(const char *from, const char *to,
-                       AppMsgType type, void *message,
-                       void *ext_info)
+int AppCenter::sendMsgTo(const char *from, const char *to,
+                         AppMsgType type, void *message,
+                         void *ext_info)
 {
     App *fromApp = getAppByName(from); // 来自谁 有可能为空
     App *toApp = getAppByName(to);     // 发送给谁 有可能为空
@@ -265,13 +260,13 @@ int AppCenter::send_to(const char *from, const char *to,
         else if (!strcmp(to, CTRL_NAME))
         {
             Serial.print("[Massage]\tFrom " + String(fromApp->app_name) + "\tTo " + CTRL_NAME + "\n");
-            deal_config(type, (const char *)message, (char *)ext_info);
+            dealCfg(type, (const char *)message, (char *)ext_info);
         }
     }
     return 0;
 }
 
-int AppCenter::req_event_deal(void)
+int AppCenter::dealEvent(void)
 {
     // 请求事件的处理
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();)
@@ -282,7 +277,7 @@ int AppCenter::req_event_deal(void)
             continue;
         }
         // 后期可以拓展其他事件的处理
-        bool ret = wifi_event((*event).type);
+        bool ret = wifiEvent((*event).type);
         if (false == ret)
         {
             // 本事件没处理完成
@@ -322,24 +317,22 @@ int AppCenter::req_event_deal(void)
  *  wifi事件的处理
  *  事件处理成功返回true 否则false
  * */
-bool AppCenter::wifi_event(AppMsgType type)
+bool AppCenter::wifiEvent(AppMsgType type)
 {
     switch (type)
     {
     case APP_MESSAGE_WIFI_CONN:
     {
         // 更新请求
-        // CONN_ERROR == m_network.end_conn_wifi() ||
         if (false == m_wifi_status)
         {
-            // m_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str());
             m_network.start_conn_wifi(wifi_ssid.c_str(), wifi_password.c_str());
             m_wifi_status = true;
         }
         m_preWifiReqMillis = GET_SYS_MILLIS();
-        if ((WiFi.getMode() & WIFI_MODE_STA) == WIFI_MODE_STA && CONN_SUCC != m_network.end_conn_wifi())
+        if ((WiFi.getMode() & WIFI_MODE_STA) == WIFI_MODE_STA &&
+            CONN_SUCC != m_network.end_conn_wifi())
         {
-            // 在STA模式下 并且还没连接上wifi
             return false;
         }
     }
@@ -363,8 +356,7 @@ bool AppCenter::wifi_event(AppMsgType type)
     case APP_MESSAGE_WIFI_DISCONN:
     {
         m_network.close_wifi();
-        m_wifi_status = false; // 标志位
-        // m_preWifiReqMillis = GET_SYS_MILLIS() - WIFI_LIFE_CYCLE;
+        m_wifi_status = false;
     }
     break;
     case APP_MESSAGE_UPDATE_TIME:
@@ -374,15 +366,15 @@ bool AppCenter::wifi_event(AppMsgType type)
     case APP_MESSAGE_MQTT_DATA:
     {
         Serial.println("APP_MESSAGE_MQTT_DATA");
-        if (app_exit_flag == 1 && cur_app_index != getAppIdxByName("Heartbeat")) // 在其他app中
+        if (appExitFlag == 1)
         {
-            app_exit_flag = 0;
-            (*(appList[cur_app_index]->exit_callback))(NULL); // 退出当前app
+            appExitFlag = 0;
+            (*(appList[currAppIndex]->exit_callback))(NULL); // 退出当前app
         }
-        if (app_exit_flag == 0)
+        if (appExitFlag == 0)
         {
-            app_exit_flag = 1; // 进入app, 如果已经在
-            cur_app_index = getAppIdxByName("Heartbeat");
+            appExitFlag = 1; // 进入app, 如果已经在
+            currAppIndex = getAppIdxByName("Heartbeat");
             (*(getAppByName("Heartbeat")->app_init))(this); // 执行APP初始化
         }
     }
@@ -394,14 +386,14 @@ bool AppCenter::wifi_event(AppMsgType type)
     return true;
 }
 
-void AppCenter::app_exit()
+void AppCenter::exitApp()
 {
-    app_exit_flag = 0; // 退出APP
+    appExitFlag = 0; // 退出APP
 
     // 清空该对象的所有请求
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();)
     {
-        if (appList[cur_app_index] == (*event).from)
+        if (appList[currAppIndex] == (*event).from)
         {
             event = eventList.erase(event); // 删除该响应事件
         }
@@ -411,17 +403,17 @@ void AppCenter::app_exit()
         }
     }
 
-    if (NULL != appList[cur_app_index]->exit_callback)
+    if (NULL != appList[currAppIndex]->exit_callback)
     {
         // 执行APP退出回调
-        (*(appList[cur_app_index]->exit_callback))(NULL);
+        (*(appList[currAppIndex]->exit_callback))(NULL);
     }
-    app_control_display_scr(appList[cur_app_index]->app_image,
-                            appList[cur_app_index]->app_name,
+    app_control_display_scr(appList[currAppIndex]->app_image,
+                            appList[currAppIndex]->app_name,
                             LV_SCR_LOAD_ANIM_NONE, true);
 
     // 设置CPU主频
-    if (1 == this->sys_cfg.power_mode)
+    if (1 == this->sysCfg.power_mode)
     {
         setCpuFrequencyMhz(240);
     }

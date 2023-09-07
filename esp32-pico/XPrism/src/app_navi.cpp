@@ -253,9 +253,9 @@ static int naviInit(AppCenter *appCenter)
 static void naviRoutine(AppCenter *appCenter, const Action *action)
 {
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
-    if (action->active == BTN_BACK)
+    if (action->action == ACT_BACK)
     {
-        appCenter->app_exit();
+        appCenter->exitApp();
         return;
     }
 

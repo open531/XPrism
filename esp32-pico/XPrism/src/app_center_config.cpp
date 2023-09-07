@@ -5,7 +5,7 @@
 
 #define APP_CTRL_CONFIG_PATH "/sys.cfg"
 
-void AppCenter::read_config(SysUtilConfig *cfg)
+void AppCenter::readCfg(SysUtilConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -27,7 +27,7 @@ void AppCenter::read_config(SysUtilConfig *cfg)
     cfg->auto_calibration_mpu = 1; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
     cfg->mpu_order = 0;            // 操作方向
     cfg->auto_start_app = "时间";  // 无指定开机自启APP
-    this->write_config(cfg);
+    this->writeCfg(cfg);
     // }
     // else
     // {
@@ -47,9 +47,15 @@ void AppCenter::read_config(SysUtilConfig *cfg)
     //     cfg->mpu_order = atol(param[10]);
     //     cfg->auto_start_app = param[11]; // 开机自启APP的name
     // }
+    imuCfg.xAccelOffset = 0;
+    imuCfg.yAccelOffset = 0;
+    imuCfg.zAccelOffset = 0;
+    imuCfg.xGyroOffset = 0;
+    imuCfg.yGyroOffset = 0;
+    imuCfg.zGyroOffset = 0;
 }
 
-void AppCenter::write_config(SysUtilConfig *cfg)
+void AppCenter::writeCfg(SysUtilConfig *cfg)
 {
     char tmp[25];
     // 将配置数据保存在文件中（持久化）
@@ -89,7 +95,7 @@ void AppCenter::write_config(SysUtilConfig *cfg)
     m_tft->setRotation(cfg->rotation);
 }
 
-void AppCenter::deal_config(AppMsgType type,
+void AppCenter::dealCfg(AppMsgType type,
                             const char *key, char *value)
 {
     switch (type)
@@ -99,51 +105,51 @@ void AppCenter::deal_config(AppMsgType type,
     {
         if (!strcmp(key, "ssid_0"))
         {
-            snprintf(value, 32, "%s", sys_cfg.ssid_0.c_str());
+            snprintf(value, 32, "%s", sysCfg.ssid_0.c_str());
         }
         else if (!strcmp(key, "password_0"))
         {
-            snprintf(value, 32, "%s", sys_cfg.password_0.c_str());
+            snprintf(value, 32, "%s", sysCfg.password_0.c_str());
         }
         else if (!strcmp(key, "ssid_1"))
         {
-            snprintf(value, 32, "%s", sys_cfg.ssid_1.c_str());
+            snprintf(value, 32, "%s", sysCfg.ssid_1.c_str());
         }
         else if (!strcmp(key, "password_1"))
         {
-            snprintf(value, 32, "%s", sys_cfg.password_1.c_str());
+            snprintf(value, 32, "%s", sysCfg.password_1.c_str());
         }
         if (!strcmp(key, "ssid_2"))
         {
-            snprintf(value, 32, "%s", sys_cfg.ssid_2.c_str());
+            snprintf(value, 32, "%s", sysCfg.ssid_2.c_str());
         }
         else if (!strcmp(key, "password_2"))
         {
-            snprintf(value, 32, "%s", sys_cfg.password_2.c_str());
+            snprintf(value, 32, "%s", sysCfg.password_2.c_str());
         }
         else if (!strcmp(key, "power_mode"))
         {
-            snprintf(value, 32, "%u", sys_cfg.power_mode);
+            snprintf(value, 32, "%u", sysCfg.power_mode);
         }
         else if (!strcmp(key, "backLight"))
         {
-            snprintf(value, 32, "%u", sys_cfg.backLight);
+            snprintf(value, 32, "%u", sysCfg.backLight);
         }
         else if (!strcmp(key, "rotation"))
         {
-            snprintf(value, 32, "%u", sys_cfg.rotation);
+            snprintf(value, 32, "%u", sysCfg.rotation);
         }
         else if (!strcmp(key, "auto_calibration_mpu"))
         {
-            snprintf(value, 32, "%u", sys_cfg.auto_calibration_mpu);
+            snprintf(value, 32, "%u", sysCfg.auto_calibration_mpu);
         }
         else if (!strcmp(key, "mpu_order"))
         {
-            snprintf(value, 32, "%u", sys_cfg.mpu_order);
+            snprintf(value, 32, "%u", sysCfg.mpu_order);
         }
         else if (!strcmp(key, "auto_start_app"))
         {
-            snprintf(value, 32, "%s", sys_cfg.auto_start_app.c_str());
+            snprintf(value, 32, "%s", sysCfg.auto_start_app.c_str());
         }
     }
     break;
@@ -151,52 +157,52 @@ void AppCenter::deal_config(AppMsgType type,
     {
         if (!strcmp(key, "ssid_0"))
         {
-            sys_cfg.ssid_0 = value;
+            sysCfg.ssid_0 = value;
         }
         else if (!strcmp(key, "password_0"))
         {
-            sys_cfg.password_0 = value;
+            sysCfg.password_0 = value;
         }
         else if (!strcmp(key, "ssid_1"))
         {
-            sys_cfg.ssid_1 = value;
+            sysCfg.ssid_1 = value;
         }
         else if (!strcmp(key, "password_1"))
         {
-            sys_cfg.password_1 = value;
+            sysCfg.password_1 = value;
         }
         else if (!strcmp(key, "ssid_2"))
         {
-            sys_cfg.ssid_2 = value;
+            sysCfg.ssid_2 = value;
         }
         else if (!strcmp(key, "password_2"))
         {
-            sys_cfg.password_2 = value;
+            sysCfg.password_2 = value;
         }
         else if (!strcmp(key, "power_mode"))
         {
-            sys_cfg.power_mode = atol(value);
+            sysCfg.power_mode = atol(value);
         }
         else if (!strcmp(key, "backLight"))
         {
-            sys_cfg.backLight = atol(value);
+            sysCfg.backLight = atol(value);
         }
         else if (!strcmp(key, "rotation"))
         {
-            sys_cfg.rotation = atol(value);
+            sysCfg.rotation = atol(value);
         }
     }
     break;
     case APP_MESSAGE_READ_CFG:
     {
-        read_config(&sys_cfg);
-        // read_config(&mpu_cfg);
+        readCfg(&sysCfg);
+        // readCfg(&mpu_cfg);
     }
     break;
     case APP_MESSAGE_WRITE_CFG:
     {
-        write_config(&sys_cfg);
-        // write_config(&mpu_cfg);  // 在取消自动校准的时候已经写过一次了
+        writeCfg(&sysCfg);
+        // writeCfg(&mpu_cfg);  // 在取消自动校准的时候已经写过一次了
     }
     break;
     default:

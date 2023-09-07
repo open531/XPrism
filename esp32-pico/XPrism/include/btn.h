@@ -11,9 +11,9 @@
 #define BTN_LEFT_PIN 33
 #define BTN_RIGHT_PIN 27
 
-extern const char *action_type_info[];
+extern const char *btnActionTypeInfo[];
 
-enum ActionType
+enum BTNActionType
 {
     BTN_NONE,
     BTN_BACK,
@@ -22,9 +22,9 @@ enum ActionType
     BTN_RIGHT
 };
 
-struct Action
+struct BTNAction
 {
-    volatile ActionType active;
+    volatile BTNActionType btnAction;
     boolean isValid;
 };
 
@@ -32,19 +32,19 @@ class Buttons
 {
 private:
     int flag;
-    long last_update_time;
+    long lastUpdate;
 
 public:
-    Action action_info;
+    BTNAction btnActionInfo;
     // 用来储存历史动作
-    ActionType act_info_history[ACTION_HISTORY_BUF_LEN];
-    int act_info_history_ind; // 标志储存的位置
+    BTNActionType btnActionInfoHistory[ACTION_HISTORY_BUF_LEN];
+    int btnActionInfoHistoryInd; // 标志储存的位置
 
 public:
     Buttons();
     void init();
-    Action *update(int interval);
-    Action *getAction(void); // 获取动作
+    BTNAction *update(int interval);
+    BTNAction *getAction(void); // 获取动作
 };
 
 #endif

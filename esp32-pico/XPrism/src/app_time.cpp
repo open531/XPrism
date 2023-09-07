@@ -148,9 +148,9 @@ static int timeInit(AppCenter *appCenter)
 static void timeRoutine(AppCenter *appCenter, const Action *action)
 {
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
-    if (action->active == BTN_BACK)
+    if (action->action == ACT_BACK)
     {
-        appCenter->app_exit();
+        appCenter->exitApp();
         return;
     }
 
@@ -158,7 +158,7 @@ static void timeRoutine(AppCenter *appCenter, const Action *action)
 
     if (timeRunData->forceUpdate || doDelayMillisTime(timeCfg.updateInterval, &timeRunData->lastUpdate, false))
     {
-        appCenter->send_to(APP_TIME_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+        appCenter->sendMsgTo(APP_TIME_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
     }
     else if (GET_SYS_MILLIS() - timeRunData->preLocalTimestamp > 400)
     {

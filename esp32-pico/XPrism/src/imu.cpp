@@ -1,24 +1,24 @@
 #include "imu.h"
 #include "common.h"
 
-const char *imu_action_type_info[] = {"IMU_NONE",
-                                      "IMU_TURN_LEFT",
-                                      "IMU_TURN_RIGHT",
-                                      "IMU_SHRUG_LEFT",
-                                      "IMU_SHRUG_RIGHT",
-                                      "IMU_UP",
-                                      "IMU_DOWN",
-                                      "IMU_SHAKE"};
+const char *imuActionTypeInfo[] = {"IMU_NONE",
+                                   "IMU_TURN_LEFT",
+                                   "IMU_TURN_RIGHT",
+                                   "IMU_SHRUG_LEFT",
+                                   "IMU_SHRUG_RIGHT",
+                                   "IMU_UP",
+                                   "IMU_DOWN",
+                                   "IMU_SHAKE"};
 
 IMU::IMU()
 {
     imuActionInfo.isValid = false;
-    imuActionInfo.imuAction = IMUActionType::IMU_NONE;
+    imuActionInfo.imuAction = IMU_NONE;
     imuActionInfo.isLong = true;
     // 初始化数据
     for (int pos = 0; pos < IMU_ACTION_HISTORY_BUF_LEN; ++pos)
     {
-        imuActionInfoHistory[pos] = IMUActionType::IMU_NONE;
+        imuActionInfoHistory[pos] = IMU_NONE;
     }
     imuActionInfoHistoryInd = IMU_ACTION_HISTORY_BUF_LEN - 1;
     this->order = 0;
@@ -41,7 +41,7 @@ void IMU::init(uint8_t order, uint8_t autoCalibration, IMUCfg *cfg)
         return;
     }
 
-    Serial.print(F("Initialization MPU6050 now, Please don't move.\n"));
+    Serial.print(F("Initializing MPU6050, Please don't move.\n"));
     mpu.initialize();
 
     if (autoCalibration == 0)
@@ -70,54 +70,45 @@ void IMU::init(uint8_t order, uint8_t autoCalibration, IMUCfg *cfg)
         cfg->zAccelOffset = mpu.getZAccelOffset();
     }
 
-    Serial.print(F("Initialization MPU6050 success.\n"));
+    Serial.print(F("Initialize MPU6050 success.\n"));
 }
 
 IMUAction *IMU::update(int interval)
 {
     getVirtualMotion(&imuActionInfo);
+    imuActionInfo.imuAction = IMU_NONE;
     if (GET_SYS_MILLIS() - lastUpdate > interval)
     {
         if (!imuActionInfo.isValid)
         {
-            if (imuActionInfo.vAy > 4000)
+            if (imuActionInfo.vGz > 6000)
             {
-                imuActionInfo.imuAction = IMUActionType::IMU_TURN_LEFT;
+                imuActionInfo.imuAction = IMU_TURN_LEFT;
                 imuActionInfo.isValid = true;
             }
-            else if (imuActionInfo.vAy < -4000)
+            else if (imuActionInfo.vGz < -6000)
             {
-                imuActionInfo.imuAction = IMUActionType::IMU_TURN_RIGHT;
+                imuActionInfo.imuAction = IMU_TURN_RIGHT;
                 imuActionInfo.isValid = true;
             }
-            else if (imuActionInfo.vAx > 4000)
+            else if (imuActionInfo.vGy > 4000)
             {
-                imuActionInfo.imuAction = IMUActionType::IMU_SHRUG_LEFT;
+                imuActionInfo.imuAction = IMU_SHRUG_RIGHT;
                 imuActionInfo.isValid = true;
             }
-            else if (imuActionInfo.vAx < -4000)
+            else if (imuActionInfo.vGy < -4000)
             {
-                imuActionInfo.imuAction = IMUActionType::IMU_SHRUG_RIGHT;
+                imuActionInfo.imuAction = IMU_SHRUG_LEFT;
                 imuActionInfo.isValid = true;
             }
-            else if (imuActionInfo.vAz > 4000)
+            else if (imuActionInfo.vGx > 4000)
             {
-                imuActionInfo.imuAction = IMUActionType::IMU_UP;
+                imuActionInfo.imuAction = IMU_UP;
                 imuActionInfo.isValid = true;
             }
-            else if (imuActionInfo.vAz < -4000)
+            else if (imuActionInfo.vGx < -4000)
             {
-                imuActionInfo.imuAction = IMUActionType::IMU_DOWN;
-                imuActionInfo.isValid = true;
-            }
-            else if (imuActionInfo.vAx > 1000)
-            {
-                imuActionInfo.imuAction = IMUActionType::IMU_SHAKE;
-                imuActionInfo.isValid = true;
-            }
-            else if (imuActionInfo.vAx < -1000)
-            {
-                imuActionInfo.imuAction = IMUActionType::IMU_SHAKE;
+                imuActionInfo.imuAction = IMU_DOWN;
                 imuActionInfo.isValid = true;
             }
             else
@@ -125,9 +116,49 @@ IMUAction *IMU::update(int interval)
                 imuActionInfo.isValid = false;
             }
         }
+        else
+        {
+            if (imuActionInfo.vAx > -1000 && imuActionInfo.vAx < 1000 &&
+                imuActionInfo.vAy > -1000 && imuActionInfo.vAy < 1000 &&
+                imuActionInfo.vAz > 15000)
+            {
+                imuActionInfo.imuAction = IMU_NONE;
+                imuActionInfo.isValid = false;
+            }
+        }
+
+        if (imuActionInfo.imuAction != IMU_NONE)
+        {
+            Serial.printf("imuAction:%s\n", imuActionTypeInfo[imuActionInfo.imuAction]);
+        }
+
+        // Serial.printf("vAx:%d vAy:%d vAz:%d vGx:%d vGy:%d vGz:%d\n",
+        //               imuActionInfo.vAx,
+        //               imuActionInfo.vAy,
+        //               imuActionInfo.vAz,
+        //               imuActionInfo.vGx,
+        //               imuActionInfo.vGy,
+        //               imuActionInfo.vGz);
+
         lastUpdate = GET_SYS_MILLIS();
     }
     return &imuActionInfo;
+    // IMUAction tmp;
+    // if (GET_SYS_MILLIS() - lastUpdate > interval)
+    // {
+    //     getVirtualMotion(&tmp);
+
+    //     Serial.printf("vAx:%d vAy:%d vAz:%d vGx:%d vGy:%d vGz:%d\n",
+    //                   tmp.vAx,
+    //                   tmp.vAy,
+    //                   tmp.vAz,
+    //                   tmp.vGx,
+    //                   tmp.vGy,
+    //                   tmp.vGz);
+
+    //     lastUpdate = GET_SYS_MILLIS();
+    // }
+    // return &tmp;
 }
 
 void IMU::setOrder(uint8_t order)
@@ -137,13 +168,7 @@ void IMU::setOrder(uint8_t order)
 
 void IMU::getVirtualMotion(IMUAction *action)
 {
-    int16_t ax, ay, az;
-    int16_t gx, gy, gz;
-    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    action->vAx = ax;
-    action->vAy = ay;
-    action->vAz = az;
-    action->vGx = gx;
-    action->vGy = gy;
-    action->vGz = gz;
+    mpu.getMotion6(&(action->vAx), &(action->vAy),
+                   &(action->vAz), &(action->vGx),
+                   &(action->vGy), &(action->vGz));
 }

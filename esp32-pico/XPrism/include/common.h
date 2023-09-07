@@ -7,6 +7,7 @@
 #include "flash_fs.h"
 #include "sd_card.h"
 #include "display.h"
+#include "action.h"
 #include "btn.h"
 #include "gps.h"
 #include "imu.h"
@@ -23,13 +24,14 @@
 #define MPU_SDA 21
 #define MPU_SCL 22
 
-extern Buttons m_btn; // 原则上只提供给主程序调用
-extern SdCard m_tf;
-// extern Config g_cfg;       // 全局配置文件
+extern Action m_action;      // 原则上只提供给主程序调用
+extern Buttons m_btn;        // 按键
+extern SdCard m_tf;          // SD卡
 extern Network m_network;    // 网络连接
 extern FlashFS m_flashCfg;   // flash中的文件系统（替代原先的Preferences）
 extern Display m_screen;     // 屏幕对象
 extern GPS m_gps;            // GPS对象
+extern IMU m_imu;            // IMU对象
 extern uint64_t m_timestamp; // 时间戳
 
 boolean doDelayMillisTime(unsigned long interval,

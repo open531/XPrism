@@ -13,8 +13,8 @@
 static bool isCheckAction = false;
 // static bool isCheckGPS = false;
 
-Action *act_info;     // 存放按键返回的数据
-AppCenter *appCenter; // APP控制器
+BTNAction *buttonAction; // 存放按键返回的数据
+AppCenter *appCenter;    // APP控制器
 
 TimerHandle_t xTimerAction = NULL;
 void actionCheckHandle(TimerHandle_t xTimer)
@@ -44,7 +44,7 @@ void setup()
         return;
     }
 
-    appCenter->read_config(&appCenter->sys_cfg);
+    appCenter->readCfg(&appCenter->sysCfg);
 
     /*** Init screen ***/
     m_screen.init(0, 100);
@@ -54,49 +54,51 @@ void setup()
 
     lv_fs_fatfs_init();
 
-    appCenter->init();
+    appCenter->centerInit();
 
 // 将APP"安装"到controller里
 #if APP_TIME_USE
-    appCenter->app_install(&timeApp);
+    appCenter->installApp(&timeApp);
 #endif
 #if APP_WEATHER_USE
-    appCenter->app_install(&weatherApp);
+    appCenter->installApp(&weatherApp);
 #endif
 #if APP_CLOCK_USE
-    appCenter->app_install(&clockApp);
+    appCenter->installApp(&clockApp);
 #endif
 #if APP_NAVI_USE
-    appCenter->app_install(&naviApp);
+    appCenter->installApp(&naviApp);
 #endif
 #if APP_INFO_USE
-    appCenter->app_install(&infoApp);
+    appCenter->installApp(&infoApp);
 #endif
 #if APP_NOTI_USE
-    appCenter->app_install(&notiApp);
+    appCenter->installApp(&notiApp);
 #endif
 #if APP_FILE_USE
-    appCenter->app_install(&fileApp);
+    appCenter->installApp(&fileApp);
 #endif
 #if APP_SPORT_USE
-    appCenter->app_install(&sportApp);
+    appCenter->installApp(&sportApp);
 #endif
 #if APP_CALENDAR_USE
-    appCenter->app_install(&calendarApp);
+    appCenter->installApp(&calendarApp);
 #endif
 
-    m_btn.init();
-
-    m_gps.init();
-
     // 自启动APP
-    appCenter->app_auto_start();
+    appCenter->autoStart();
 
     // 优先显示屏幕 加快视觉上的开机时间
-    appCenter->main_process(&m_btn.action_info);
+    appCenter->centerRoutine(&m_action);
+
+    m_btn.init();
+    m_imu.init(appCenter->sysCfg.mpu_order,
+               appCenter->sysCfg.auto_calibration_mpu,
+               &appCenter->imuCfg);
+    m_gps.init();
 
     // 先初始化一次动作数据 防空指针
-    act_info = m_btn.getAction();
+    buttonAction = m_btn.getAction();
 
     // 定义一个按键检测定时器
     xTimerAction = xTimerCreate("Action Check",
@@ -117,12 +119,65 @@ void loop()
     if (isCheckAction)
     {
         isCheckAction = false;
-        act_info = m_btn.getAction();
+        buttonAction = m_btn.getAction();
+        switch (buttonAction->btnAction)
+        {
+        case BTN_NONE:
+            m_action.action = ACT_NONE;
+            break;
+        case BTN_BACK:
+            m_action.action = ACT_BACK;
+            break;
+        case BTN_FORWARD:
+            m_action.action = ACT_FORWARD;
+            break;
+        case BTN_LEFT:
+            m_action.action = ACT_LEFT;
+            break;
+        case BTN_RIGHT:
+            m_action.action = ACT_RIGHT;
+            break;
+        default:
+            break;
+        }
     }
+
+    if (m_action.action == ACT_NONE)
+    {
+        switch (m_imu.update(200)->imuAction)
+        {
+        case IMU_NONE:
+            m_action.action = ACT_NONE;
+            break;
+        case IMU_TURN_LEFT:
+            m_action.action = ACT_LEFT;
+            break;
+        case IMU_TURN_RIGHT:
+            m_action.action = ACT_RIGHT;
+            break;
+        case IMU_SHRUG_LEFT:
+            m_action.action = ACT_BACK;
+            break;
+        case IMU_SHRUG_RIGHT:
+            m_action.action = ACT_FORWARD;
+            break;
+        case IMU_UP:
+            m_action.action = ACT_UP;
+            break;
+        case IMU_DOWN:
+            m_action.action = ACT_DOWN;
+            break;
+        default:
+            break;
+        }
+    }
+
     // if (isCheckGPS)
     // {
     //     isCheckGPS = false;
     m_gps.update();
     // }
-    appCenter->main_process(act_info); // 运行当前进程
+    // m_imu.update(200);
+
+    appCenter->centerRoutine(&m_action); // 运行当前进程
 }

@@ -249,22 +249,22 @@ static void weatherRoutine(AppCenter *appCenter, const Action *action)
 {
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_NONE;
 
-    if (action->active == BTN_BACK)
+    if (action->action == ACT_BACK)
     {
-        appCenter->app_exit();
+        appCenter->exitApp();
         return;
     }
-    else if (action->active == BTN_FORWARD)
+    else if (action->action == ACT_FORWARD)
     {
         weatherRunData->forceUpdate = 1;
         delay(500);
     }
-    else if (action->active == BTN_LEFT)
+    else if (action->action == ACT_LEFT)
     {
         animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
         weatherRunData->currPage = (weatherRunData->currPage + 1) % APP_WEATHER_PAGE_SIZE;
     }
-    else if (action->active == BTN_RIGHT)
+    else if (action->action == ACT_RIGHT)
     {
         animType = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
         weatherRunData->currPage = (weatherRunData->currPage + APP_WEATHER_PAGE_SIZE - 1) % APP_WEATHER_PAGE_SIZE;

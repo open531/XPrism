@@ -337,11 +337,11 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
 
     if (fileAppRunData->uiType == FILE_UI_TYPE_EXPLORER)
     {
-        if (action->active == BTN_BACK)
+        if (action->action == ACT_BACK)
         {
             if (fileAppRunData->currPath == ROOT)
             {
-                appCenter->app_exit();
+                appCenter->exitApp();
                 return;
             }
             else
@@ -350,7 +350,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                 force = true;
             }
         }
-        else if (action->active == BTN_FORWARD)
+        else if (action->action == ACT_FORWARD)
         {
             if (fileAppRunData->currFile->file_type == FILE_TYPE_FOLDER)
             {
@@ -363,13 +363,13 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                 return;
             }
         }
-        else if (action->active == BTN_LEFT)
+        else if (action->action == ACT_LEFT || action->action == ACT_UP)
         {
             animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
             fileAppRunData->currFile = fileAppRunData->currFile->front_node;
             fileAppRunData->temp--;
         }
-        else if (action->active == BTN_RIGHT)
+        else if (action->action == ACT_RIGHT || action->action == ACT_DOWN)
         {
             animType = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
             fileAppRunData->currFile = fileAppRunData->currFile->next_node;
@@ -385,7 +385,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
     }
     else if (fileAppRunData->uiType == FILE_UI_TYPE_IMAGE)
     {
-        if (action->active == BTN_BACK)
+        if (action->action == ACT_BACK)
         {
             fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
             appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
@@ -395,19 +395,10 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                      fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
             return;
         }
-        else if (action->active == BTN_FORWARD)
-        {
-        }
-        else if (action->active == BTN_LEFT)
-        {
-        }
-        else if (action->active == BTN_RIGHT)
-        {
-        }
     }
     else if (fileAppRunData->uiType == FILE_UI_TYPE_VIDEO)
     {
-        if (action->active == BTN_BACK)
+        if (action->action == ACT_BACK)
         {
             fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
             setCpuFrequencyMhz(80);
@@ -417,15 +408,6 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                      fileAppRunData->currFile->next_node->next_node->file_name,
                                      fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
             return;
-        }
-        else if (action->active == BTN_FORWARD)
-        {
-        }
-        else if (action->active == BTN_LEFT)
-        {
-        }
-        else if (action->active == BTN_RIGHT)
-        {
         }
 
         setCpuFrequencyMhz(240);
@@ -447,7 +429,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
     }
     else if (fileAppRunData->uiType == FILE_UI_TYPE_TEXT)
     {
-        if (action->active == BTN_BACK)
+        if (action->action == ACT_BACK)
         {
             fileAppRunData->uiType = FILE_UI_TYPE_EXPLORER;
             appFileUiDisplayExplorer(fileAppRunData->currPath.c_str(),
@@ -457,10 +439,10 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                      fileAppRunData->temp, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);
             return;
         }
-        else if (action->active == BTN_FORWARD)
+        else if (action->action == ACT_FORWARD)
         {
         }
-        else if (action->active == BTN_LEFT)
+        else if (action->action == ACT_LEFT)
         {
             if (fileAppRunData->textCurrPage > 0)
             {
@@ -468,7 +450,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
             }
             animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
         }
-        else if (action->active == BTN_RIGHT)
+        else if (action->action == ACT_RIGHT)
         {
             if (fileAppRunData->textIsEnd == false)
             {

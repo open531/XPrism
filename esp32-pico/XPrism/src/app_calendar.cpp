@@ -62,16 +62,16 @@ static int calendarInit(AppCenter *appCenter)
 static void calendarRoutine(AppCenter *appCenter, const Action *action)
 {
     lv_scr_load_anim_t animType = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-    if (action->active == BTN_BACK)
+    if (action->action == ACT_BACK)
     {
-        appCenter->app_exit();
+        appCenter->exitApp();
         return;
     }
-    else if (action->active == BTN_LEFT)
+    else if (action->action == ACT_LEFT)
     {
         calendarAppRunData->currDate.month--;
     }
-    else if (action->active == BTN_RIGHT)
+    else if (action->action == ACT_RIGHT)
     {
         calendarAppRunData->currDate.month++;
     }
