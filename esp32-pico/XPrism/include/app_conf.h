@@ -47,5 +47,9 @@
 #if APP_CALENDAR_USE
 #include "app_calendar.h"
 #endif
+#define APP_GPA_USE 1
+#if APP_GPA_USE
+#include "app_gpa.h"
+#endif
 
 #endif

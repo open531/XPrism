@@ -84,6 +84,9 @@ void setup()
 #if APP_CALENDAR_USE
     appCenter->installApp(&calendarApp);
 #endif
+#if APP_GPA_USE
+    appCenter->installApp(&gpaApp);
+#endif
 
     // 自启动APP
     appCenter->autoStart();

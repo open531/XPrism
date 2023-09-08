@@ -212,6 +212,29 @@ static void getTextPage()
         fileAppRunData->textBuffer[length - 1] = '\0';
     }
 
+    // replace all \r\n to \n
+    for (int i = 0; i < length; i++)
+    {
+        if (fileAppRunData->textBuffer[i] == '\r' && fileAppRunData->textBuffer[i + 1] == '\n')
+        {
+            fileAppRunData->textBuffer[i] = '\n';
+            for (int j = i + 1; j < length; j++)
+            {
+                fileAppRunData->textBuffer[j] = fileAppRunData->textBuffer[j + 1];
+            }
+            length--;
+        }
+    }
+
+    // replace all \n to space
+    for (int i = 0; i < length; i++)
+    {
+        if (fileAppRunData->textBuffer[i] == '\n')
+        {
+            fileAppRunData->textBuffer[i] = ' ';
+        }
+    }
+
     if (fileAppRunData->textIsEnd == false)
     {
         if (fileAppRunData->textPageStartIndex.size() > fileAppRunData->textCurrPage + 1)
