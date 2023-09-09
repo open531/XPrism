@@ -1,4 +1,6 @@
-﻿namespace XPrism;
+﻿using Android.Content;
+
+namespace XPrism;
 
 public partial class MainPage : ContentPage
 {
@@ -52,5 +54,11 @@ public partial class MainPage : ContentPage
         // 打开调试页面
         await Navigation.PushAsync(new DebugPage());
     }
+    //public async void OpenNotificationListenSettings(object sender, System.EventArgs e)
+    //{
+    //    var currentActivity = MauiApplication.Current.ApplicationContext as Android.App.Activity;
+    //    var intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+    //    currentActivity.StartActivity(intent);
+    //}
 }
 

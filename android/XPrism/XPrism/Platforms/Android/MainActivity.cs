@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Service.Notification;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 
 namespace XPrism;
 
@@ -35,5 +36,11 @@ public class MainActivity : MauiAppCompatActivity
         {
             StartService(new Intent(this, MediaController.Class));
         }
+    }
+    public void openNotificationListenSettings()
+    {
+        Intent intent;
+        intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+        StartActivity(intent);
     }
 }

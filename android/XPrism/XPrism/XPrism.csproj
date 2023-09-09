@@ -12,7 +12,7 @@
     <ApplicationTitle>XPrism</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>io.panxuc.xprism</ApplicationId>
+    <ApplicationId>com.panxuc.xprism</ApplicationId>
     <ApplicationIdGuid>909b293f-34a0-4c63-9443-9c7b2fed76ce</ApplicationIdGuid>
 
     <!-- Versions -->

@@ -4,7 +4,7 @@ using Android.Util;
 
 namespace XPrism
 {
-    [Service(Name = "io.panxuc.xprism.NotificationListener", Label = "XPrismNotificationListener", Permission = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE")]
+    [Service(Name = "com.panxuc.xprism.NotificationListener", Label = "XPrismNotificationListener", Permission = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE")]
     public class NotificationListener : NotificationListenerService
     {
         public override void OnNotificationPosted(StatusBarNotification sbn)
