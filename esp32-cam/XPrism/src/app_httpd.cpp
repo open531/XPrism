@@ -989,36 +989,7 @@ static esp_err_t status_handler(httpd_req_t *req)
     char *p = json_response;
     *p++ = '{';
 
-    if (s->id.PID == OV5640_PID || s->id.PID == OV3660_PID)
-    {
-        for (int reg = 0x3400; reg < 0x3406; reg += 2)
-        {
-            p += print_reg(p, s, reg, 0xFFF); // 12 bit
-        }
-        p += print_reg(p, s, 0x3406, 0xFF);
-
-        p += print_reg(p, s, 0x3500, 0xFFFF0); // 16 bit
-        p += print_reg(p, s, 0x3503, 0xFF);
-        p += print_reg(p, s, 0x350a, 0x3FF);  // 10 bit
-        p += print_reg(p, s, 0x350c, 0xFFFF); // 16 bit
-
-        for (int reg = 0x5480; reg <= 0x5490; reg++)
-        {
-            p += print_reg(p, s, reg, 0xFF);
-        }
-
-        for (int reg = 0x5380; reg <= 0x538b; reg++)
-        {
-            p += print_reg(p, s, reg, 0xFF);
-        }
-
-        for (int reg = 0x5580; reg < 0x558a; reg++)
-        {
-            p += print_reg(p, s, reg, 0xFF);
-        }
-        p += print_reg(p, s, 0x558a, 0x1FF); // 9 bit
-    }
-    else if (s->id.PID == OV2640_PID)
+    if (s->id.PID == OV2640_PID)
     {
         p += print_reg(p, s, 0xd3, 0xFF);
         p += print_reg(p, s, 0x111, 0xFF);
@@ -1256,18 +1227,7 @@ static esp_err_t index_handler(httpd_req_t *req)
     sensor_t *s = esp_camera_sensor_get();
     if (s != NULL)
     {
-        if (s->id.PID == OV3660_PID)
-        {
-            return httpd_resp_send(req, (const char *)index_ov3660_html_gz, index_ov3660_html_gz_len);
-        }
-        else if (s->id.PID == OV5640_PID)
-        {
-            return httpd_resp_send(req, (const char *)index_ov5640_html_gz, index_ov5640_html_gz_len);
-        }
-        else
-        {
-            return httpd_resp_send(req, (const char *)index_ov2640_html_gz, index_ov2640_html_gz_len);
-        }
+        return httpd_resp_send(req, (const char *)index_ov2640_html_gz, index_ov2640_html_gz_len);
     }
     else
     {
