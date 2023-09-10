@@ -47,7 +47,7 @@ void setup()
     appCenter->readCfg(&appCenter->sysCfg);
 
     /*** Init screen ***/
-    m_screen.init(0, 100);
+    m_screen.init(4, 100);
 
     /*** Init micro SD-Card ***/
     m_tf.init();
