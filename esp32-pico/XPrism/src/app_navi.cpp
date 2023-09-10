@@ -94,7 +94,7 @@ static void updateNavi()
                 break;
             }
         }
-        for (int i = naviAppRunData->navInfo.currInstruction; i < naviAppRunData->navInfo.instructionLength; i++)
+        for (int i = naviAppRunData->navInfo.instructionLength - 1; i >= 0; i--)
         {
             if (naviAppRunData->navInfo.instructionIntervalBegin[i] <= naviAppRunData->navInfo.currPoint)
             {

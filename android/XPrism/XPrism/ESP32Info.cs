@@ -9,7 +9,7 @@ namespace XPrism
     class ESP32Info
     {
         private static readonly HttpClient client = new HttpClient();
-        public static string picoIPAddress = "192.168.253.123";
+        public static string picoIPAddress = "192.168.253.238";
         public static string camIPAddress = "192.168.253.206";
         public static async Task<string> GetResponseAsync(string url)
         {

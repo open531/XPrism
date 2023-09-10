@@ -18,21 +18,24 @@ Copyright © 2023 [潘徐成](https://github.com/Panxuc) [孙宇琦](https://git
 
 ## 特色
 
-TBA
+- 使用 ESP32-PICO-KIT 开发板作为主控，使用 ESP32-CAM 模组作为摄像头。
+- 可以使用实体按钮、动作识别等多种方式控制。
+- 使用 LVGL 图形库，编写了一套简易的 UI 框架；同时制作多款软件程序，满足日常使用需求。
+- 与手机端配合，可以实现接收手机通知提醒等多种功能。
+- 支持最高 32 GB 的 TF 卡，可以存储大量数据。可以直接打开图片、视频等文件。
 
 ## 致谢
 
 XPrism 的诞生离不开以下开源项目的支持、参考与引用。
 
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
-- [ESP32FTPServer](https://github.com/HenrikSte/ESP32FTPServer)
 - [ESP32Time](https://github.com/fbiego/ESP32Time)
 - [HoloCubic](https://github.com/peng-zhihui/HoloCubic)
 - [HoloCubic_AIO](https://github.com/ClimbSnail/HoloCubic_AIO)
 - [i2cdevlib](https://github.com/jrowberg/i2cdevlib)
+- [littlefs](https://github.com/littlefs-project/littlefs)
 - [lvgl](https://github.com/lvgl/lvgl)
-- [lv_lib_100ask](https://github.com/100askTeam/lv_lib_100ask)
 - [MPU6050](https://github.com/kriswiner/MPU6050)
-- [OneButton](https://github.com/mathertel/OneButton)
 - [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
-- [U8g2](https://github.com/olikraus/u8g2)
+- [TinyGPSPlus](https://github.com/mikalhart/TinyGPSPlus)
+- [TJpg_Decoder](https://github.com/Bodmer/TJpg_Decoder)

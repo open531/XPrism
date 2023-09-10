@@ -18,21 +18,24 @@ Copyright © 2023 [Pan Xucheng](https://github.com/Panxuc) [Sun Yuqi](https://gi
 
 ## Features
 
-TBA
+- Use the ESP32-PICO-KIT development board as the main control and the ESP32-CAM module as the camera.
+- Can be controlled using physical buttons, motion recognition and other methods.
+- Using the LVGL graphics library, a simple UI framework was written; at the same time, a variety of software programs were produced to meet daily use needs.
+- Cooperating with the mobile phone, it can realize various functions such as receiving mobile phone notification reminders.
+- Supports TF cards up to 32 GB, which can store large amounts of data. You can directly open pictures, videos and other files.
 
 ## Acknowledgements
 
 The birth of XPrism is inseparable from the support, references and citations of the following open source projects.
 
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
-- [ESP32FTPServer](https://github.com/HenrikSte/ESP32FTPServer)
 - [ESP32Time](https://github.com/fbiego/ESP32Time)
 - [HoloCubic](https://github.com/peng-zhihui/HoloCubic)
 - [HoloCubic_AIO](https://github.com/ClimbSnail/HoloCubic_AIO)
 - [i2cdevlib](https://github.com/jrowberg/i2cdevlib)
+- [littlefs](https://github.com/littlefs-project/littlefs)
 - [lvgl](https://github.com/lvgl/lvgl)
-- [lv_lib_100ask](https://github.com/100askTeam/lv_lib_100ask)
 - [MPU6050](https://github.com/kriswiner/MPU6050)
-- [OneButton](https://github.com/mathertel/OneButton)
 - [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
-- [U8g2](https://github.com/olikraus/u8g2)
+- [TinyGPSPlus](https://github.com/mikalhart/TinyGPSPlus)
+- [TJpg_Decoder](https://github.com/Bodmer/TJpg_Decoder)
