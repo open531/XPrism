@@ -27,6 +27,12 @@
                 </StackLayout>
             </StackLayout>
             <Label />
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+                <Button Text="获取当前GPS" Clicked="OnGetGPSClicked"/>
+                <Label Text="    " />
+                <Button Text="复制到目的地" Clicked="OnCopyClicked"/>
+            </StackLayout>
+            <Label />
             <Label Text="导航" FontSize="Title" HorizontalTextAlignment="Center" />
             <Label />
             <Label Text="（请按照如下格式填写：「纬度,经度」）" HorizontalTextAlignment="Center" />
@@ -44,6 +50,8 @@
             </Picker>
             <Button Text="开始导航" Clicked="OnNaviClicked" FontSize="18" />
             <Label x:Name="naviLabel" />
+            <WebView x:Name="naviWebView">
+            </WebView>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

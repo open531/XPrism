@@ -62,6 +62,8 @@
                     <Label x:Name="sourceLabel" />
                 </StackLayout>
             </StackLayout>
+            <WebView x:Name="weatherWebView">
+            </WebView>
 
         </VerticalStackLayout>
     </ScrollView>

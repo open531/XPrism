@@ -56,6 +56,7 @@ public partial class WeatherPage : ContentPage
                 reportTimeLabel.Text = UnixTimeStampToDateTime(weather.dt).ToString();
                 var toast = Toast.Make("查询成功", ToastDuration.Short, 14);
                 await toast.Show();
+                weatherWebView.Source = $"http://{ESP32Info.picoIPAddress}/weather?city={weather.name}";
             }
             else
             {

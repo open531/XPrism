@@ -2,25 +2,45 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Android.Service.Notification;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 
 namespace XPrism;
 
 [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
 public class MainActivity : MauiAppCompatActivity
 {
-    public static NLServiceConnection? serviceConnection;
-    protected override void OnCreate(Bundle? savedInstanceState)
+    static public NotificationListener listener { get; private set; }
+    protected override void OnCreate(Bundle savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+
+        startNotificationListener();
     }
-    protected override void OnStart()
+    public void startNotificationListener()
     {
-        base.OnStart();
-        if (serviceConnection == null)
+        // Register the notification listener service
+        listener = new NotificationListener();
+        var intent = new Intent(NotificationListenerService.ServiceInterface);
+        intent.SetComponent(new ComponentName(this, Java.Lang.Class.FromType(listener.GetType())));
+        StartService(intent);
+    }
+    public void startMediaController()
+    {
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
         {
-            serviceConnection = new NLServiceConnection(this);
+            //8.0以上系统启动为前台服务, 否则在后台, 测试中发现过几分钟后MediaController监听不到音乐信息
+            StartForegroundService(new Intent(this, MediaController.Class));
         }
-        Intent serviceToStart = new Intent(this, typeof(NLService));
-        BindService(serviceToStart, serviceConnection, Bind.AutoCreate);
+        else
+        {
+            StartService(new Intent(this, MediaController.Class));
+        }
+    }
+    public void openNotificationListenSettings()
+    {
+        Intent intent;
+        intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+        StartActivity(intent);
     }
 }

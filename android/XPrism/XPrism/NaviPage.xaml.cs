@@ -80,22 +80,61 @@ public partial class NaviPage : ContentPage
                 var path = graphhopper.paths[0];
                 var points = path.points;
                 var instructions = path.instructions;
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                sb.Append("距离：");
-                sb.Append(path.distance.ToString());
-                sb.Append("米\n");
-                sb.Append("时间：");
-                sb.Append(path.time.ToString());
-                sb.Append("秒\n");
-                sb.Append("指令：\n");
+                //System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                //sb.Append("距离：");
+                //sb.Append(path.distance.ToString());
+                //sb.Append("米\n");
+                //sb.Append("时间：");
+                //sb.Append(path.time.ToString());
+                //sb.Append("秒\n");
+                //sb.Append("指令：\n");
+                //foreach (var instruction in instructions)
+                //{
+                //    sb.Append(instruction.text);
+                //    sb.Append("\n");
+                //}
+                //sb.Append("坐标：\n");
+                //sb.Append(points);
+                //naviLabel.Text = sb.ToString();
+                string naviUrl = $"&instructionText=";
                 foreach (var instruction in instructions)
                 {
-                    sb.Append(instruction.text);
-                    sb.Append("\n");
+                    naviUrl += $"{instruction.text}";
+                    naviUrl += $"|";
                 }
-                sb.Append("坐标：\n");
-                sb.Append(points);
-                naviLabel.Text = sb.ToString();
+                naviUrl += $"&instructionSign=";
+                foreach (var instruction in instructions)
+                {
+                    naviUrl += $"{instruction.sign}";
+                    naviUrl += $"|";
+                }
+                naviUrl += $"&instructionIntervalBegin=";
+                foreach (var instruction in instructions)
+                {
+                    naviUrl += $"{instruction.interval[0]}";
+                    naviUrl += $"|";
+                }
+                naviUrl += $"&instructionIntervalEnd=";
+                foreach (var instruction in instructions)
+                {
+                    naviUrl += $"{instruction.interval[1]}";
+                    naviUrl += $"|";
+                }
+                //naviLabel.Text = $"http://{ESP32Info.picoIPAddress}/navi?pointEncoded={points}&instructionLength={instructions.Count}{naviUrl}";
+                await Clipboard.Default.SetTextAsync($"http://{ESP32Info.picoIPAddress}/navi?pointEncoded={points}&instructionLength={instructions.Count}{naviUrl}");
+                //naviWebView.Source = $"http://{ESP32Info.picoIPAddress}/navi?pointEncoded={points}&instructionLength={instructions.Count}{naviUrl}";
+                HttpClient client2 = new HttpClient();
+                var response2 = await client2.GetAsync($"http://{ESP32Info.picoIPAddress}/navi?pointEncoded={points}&instructionLength={instructions.Count}{naviUrl}");
+                if(response2.IsSuccessStatusCode)
+                {
+                    var content2 = await response2.Content.ReadAsStringAsync();
+                    naviLabel.Text = content2;
+                }
+                else
+                {
+                    await DisplayAlert("错误", "导航网页加载失败", "确定");
+                    return;
+                }
             }
             else
             {
@@ -107,6 +146,61 @@ public partial class NaviPage : ContentPage
         {
             await DisplayAlert("错误", "经纬度不能为空", "确定");
             return;
+        }
+    }
+
+    public async void OnGetGPSClicked(object sender, EventArgs e)
+    {
+        CancellationTokenSource _cancelTokenSource;
+        bool _isCheckingLocation;
+        try
+        {
+            _cancelTokenSource = new CancellationTokenSource();
+            _isCheckingLocation = true;
+            GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
+            Location location = await Geolocation.Default.GetLocationAsync(request, _cancelTokenSource.Token);
+            if (location != null)
+            {
+                var toast = Toast.Make("查询成功", ToastDuration.Short, 14);
+                await toast.Show();
+                srcLabel.Text = location.Latitude.ToString() + "," + location.Longitude.ToString();
+            }
+        }
+        catch (FeatureNotSupportedException fnsEx)
+        {
+            await DisplayAlert("错误", "设备不支持定位", "确定");
+            return;
+        }
+        catch (FeatureNotEnabledException fneEx)
+        {
+            await DisplayAlert("错误", "定位未启用", "确定");
+            return;
+        }
+        catch (PermissionException pEx)
+        {
+            await DisplayAlert("错误", "定位权限未授予", "确定");
+            return;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("错误", "定位失败", "确定");
+            return;
+        }
+        finally
+        {
+            _isCheckingLocation = false;
+        }
+    }
+
+    public async void OnCopyClicked(object sender, EventArgs e)
+    {
+        if (latLabel.Text != "" && lonLabel.Text != "")
+        {
+            dstLabel.Text = latLabel.Text + "," + lonLabel.Text;
+        }
+        else
+        {
+            await DisplayAlert("错误", "经纬度不能为空", "确定");
         }
     }
     public class Nominatim
