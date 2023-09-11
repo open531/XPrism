@@ -224,7 +224,7 @@ static void notiRoutine(AppCenter *appCenter, const Action *action)
     serverNotiLoop();
 
     appNotiUiDisplay(getNoti(notiAppRunData->currNoti), animType, false);
-    delay(100);
+    // delay(100);
 }
 
 static void notiBackground(AppCenter *appCenter, const Action *action)

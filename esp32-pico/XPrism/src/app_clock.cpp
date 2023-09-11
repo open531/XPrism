@@ -113,10 +113,10 @@ static void clockRoutine(AppCenter *appCenter, const Action *action)
         }
     }
 
-    if (GET_SYS_MILLIS() - clockRunData->preLocalTimestamp > 400)
-    {
-        updateStopwatch();
-    }
+    // if (GET_SYS_MILLIS() - clockRunData->preLocalTimestamp > 400)
+    // {
+    updateStopwatch();
+    // }
 }
 
 static void clockBackground(AppCenter *appCenter, const Action *action)

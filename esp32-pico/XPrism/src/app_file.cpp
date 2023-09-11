@@ -404,7 +404,7 @@ static void fileRoutine(AppCenter *appCenter, const Action *action)
                                  fileAppRunData->currFile->next_node->file_name,
                                  fileAppRunData->currFile->next_node->next_node->file_name,
                                  fileAppRunData->temp, animType, force);
-        delay(100);
+        // delay(100);
     }
     else if (fileAppRunData->uiType == FILE_UI_TYPE_IMAGE)
     {
