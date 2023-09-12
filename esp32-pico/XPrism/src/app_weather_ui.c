@@ -86,12 +86,12 @@ void appWeatherUiDisplayBasicInit(lv_scr_load_anim_t animType)
     lv_label_set_recolor(cityLabel, true);
     lv_label_set_text(cityLabel, "北京");
 
-    lv_obj_align(weatherImage, LV_ALIGN_TOP_LEFT, 10, 10);
-    lv_obj_align(weatherLabel, LV_ALIGN_TOP_MID, 30, 40);
-    lv_obj_align(tempLabel, LV_ALIGN_LEFT_MID, 10, 10);
-    lv_obj_align(feelsLikeLabel, LV_ALIGN_LEFT_MID, 10, 60);
-    lv_obj_align(humidityLabel, LV_ALIGN_LEFT_MID, 10, 90);
-    lv_obj_align(cityLabel, LV_ALIGN_TOP_MID, 30, 70);
+    lv_obj_align(weatherImage, LV_ALIGN_TOP_RIGHT, -60, 0);
+    lv_obj_align(weatherLabel, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_align(tempLabel, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_align(feelsLikeLabel, LV_ALIGN_RIGHT_MID, 0, 60);
+    lv_obj_align(humidityLabel, LV_ALIGN_RIGHT_MID, 0, 90);
+    lv_obj_align(cityLabel, LV_ALIGN_TOP_RIGHT, 0, 30);
 }
 
 void appWeatherUiDisplayBasic(struct Weather weaInfo,

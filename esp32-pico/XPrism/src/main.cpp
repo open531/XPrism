@@ -158,12 +158,12 @@ void loop()
         case IMU_TURN_RIGHT:
             m_action.action = ACT_RIGHT;
             break;
-        case IMU_SHRUG_LEFT:
-            m_action.action = ACT_BACK;
-            break;
-        case IMU_SHRUG_RIGHT:
-            m_action.action = ACT_FORWARD;
-            break;
+        // case IMU_SHRUG_LEFT:
+        //     m_action.action = ACT_BACK;
+        //     break;
+        // case IMU_SHRUG_RIGHT:
+        //     m_action.action = ACT_FORWARD;
+        //     break;
         case IMU_UP:
             m_action.action = ACT_UP;
             break;
