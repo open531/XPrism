@@ -74,10 +74,10 @@ void appTimeUiDisplayInit(lv_scr_load_anim_t animType)
     lv_obj_add_style(dateLabel, &textStyle, LV_STATE_DEFAULT);
     lv_label_set_text(dateLabel, "0000-00-00 星期一");
 
-    lv_obj_align(timeHourLabel, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_align(timeMinuteLabel, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_obj_align(timeSecondLabel, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_align(dateLabel, LV_ALIGN_BOTTOM_MID, 0, -20);
+    lv_obj_align(timeHourLabel, LV_ALIGN_TOP_LEFT, 30, 0);
+    lv_obj_align(timeMinuteLabel, LV_ALIGN_TOP_RIGHT, 0, 60);
+    lv_obj_align(timeSecondLabel, LV_ALIGN_RIGHT_MID, -60, 60);
+    lv_obj_align(dateLabel, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 }
 
 void appTimeUiDisplay(struct Time timInfo, lv_scr_load_anim_t animType)

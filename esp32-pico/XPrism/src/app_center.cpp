@@ -152,7 +152,7 @@ int AppCenter::centerRoutine(Action *action)
         this->dealEvent();
     }
 
-    if (0 == appExitFlag)
+    if (appExitFlag == 0)
     {
         // 当前没有进入任何app
         lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
@@ -184,7 +184,7 @@ int AppCenter::centerRoutine(Action *action)
             app_control_display_scr(appList[currAppIndex]->app_image,
                                     appList[currAppIndex]->app_name,
                                     anim_type, false);
-            vTaskDelay(200 / portTICK_PERIOD_MS);
+            vTaskDelay(5 / portTICK_PERIOD_MS);
         }
     }
     else

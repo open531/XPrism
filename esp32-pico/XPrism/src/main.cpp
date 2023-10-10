@@ -16,12 +16,12 @@ static bool isCheckAction = false;
 BTNAction *buttonAction; // 存放按键返回的数据
 AppCenter *appCenter;    // APP控制器
 
-TimerHandle_t xTimerAction = NULL;
-void actionCheckHandle(TimerHandle_t xTimer)
-{
-    // 标志需要检测动作
-    isCheckAction = true;
-}
+// TimerHandle_t xTimerAction = NULL;
+// void actionCheckHandle(TimerHandle_t xTimer)
+// {
+//     // 标志需要检测动作
+//     isCheckAction = true;
+// }
 // TimerHandle_t xTimerGPS = NULL;
 // void gpsCheckHandle(TimerHandle_t xTimer)
 // {
@@ -103,15 +103,15 @@ void setup()
     // 先初始化一次动作数据 防空指针
     buttonAction = m_btn.getAction();
 
-    // 定义一个按键检测定时器
-    xTimerAction = xTimerCreate("Action Check",
-                                200 / portTICK_PERIOD_MS,
-                                pdTRUE, (void *)0, actionCheckHandle);
+    // // 定义一个按键检测定时器
+    // xTimerAction = xTimerCreate("Action Check",
+    //                             200 / portTICK_PERIOD_MS,
+    //                             pdTRUE, (void *)0, actionCheckHandle);
     // // 定义一个GPS检测定时器
     // xTimerGPS = xTimerCreate("GPS Check",
     //                          2000 / portTICK_PERIOD_MS,
     //                          pdTRUE, (void *)0, gpsCheckHandle);
-    xTimerStart(xTimerAction, 0);
+    // xTimerStart(xTimerAction, 0);
     // xTimerStart(xTimerGPS, 0);
 }
 
@@ -119,31 +119,31 @@ void loop()
 {
     m_screen.routine();
 
-    if (isCheckAction)
+    // if (isCheckAction)
+    // {
+    //     isCheckAction = false;
+    buttonAction = m_btn.getAction();
+    switch (buttonAction->btnAction)
     {
-        isCheckAction = false;
-        buttonAction = m_btn.getAction();
-        switch (buttonAction->btnAction)
-        {
-        case BTN_NONE:
-            m_action.action = ACT_NONE;
-            break;
-        case BTN_BACK:
-            m_action.action = ACT_BACK;
-            break;
-        case BTN_FORWARD:
-            m_action.action = ACT_FORWARD;
-            break;
-        case BTN_LEFT:
-            m_action.action = ACT_LEFT;
-            break;
-        case BTN_RIGHT:
-            m_action.action = ACT_RIGHT;
-            break;
-        default:
-            break;
-        }
+    case BTN_NONE:
+        m_action.action = ACT_NONE;
+        break;
+    case BTN_BACK:
+        m_action.action = ACT_BACK;
+        break;
+    case BTN_FORWARD:
+        m_action.action = ACT_FORWARD;
+        break;
+    case BTN_LEFT:
+        m_action.action = ACT_LEFT;
+        break;
+    case BTN_RIGHT:
+        m_action.action = ACT_RIGHT;
+        break;
+    default:
+        break;
     }
+    // }
 
     if (m_action.action == ACT_NONE)
     {
@@ -158,12 +158,12 @@ void loop()
         case IMU_TURN_RIGHT:
             m_action.action = ACT_RIGHT;
             break;
-        case IMU_SHRUG_LEFT:
-            m_action.action = ACT_BACK;
-            break;
-        case IMU_SHRUG_RIGHT:
-            m_action.action = ACT_FORWARD;
-            break;
+        // case IMU_SHRUG_LEFT:
+        //     m_action.action = ACT_BACK;
+        //     break;
+        // case IMU_SHRUG_RIGHT:
+        //     m_action.action = ACT_FORWARD;
+        //     break;
         case IMU_UP:
             m_action.action = ACT_UP;
             break;

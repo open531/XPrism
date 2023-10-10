@@ -77,9 +77,9 @@ void appNotiUiDisplayInit(struct Notification notInfo)
     lv_obj_set_width(prevTimeLabel, 200);
     lv_label_set_text(prevTimeLabel, notInfo.timeStr);
 
-    lv_obj_align(prevTitleLabel, LV_ALIGN_TOP_MID, 0, 10);
-    lv_obj_align(prevTextLabel, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_align(prevTimeLabel, LV_ALIGN_BOTTOM_MID, 0, -10);
+    lv_obj_align(prevTitleLabel, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_align(prevTextLabel, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_align(prevTimeLabel, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 
     lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_NONE, 300, 300, false);
 }
@@ -135,9 +135,9 @@ void appNotiUiDisplay(struct Notification notInfo,
     lv_obj_set_width(currTimeLabel, 200);
     lv_label_set_text(currTimeLabel, notInfo.timeStr);
 
-    lv_obj_align(currTitleLabel, LV_ALIGN_TOP_MID, 0, 10);
-    lv_obj_align(currTextLabel, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_align(currTimeLabel, LV_ALIGN_BOTTOM_MID, 0, -10);
+    lv_obj_align(currTitleLabel, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_align(currTextLabel, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_align(currTimeLabel, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 
     static lv_anim_t currTitleAnim;
     lv_anim_init(&currTitleAnim);

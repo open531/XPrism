@@ -81,12 +81,12 @@ IMUAction *IMU::update(int interval)
     {
         if (!imuActionInfo.isValid)
         {
-            if (imuActionInfo.vGz > 6000)
+            if (imuActionInfo.vGz > 14000)
             {
                 imuActionInfo.imuAction = IMU_TURN_LEFT;
                 imuActionInfo.isValid = true;
             }
-            else if (imuActionInfo.vGz < -6000)
+            else if (imuActionInfo.vGz < -14000 )
             {
                 imuActionInfo.imuAction = IMU_TURN_RIGHT;
                 imuActionInfo.isValid = true;
@@ -119,7 +119,7 @@ IMUAction *IMU::update(int interval)
         else
         {
             if (imuActionInfo.vAx > -1000 && imuActionInfo.vAx < 1000 &&
-                imuActionInfo.vAy > -1000 && imuActionInfo.vAy < 1000 &&
+                imuActionInfo.vAy > -4000 && imuActionInfo.vAy < 1000 &&
                 imuActionInfo.vAz > 15000)
             {
                 imuActionInfo.imuAction = IMU_NONE;
